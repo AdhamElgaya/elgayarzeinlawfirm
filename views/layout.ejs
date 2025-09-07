@@ -1,0 +1,957 @@
+<!doctype html>
+<% if (lang === "ar") { %>
+<html lang="ar" dir="rtl" style="overflow:auto;"> 
+<% } else { %>
+<html lang="en" dir="ltr" style="overflow:auto;"> 
+<% } %>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
+    <title><%= l.title %> - <%= pageTitle || 'Law Firm' %></title>
+
+    <link href="/Content/ar/bootstrap.rtl.css" rel="stylesheet" />
+    <script src="/Scripts/jquery-3.7.1.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        @font-face {
+            font-family: 'droid';
+            src: url('/fonts/DroidKufi-Regular.woff');
+        }
+        @font-face {
+            font-family: 'droid-b';
+            src: url('/fonts/DroidKufi-Bold.woff');
+        }
+        
+        :root {
+            --primary-gold: #d1ad56;
+            --secondary-gold: #b78632;
+            --dark-gold: #8b6914;
+            --light-gold: #e1dd84;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+            --gradient-gold: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            --shadow-gold: 0 4px 20px rgba(209, 173, 86, 0.3);
+            --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            font-family: "Noto Kufi Arabic", "Cairo", sans-serif;
+            font-weight: 400;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--gradient-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        ul.lst {
+            list-style: none;
+            line-height: 2.5;
+            padding-left: 0;
+        }
+
+        ul.lst li {
+            position: relative;
+            padding-right: 20px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ul.lst li:before {
+            content: "▶";
+            color: var(--primary-gold);
+            font-size: 12px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        ul.lst li:hover {
+            color: var(--primary-gold);
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            font-size: 36px !important;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        a.lang, img.lang {
+            display: block;
+            height: 36px;
+            transition: transform 0.3s ease;
+        }
+
+        a.lang:hover {
+            transform: scale(1.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-gold);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gold);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(209, 173, 86, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Smooth transitions */
+        .card, .btn, .nav-link, .navbar-brand {
+            transition: all 0.3s ease;
+        }
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(209, 173, 86, 0.2);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .navbar-brand img {
+                height: 35px !important;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem !important;
+                line-height: 1.2;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem !important;
+                line-height: 1.6;
+            }
+            
+            .hero-buttons .btn {
+                display: block;
+                margin: 10px auto;
+                width: 200px;
+                font-size: 14px;
+            }
+            
+            .page-title {
+                font-size: 28px !important;
+                margin-top: 15px;
+            }
+            
+            .service-card {
+                margin-bottom: 20px;
+                padding: 20px;
+            }
+            
+            .service-card h1 {
+                font-size: 24px !important;
+            }
+            
+            .service-card img {
+                margin-bottom: 20px;
+            }
+            
+            .card {
+                margin-bottom: 20px;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            .social-btn {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .social-btn i {
+                font-size: 16px;
+            }
+            
+            /* Touch-friendly interactions */
+            .btn, .nav-link, .card {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Improve scrolling on mobile */
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Fix viewport issues */
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem !important;
+            }
+            
+            .page-title {
+                font-size: 24px !important;
+            }
+            
+            .service-card {
+                padding: 15px;
+            }
+            
+            .service-card h1 {
+                font-size: 20px !important;
+            }
+            
+            .navbar-brand {
+                font-size: 14px;
+            }
+            
+            .navbar-brand img {
+                height: 30px !important;
+            }
+        }
+
+        /* High DPI display optimizations */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .service-card img,
+            .card img {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Dark mode optimizations */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--gradient-dark);
+            }
+        }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .scroll-arrow {
+                animation: none;
+            }
+            
+            .hero-title {
+                animation: none;
+            }
+        }
+    </style>
+    
+    <link rel="stylesheet" href="/Content/ar/src/css/mdb.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="/Scripts/jquery.lazyload-any.js"></script>
+    <script src="/Scripts/jquery.isonscreen.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    
+    <%- include('partials/head') %>
+</head>
+<body style="overflow-x:hidden;">
+
+    <header>
+        <style>
+            #intro {
+                background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url("/Content/img/carousel-1.jpg");
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                height: 100vh;
+                position: relative;
+                overflow: hidden;
+            }
+
+            #intro::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--gradient-dark);
+                opacity: 0.3;
+                z-index: 1;
+            }
+
+            #intro .container {
+                position: relative;
+                z-index: 2;
+            }
+
+            /* Height for devices larger than 576px */
+            @media (min-width: 992px) {
+                #intro {
+                    margin-top: -58.59px;
+                }
+            }
+
+            .navbar {
+                background: rgba(0, 0, 0, 0.95) !important;
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(209, 173, 86, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .navbar.scrolled {
+                background: rgba(0, 0, 0, 0.98) !important;
+                box-shadow: var(--shadow-dark);
+            }
+
+            .navbar .nav-link {
+                color: var(--text-light) !important;
+                position: relative;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            .navbar .nav-link:hover {
+                color: var(--primary-gold) !important;
+                transform: translateY(-2px);
+            }
+
+            .navbar .nav-link.active {
+                color: var(--primary-gold) !important;
+            }
+
+            .navbar .nav-link.active::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 2px;
+                background: var(--gradient-gold);
+                border-radius: 1px;
+            }
+
+            .navbar-brand {
+                transition: all 0.3s ease;
+            }
+
+            .navbar-brand:hover {
+                transform: scale(1.05);
+            }
+
+            .navbar-toggler {
+                border: 1px solid var(--primary-gold);
+                border-radius: 5px;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+            }
+        </style>
+
+        <style>
+            li.nav-item {
+                padding-right: 12px;
+            }
+
+            i.fa {
+                font-size: 24px;
+                color: #d1ad56;
+            }
+
+            i.fa:hover {
+                font-size: 24px;
+                color: White;
+            }
+
+            a.ld:hover {
+                color: #fffef3 !important;
+            }
+
+            a.ld {
+                color: #d1ad56 !important;
+                padding-left: var(--mdb-navbar-nav-link-padding-x);
+                padding-right: var(--mdb-navbar-nav-link-padding-x);
+                padding-top: var(--mdb-navbar-nav-link-padding-x);
+                display: block;
+            }
+
+            a.bttel {
+                font-size: 16px;
+                background: var(--gradient-gold);
+                border: none;
+                padding: 12px 30px;
+                border-radius: 50px;
+                color: white;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-block;
+                position: relative;
+                overflow: hidden;
+                box-shadow: var(--shadow-gold);
+                transition: all 0.3s ease;
+            }
+
+            a.bttel::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            a.bttel:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(209, 173, 86, 0.4);
+                color: white;
+                text-decoration: none;
+            }
+
+            a.bttel:hover::before {
+                left: 100%;
+            }
+            
+            h1.h {
+                text-align: center;
+                padding-bottom: 24px;
+                background: var(--gradient-gold);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: bold;
+            }
+            
+            .page-title {
+                font-size: 36px;
+                text-align: center;
+                background: var(--gradient-gold);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                border-bottom: 3px solid transparent;
+                border-image: var(--gradient-gold) 1;
+                padding-bottom: 15px;
+                margin-top: 20px;
+                animation: slideIn 0.8s ease-out;
+                position: relative;
+            }
+
+            .page-title::after {
+                content: '';
+                position: absolute;
+                bottom: -3px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 3px;
+                background: var(--gradient-gold);
+                border-radius: 2px;
+            }
+
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateY(-30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            button.sss, button.sss:active, button.sss:visited {
+                background: var(--gradient-gold);
+                border: none;
+                color: white;
+                padding: 12px 30px;
+                border-radius: 50px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                box-shadow: var(--shadow-gold);
+                position: relative;
+                overflow: hidden;
+            }
+
+            button.sss::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s;
+            }
+            
+            button.sss:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(209, 173, 86, 0.4);
+                color: white;
+            }
+
+            button.sss:hover::before {
+                left: 100%;
+            }
+
+            button.sss:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+            
+            p.text-primary {
+                color: var(--text-light) !important;
+            }
+
+            /* Form enhancements */
+            .form-control {
+                background: rgba(26, 26, 26, 0.8);
+                border: 1px solid rgba(209, 173, 86, 0.3);
+                color: var(--text-light);
+                border-radius: 10px;
+                padding: 12px 15px;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                background: rgba(26, 26, 26, 0.9);
+                border-color: var(--primary-gold);
+                box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+                color: var(--text-light);
+            }
+
+            .form-control::placeholder {
+                color: var(--text-muted);
+            }
+
+            .form-label {
+                color: var(--primary-gold);
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            /* Card enhancements */
+            .card {
+                background: rgba(26, 26, 26, 0.8);
+                border: 1px solid rgba(209, 173, 86, 0.2);
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-gold);
+                border-color: var(--primary-gold);
+            }
+
+            .card-body {
+                color: var(--text-light);
+            }
+        </style>
+        
+        <nav class="navbar navbar-inverse fixed-top navbar-expand-lg navbar-dark bg-dark navbar-default" style="background-color:black !important;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/" style="color: #e1dd84 !important;">
+                    <img src="/Content/img/logo1.png" height="48"/>
+                    <img src="/Content/img/slogan.png" height="48" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa fa-bars" style="color: #b78632"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'home' ? 'active' : '' %>" href="/?lang=<%= lang %>">الرئيسية</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'news' ? 'active' : '' %>" href="/posts?lang=<%= lang %>">المستجدات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'services' ? 'active' : '' %>" href="/services?lang=<%= lang %>">الخدمات الاكثر طلباً</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'partners' ? 'active' : '' %>" href="/partners?lang=<%= lang %>">شركاء النجاح</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'team' ? 'active' : '' %>" href="/team?lang=<%= lang %>">فريق العمل</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'consultation' ? 'active' : '' %>" href="/consultation?lang=<%= lang %>">حجز مواعيد او استشارات</a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="soc" class="d-sm-none d-md-block">
+                    <ul class="navbar-nav" style="padding-left:48px;">
+                        <li class="nav-item">
+                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
+                                <i class="fa fa-facebook-f"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
+                                <i class="fa fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <% if (lang === "en") { %>
+                            <a href="/lang?lang=ar" class="lang">
+                                <img src="/Content/ar.png" class="lang"/>
+                            </a>
+                            <% } else { %>
+                            <a href="/lang?lang=en" class="lang">
+                                <img src="/Content/en.png" class="lang"/>
+                            </a>
+                            <% } %>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div style="margin-top:48px;">
+        <%- body %>
+    </div>
+
+    <style>
+        a.flink {
+            color: var(--primary-gold) !important;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        a.flink::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: var(--gradient-gold);
+            transition: width 0.3s ease;
+        }
+        
+        a.flink:hover {
+            color: var(--light-gold) !important;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        a.flink:hover::after {
+            width: 100%;
+        }
+
+        /* Social media buttons */
+        .social-btn {
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-btn:hover {
+            background: var(--gradient-gold);
+            color: white !important;
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .social-btn i {
+            font-size: 18px;
+        }
+
+        /* Copyright styling */
+        .copyright {
+            color: var(--primary-gold);
+            font-weight: 600;
+        }
+
+        .copyright a {
+            color: var(--light-gold);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .copyright a:hover {
+            color: var(--primary-gold);
+            text-decoration: underline;
+        }
+    </style>
+    
+    <!-- Footer -->
+    <footer class="text-center" style="background: var(--gradient-dark) !important; border-top: 1px solid rgba(209, 173, 86, 0.2);">
+        <!-- Grid container -->
+        <div class="container p-4">
+            <img src="/Content/img/logo1.png" />
+            <img src="/Content/img/slogan.png" />
+            <!-- Section: Text -->
+            <section class="mb-4" style="margin-top:24px;">
+                <p style="color: var(--text-light); font-size: 18px; font-weight: 500;">
+                    مكتب محاماة متخصص في تقديم الحلول القانونية الشاملة
+                </p>
+            </section>
+            <!-- Section: Links -->
+            <section class="">
+                <!--Grid row-->
+                <div class="row">
+                    <!--Grid column-->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <ul class="list-unstyled mb-0">
+                            <li>
+                                <a class="text-body flink" href="/?lang=<%= lang %>">الرئيسية</a>
+                            </li>
+                            <li>
+                                <a class="text-body flink" href="/services?lang=<%= lang %>">الخدمات الاكثر طلباً</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--Grid column-->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <ul class="list-unstyled mb-0">
+                            <li>
+                                <a class="text-body flink" href="/partners?lang=<%= lang %>">شركاء النجاح</a>
+                            </li>
+                            <li>
+                                <a class="text-body flink" href="/consultation?lang=<%= lang %>">حجز مواعيد او استشارات</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--Grid column-->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <ul class="list-unstyled mb-0">
+                            <li>
+                                <a class="text-body flink" href="/team?lang=<%= lang %>">فريق العمل</a>
+                            </li>
+                            <li>
+                                <a class="text-body flink" href="/posts?lang=<%= lang %>">المستجدات</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--Grid column-->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <ul class="list-unstyled mb-0">
+                            <li>
+                                <a class="text-body flink" href="/gallery?lang=<%= lang %>">مكتبة الصور</a>
+                            </li>
+                            <li>
+                                <a class="text-body flink" href="/contact?lang=<%= lang %>">اتصل بنا</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--Grid column-->
+                </div>
+                <!--Grid row-->
+            </section>
+            <!-- Section: Links -->
+        </div>
+        
+        <!-- Section: Social media -->
+        <section class="mb-4">
+            <!-- Facebook -->
+            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
+                <i class="fa fa-facebook-f"></i>
+            </a>
+            <!-- Instagram -->
+            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
+                <i class="fa fa-instagram"></i>
+            </a>
+            <!-- Linkedin -->
+            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
+                <i class="fa fa-linkedin"></i>
+            </a>
+            <% if (lang === "en") { %>
+            <a data-mdb-ripple-init href="/lang?lang=ar" class="btn btn-outline btn-floating btn m-1 social-btn" role="button" style="border-color: var(--primary-gold);">
+                <img src="/Content/ar.png" class="lang"/>
+            </a>
+            <% } else { %>
+            <a data-mdb-ripple-init href="/lang?lang=en" class="btn btn-outline btn-floating btn m-1 social-btn" role="button" style="border-color: var(--primary-gold);">
+                <img src="/Content/en.png" class="lang"/>
+            </a>
+            <% } %>
+        </section>
+        
+        <!-- Copyright -->
+        <div class="text-center p-3 copyright">
+            © <%= new Date().getFullYear() %> Copyright:
+            <a href="#">GZlawfirm.net</a>
+        </div>
+        <!-- Copyright -->
+    </footer>
+
+    <script type="text/javascript">
+        var mobile = (/iphone|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+        if (mobile) {
+            $('#soc').css('display', 'none');
+        }
+
+        // Enhanced navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Form submission with loading states
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="loading"></span> جاري الإرسال...';
+                    submitBtn.disabled = true;
+                    
+                    // Re-enable button after 3 seconds if no response
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 3000);
+                }
+            });
+        });
+
+        // Add hover effects to cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('#intro');
+            if (parallax) {
+                const speed = scrolled * 0.5;
+                parallax.style.transform = `translateY(${speed}px)`;
+            }
+        });
+
+        // Initialize AOS with custom settings
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-in-out',
+                once: true,
+                offset: 100
+            });
+        }
+
+        // Add typing effect to hero text
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Initialize typing effect on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroTitle = document.querySelector('#intro h1');
+            if (heroTitle && window.location.pathname === '/') {
+                const originalText = heroTitle.textContent;
+                setTimeout(() => {
+                    typeWriter(heroTitle, originalText, 80);
+                }, 500);
+            }
+        });
+    </script>
+
+</body>
+</html>

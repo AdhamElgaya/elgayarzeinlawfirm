@@ -1,0 +1,463 @@
+<%- include('layout', { 
+    body: `
+    <div class="white-page-wrapper">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="white-page-title"><i class="bi bi-calendar-check-fill me-2"></i>نموذج الاستشارة</h1>
+                    
+                    <div class="consultation-form-container" data-aos="fade-up" data-aos-delay="100">
+                        <div class="form-header">
+                            <div class="form-icon">
+                                <i class="fa fa-gavel"></i>
+                            </div>
+                            <h3 class="form-subtitle">احجز استشارتك القانونية</h3>
+                            <p class="form-description">
+                                املأ النموذج أدناه وسنتواصل معك في أقرب وقت ممكن لتحديد موعد الاستشارة
+                            </p>
+                        </div>
+                        
+                        <form id="consultationForm" action="/api/consultation" method="POST" class="consultation-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">
+                                        <i class="fa fa-user me-2"></i>الاسم الكامل
+                                    </label>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="ادخل اسمك الكامل" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">
+                                        <i class="fa fa-phone me-2"></i>رقم التليفون
+                                    </label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="رقم التليفون" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nationalId" class="form-label">
+                                        <i class="fa fa-id-card me-2"></i>الرقم القومى
+                                    </label>
+                                    <input type="text" class="form-control" id="nationalId" name="nationalId" placeholder="الرقم القومى" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city" class="form-label">
+                                        <i class="fa fa-map-marker me-2"></i>المدينة
+                                    </label>
+                                    <input type="text" class="form-control" id="city" name="city" placeholder="المدينة" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject" class="form-label">
+                                    <i class="fa fa-file-text me-2"></i>موضوع الاستشارة
+                                </label>
+                                <textarea class="form-control" id="subject" name="subject" rows="5" placeholder="اكتب تفاصيل موضوع الاستشارة القانونية" required></textarea>
+                            </div>
+                            
+                            <div class="form-submit">
+                                <button type="submit" class="submit-btn">
+                                    <i class="fa fa-paper-plane me-2"></i>إرسال طلب الاستشارة
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .white-page-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .white-page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
+        }
+        
+        .consultation-form-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .form-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 25px rgba(209, 173, 86, 0.3);
+        }
+        
+        .form-icon i {
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .form-subtitle {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .form-description {
+            color: #6c757d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .consultation-form {
+            max-width: 100%;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        
+        .form-label i {
+            color: #d1ad56;
+            font-size: 1.1rem;
+        }
+        
+        .form-control {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            background: white;
+            border-color: #d1ad56;
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+            color: #495057;
+        }
+        
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+        
+        .form-submit {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(209, 173, 86, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .white-page-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .consultation-form-container {
+                padding: 2rem;
+            }
+            
+            .form-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .form-icon i {
+                font-size: 1.5rem;
+            }
+            
+            .form-subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .form-description {
+                font-size: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .white-page-title {
+                font-size: 1.8rem;
+            }
+            
+            .consultation-form-container {
+                padding: 1.5rem;
+            }
+            
+            .form-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .form-icon i {
+                font-size: 1.2rem;
+            }
+            
+            .form-subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .submit-btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('consultationForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Real-time validation
+            const inputs = form.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', clearFieldError);
+            });
+            
+            function validateField(e) {
+                const field = e.target;
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Remove existing error styling
+                field.classList.remove('is-invalid');
+                const existingError = field.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                // Validation rules
+                if (field.hasAttribute('required') && !value) {
+                    isValid = false;
+                    errorMessage = 'هذا الحقل مطلوب';
+                } else if (field.type === 'tel' && value) {
+                    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+                    if (!phoneRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'يرجى إدخال رقم هاتف صحيح';
+                    }
+                } else if (field.id === 'nationalId' && value) {
+                    const nationalIdRegex = /^[0-9]{14}$/;
+                    if (!nationalIdRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'الرقم القومي يجب أن يكون 14 رقم';
+                    }
+                }
+                
+                if (!isValid) {
+                    field.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = errorMessage;
+                    field.parentNode.appendChild(errorDiv);
+                }
+                
+                return isValid;
+            }
+            
+            function clearFieldError(e) {
+                const field = e.target;
+                field.classList.remove('is-invalid');
+                const existingError = field.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+            
+            function validateForm() {
+                let isFormValid = true;
+                inputs.forEach(input => {
+                    if (!validateField({ target: input })) {
+                        isFormValid = false;
+                    }
+                });
+                return isFormValid;
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    // Scroll to first invalid field
+                    const firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.innerHTML = '<span class="loading"></span> جاري الإرسال...';
+                submitBtn.disabled = true;
+                
+                const formData = new FormData(this);
+                
+                fetch('/api/consultation', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification('تم إرسال طلب الاستشارة بنجاح! سنتواصل معك قريباً.', 'success');
+                        form.reset();
+                    } else {
+                        showNotification('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+                })
+                .finally(() => {
+                    // Reset button state
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+            });
+            
+            function showNotification(message, type) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                        <span>${message}</span>
+                        <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+        });
+        
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+    </script>
+    `,
+    currentPage: 'consultation',
+    pageTitle: 'نموذج الاستشارة'
+}) %>

@@ -1,0 +1,289 @@
+<%- include('layout', { 
+    body: `
+    <div class="white-page-wrapper">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <h1 class="white-page-title"><i class="bi bi-info-circle-fill me-2"></i>من نحن</h1>
+                    
+                    <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="card-content">
+                            <p class="content-text">
+                                مكتب الجيار وزين للمحاماة والاستشارات القانونية مؤسسة قانونية متكاملة تضم فريقاً من المحامين والمستشارين القانونيين وأساتذة الجامعات ذوي المؤهلات العالية والحاصلين على درجات علمية متقدمة في القانون بما في ذلك الدكتوراه في القانون، مع خبرة واسعة في التأليف القانوني والمراجع القانونية الرائدة.
+                            </p>
+                            <p class="content-text">
+                                نحن ملتزمون بالتميز المهني وتقديم خدمات قانونية عالية الجودة تتماشى مع المعايير الدولية وتغطي مختلف القطاعات القانونية وتواكب التطورات التكنولوجية والميكنة الحديثة.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <h1 class="white-page-title"><i class="bi bi-eye-fill me-2"></i>رؤيتنا</h1>
+                    
+                    <div class="content-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card-content">
+                            <p class="content-text">
+                                أن نكون الشريك القانوني الأول للعملاء الذين يسعون للحصول على حلول قانونية مبتكرة واستراتيجية، قائمة على الابتكار والالتزام، ودعم مصالحهم القانونية والتجارية محلياً ودولياً.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <h1 class="white-page-title"><i class="bi bi-people-fill me-2"></i>فريق العمل</h1>
+                    
+                    <div class="team-preview">
+                        <div class="team-member-preview" data-aos="fade-up" data-aos-delay="300">
+                            <div class="member-preview-content">
+                                <div class="member-preview-image">
+                                    <img src="/Content/dw/MahmoudEmam.jpg" class="rounded-circle" alt="Prof. Dr. Mostafa Zain">
+                                </div>
+                                <div class="member-preview-info">
+                                    <h3 class="member-preview-name">أ.د / مصطفى زين</h3>
+                                    <h5 class="member-preview-position">رئيس مجلس الادارة وشريك مؤسس</h5>
+                                    <div class="member-preview-credentials">
+                                        <div class="credential-preview-item">
+                                            <i class="fa fa-check-circle"></i>
+                                            <span>المحامي بالنقض والاداريه العليا والدستوريه</span>
+                                        </div>
+                                        <div class="credential-preview-item">
+                                            <i class="fa fa-check-circle"></i>
+                                            <span>المستشار القانوني للعديد من الجهات الدولية والحكوميه</span>
+                                        </div>
+                                        <div class="credential-preview-item">
+                                            <i class="fa fa-check-circle"></i>
+                                            <span>وخبير الحكومة ومكافحة الفساد والعقود الدولية</span>
+                                        </div>
+                                        <div class="credential-preview-item">
+                                            <i class="fa fa-check-circle"></i>
+                                            <span>والمعاملات المصرفية الدولية</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="team-member-preview" data-aos="fade-up" data-aos-delay="400">
+                            <div class="member-preview-content">
+                                <div class="member-preview-image">
+                                    <img src="/Content/dw/mahmoudGayar.jpg" class="rounded-circle" alt="Mahmoud El Gayar">
+                                </div>
+                                <div class="member-preview-info">
+                                    <h3 class="member-preview-name">أ / محمود الجيار</h3>
+                                    <h5 class="member-preview-position">المدير تنفيذي وشريك مؤسس</h5>
+                                    <p class="member-preview-description">
+                                        محامي متخصص في القانون التجاري والاستثماري مع أكثر من 15 عاماً من الخبرة في المحاكم المصرية والدولية.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .white-page-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .white-page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .content-text {
+            color: #495057;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-text:last-child {
+            margin-bottom: 0;
+        }
+        
+        .team-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .team-member-preview {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .team-member-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .member-preview-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .member-preview-image {
+            flex-shrink: 0;
+        }
+        
+        .member-preview-image img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 4px solid #f8f9fa;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .team-member-preview:hover .member-preview-image img {
+            transform: scale(1.05);
+            border-color: #d1ad56;
+        }
+        
+        .member-preview-info {
+            flex: 1;
+        }
+        
+        .member-preview-name {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .member-preview-position {
+            color: #d1ad56;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .member-preview-description {
+            color: #6c757d;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .member-preview-credentials {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        
+        .credential-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #495057;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .credential-preview-item i {
+            color: #28a745;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .white-page-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .member-preview-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+            
+            .member-preview-image img {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .member-preview-name {
+                font-size: 1.3rem;
+            }
+            
+            .member-preview-position {
+                font-size: 1rem;
+            }
+            
+            .content-card, .team-member-preview {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .white-page-title {
+                font-size: 1.8rem;
+            }
+            
+            .member-preview-image img {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .member-preview-name {
+                font-size: 1.2rem;
+            }
+            
+            .content-card, .team-member-preview {
+                padding: 1rem;
+            }
+        }
+    </style>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+    </script>
+    `,
+    currentPage: 'about',
+    pageTitle: 'من نحن'
+}) %>

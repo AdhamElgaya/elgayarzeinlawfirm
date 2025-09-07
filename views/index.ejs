@@ -1,0 +1,390 @@
+<%- include('layout', { 
+    body: `
+    <div id="intro" class="bg-image shadow-2-strong" style="margin-top:0px;">
+        <div class="mask" style="background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 0.6) 100%);">
+            <div class="container d-flex align-items-center justify-content-center text-center h-100">
+                <div class="text-white hero-content" data-mdb-theme="dark" data-aos="fade-up" data-aos-duration="1500">
+                    <h1 class="mb-4 hero-title" style="color: #d1ad56; font-size: 3.5rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                        ${l.hero}
+                    </h1>
+                    <h5 class="mb-5 hero-subtitle" style="line-height:1.8; font-size: 1.3rem; color: #f8f9fa; max-width: 600px; margin: 0 auto;">
+                        ${l.subtitle}
+                    </h5>
+                    <div class="hero-buttons" data-aos="fade-up" data-aos-delay="500">
+                        <a class="btn bttel me-3" href="/contact?lang=${lang}">${l.cta}</a>
+                        <a class="btn btn-outline-light" href="/services?lang=${lang}" style="border-color: #d1ad56; color: #d1ad56; padding: 12px 30px; border-radius: 50px; font-weight: 600;">
+                            <i class="fa fa-info-circle me-2"></i>تعرف على خدماتنا
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Scroll indicator -->
+            <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="1000">
+                <div class="scroll-arrow">
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+    <style>
+        h1.hh{
+            color:#d1ad56;
+        }
+        div.npm ul
+        {
+            list-style: square;
+            line-height: 40px;
+        }
+
+        /* Hero section enhancements */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(209, 173, 86, 0.3); }
+            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 30px rgba(209, 173, 86, 0.6); }
+        }
+
+        .hero-buttons .btn {
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .hero-buttons .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        .scroll-arrow {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-gold);
+            font-size: 18px;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-arrow:hover {
+            background: var(--primary-gold);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Service cards enhancements */
+        .service-card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(209, 173, 86, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(209, 173, 86, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(209, 173, 86, 0.2);
+            border-color: var(--primary-gold);
+        }
+
+        .service-card img {
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem !important;
+            }
+            
+            .hero-buttons .btn {
+                display: block;
+                margin: 10px auto;
+                width: 200px;
+            }
+        }
+    </style>
+
+    <div class="bg-dark text-secondary px-4 py-5 text-center" style="padding-bottom: 0px !important;background: var(--gradient-dark) !important;">
+        <div class="py-5">
+            <h1 class="display-5 fw-bold text-white" style="color: var(--primary-gold) !important;" data-aos="fade-up">${l.services}</h1>
+            <div class="col-lg-6 mx-auto">
+                <p class="fs-5 mb-4" style="
+                    color: var(--text-light);
+                    font-weight: 600;
+                    margin-bottom: 0px !important;
+                " data-aos="fade-up" data-aos-delay="200">${l.servicesDesc}</p>
+            </div>
+        </div>
+    </div>
+    
+    <h1 class="page-title"><i class="bi bi-gear-fill me-2"></i>${l.services}</h1>
+
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-right" data-aos-duration="1000" id="pl1" style="padding-top:0px !important;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img1}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">الاستشارات القانونية</h1>
+                    <ul class="lst">
+                        <li>استشارات قانونية شاملة</li>
+                        <li>تحليل القضايا القانونية</li>
+                        <li>تقديم النصائح القانونية</li>
+                        <li>مراجعة العقود والاتفاقيات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-left" data-aos-duration="1000" id="pl2" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5 npm">
+                <div class="col-10 col-sm-8 col-lg-6">
+                    <img src="${img2}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">التمثيل القانوني</h1>
+                    <ul class="lst">
+                        <li>التمثيل أمام المحاكم</li>
+                        <li>إعداد المذكرات القانونية</li>
+                        <li>الدفاع في القضايا المدنية والجنائية</li>
+                        <li>متابعة الإجراءات القضائية</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-right" data-aos-duration="1000" id="pl3" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img3}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">صياغة العقود</h1>
+                    <ul class="lst">
+                        <li>صياغة العقود التجارية</li>
+                        <li>عقود العمل والاستخدام</li>
+                        <li>عقود البيع والشراء</li>
+                        <li>مراجعة العقود الموجودة</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-left" data-aos-duration="1000" id="pl4" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img4}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القانون التجاري</h1>
+                    <ul class="lst">
+                        <li>تأسيس الشركات</li>
+                        <li>القانون التجاري والاستثماري</li>
+                        <li>حل النزاعات التجارية</li>
+                        <li>الاستشارات المالية</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-right" data-aos-duration="1000" id="pl5" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img5}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القانون العقاري</h1>
+                    <ul class="lst">
+                        <li>معاملات العقارات</li>
+                        <li>تسجيل الملكية</li>
+                        <li>النزاعات العقارية</li>
+                        <li>الاستثمار العقاري</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-left" data-aos-duration="1000" id="pl6" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img6}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القانون العائلي</h1>
+                    <ul class="lst">
+                        <li>قضايا الطلاق والخلع</li>
+                        <li>النفقة والحضانة</li>
+                        <li>الوصاية والولاية</li>
+                        <li>الميراث والتركات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-right" data-aos-duration="1000" id="pl7" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img7}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القانون الجنائي</h1>
+                    <ul class="lst">
+                        <li>الدفاع في القضايا الجنائية</li>
+                        <li>قضايا الأموال العامة</li>
+                        <li>القضايا الأخلاقية</li>
+                        <li>قضايا المخدرات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-left" data-aos-duration="1000" id="pl8" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img8}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القانون الإداري</h1>
+                    <ul class="lst">
+                        <li>القضايا الإدارية</li>
+                        <li>الطعون على القرارات</li>
+                        <li>قضايا الموظفين</li>
+                        <li>العقود الحكومية</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container col-xxl-8 px-4 py-5" data-aos="fade-right" data-aos-duration="1000" id="pl9" style="margin-top:-160px;">
+        <div class="service-card">
+            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div class="col-10 col-sm-8 col-lg-6 npm">
+                    <img src="${img9}" class="d-block mx-lg-auto img-fluid" width="700" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-6 npm">
+                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">التحكيم التجاري</h1>
+                    <ul class="lst">
+                        <li>التحكيم المحلي والدولي</li>
+                        <li>حل النزاعات خارج المحاكم</li>
+                        <li>إجراءات التحكيم</li>
+                        <li>تنفيذ أحكام التحكيم</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+
+        // Scroll indicator functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+            if (scrollIndicator) {
+                scrollIndicator.addEventListener('click', function() {
+                    const servicesSection = document.querySelector('.page-title');
+                    if (servicesSection) {
+                        servicesSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            }
+
+            // Add intersection observer for scroll indicator visibility
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        scrollIndicator.style.opacity = '0';
+                    } else {
+                        scrollIndicator.style.opacity = '1';
+                    }
+                });
+            });
+
+            const servicesTitle = document.querySelector('.page-title');
+            if (servicesTitle) {
+                observer.observe(servicesTitle);
+            }
+        });
+    </script>
+    `,
+    currentPage: 'home',
+    pageTitle: l.title
+}) %>

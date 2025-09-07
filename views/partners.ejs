@@ -1,0 +1,300 @@
+<%- include('layout', { 
+    body: `
+    <div class="white-page-wrapper">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="white-page-title"><i class="bi bi-award-fill me-2"></i>شركاء النجاح</h1>
+                    
+                    <div class="partners-intro" data-aos="fade-up" data-aos-delay="100">
+                        <p class="intro-text">
+                            نحن فخورون بالتعاون مع العديد من الجهات المحلية والدولية في المجالات القانونية والاستشارية
+                        </p>
+                    </div>
+                    
+                    <div class="partners-section" data-aos="fade-up" data-aos-delay="200">
+                        <h4 class="partners-subtitle">ومن ضمن شركائنا:</h4>
+                        
+                        <div class="partners-grid">
+                            <div class="partner-card" data-aos="fade-up" data-aos-delay="300">
+                                <div class="partner-logo-container">
+                                    <img src="/Content/img/horizons-logo.png" class="partner-logo" alt="Horizons Logo">
+                                </div>
+                                <div class="partner-info">
+                                    <h5 class="partner-name">هوريزون للخدمات القانونية</h5>
+                                    <p class="partner-location">كاليفورنيا، الولايات المتحدة</p>
+                                </div>
+                            </div>
+                            
+                            <div class="partner-card" data-aos="fade-up" data-aos-delay="400">
+                                <div class="partner-logo-container">
+                                    <img src="/Content/img/horizons-logo.png" class="partner-logo" alt="Horizons Logo">
+                                </div>
+                                <div class="partner-info">
+                                    <h5 class="partner-name">هوريزون</h5>
+                                    <p class="partner-location">أبو ظبي الإمارات العربية المتحدة</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="partners-notice" data-aos="fade-up" data-aos-delay="500">
+                        <div class="notice-card">
+                            <div class="notice-icon">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <div class="notice-content">
+                                <h6 class="notice-title">ملاحظة مهمة</h6>
+                                <p class="notice-text">
+                                    مع العلم إن حرصنا على السرية وخصوصية عملائنا يمنعنا من عرض جميع الشراكات بشكل علني.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .white-page-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .white-page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
+        }
+        
+        .partners-intro {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .intro-text {
+            color: #495057;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin: 0;
+        }
+        
+        .partners-section {
+            margin-bottom: 3rem;
+        }
+        
+        .partners-subtitle {
+            color: #d1ad56;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .partner-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .partner-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .partner-logo-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .partner-logo {
+            height: 80px;
+            width: auto;
+            background: linear-gradient(45deg, #d1ad56, #b78632);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(209, 173, 86, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .partner-card:hover .partner-logo {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.4);
+        }
+        
+        .partner-name {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .partner-location {
+            color: #6c757d;
+            font-size: 1rem;
+            margin: 0;
+        }
+        
+        .partners-notice {
+            margin-top: 3rem;
+        }
+        
+        .notice-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .notice-icon {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notice-icon i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .notice-content {
+            flex: 1;
+        }
+        
+        .notice-title {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notice-text {
+            color: #495057;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .white-page-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .intro-text {
+                font-size: 1.1rem;
+            }
+            
+            .partners-subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .partners-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .partner-card {
+                padding: 1.5rem;
+            }
+            
+            .partner-logo {
+                height: 60px;
+            }
+            
+            .notice-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+            
+            .notice-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .notice-icon i {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .white-page-title {
+                font-size: 1.8rem;
+            }
+            
+            .intro-text {
+                font-size: 1rem;
+            }
+            
+            .partners-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .partner-card {
+                padding: 1rem;
+            }
+            
+            .partner-logo {
+                height: 50px;
+            }
+            
+            .partner-name {
+                font-size: 1.1rem;
+            }
+            
+            .notice-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+    </script>
+    `,
+    currentPage: 'partners',
+    pageTitle: 'شركاء النجاح'
+}) %>
