@@ -205,15 +205,18 @@
                 align-items: center;
             }
             
-            .hero-buttons .btn, .hero-buttons .bttel {
-                display: block;
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .hero-btn-primary, .hero-btn-secondary {
                 width: 100%;
                 max-width: 280px;
-                margin: 0 auto 10px;
                 padding: 15px 25px;
                 font-size: 16px;
                 text-align: center;
-                border-radius: 10px;
             }
             
             /* Page titles */
@@ -289,15 +292,69 @@
             }
             
             /* Footer mobile optimization */
-            .social-btn {
+            .footer-social-link {
                 width: 50px;
                 height: 50px;
                 margin: 5px;
-                border-radius: 50%;
             }
             
-            .social-btn i {
+            .footer-social-link i {
                 font-size: 18px;
+            }
+            
+            /* Footer social media links styling */
+            .footer-social-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                color: var(--primary-gold);
+                border: 2px solid var(--primary-gold);
+                background: transparent;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                margin: 0 8px;
+            }
+            
+            .footer-social-link:hover {
+                color: white;
+                background: var(--primary-gold);
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-gold);
+                text-decoration: none;
+            }
+            
+            .footer-social-link.facebook:hover {
+                background: #1877f2;
+                border-color: #1877f2;
+            }
+            
+            .footer-social-link.linkedin:hover {
+                background: #0077b5;
+                border-color: #0077b5;
+            }
+            
+            .footer-social-link.instagram:hover {
+                background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+                border-color: #e6683c;
+            }
+            
+            .footer-social-link.twitter:hover {
+                background: #1da1f2;
+                border-color: #1da1f2;
+            }
+            
+            .footer-social-link.whatsapp:hover {
+                background: #25d366;
+                border-color: #25d366;
+            }
+            
+            .footer-social-link.lang-switch {
+                width: 45px;
+                height: 45px;
+                padding: 3px;
             }
             
             /* White page wrappers mobile */
@@ -754,7 +811,68 @@
 
         <style>
             li.nav-item {
-                padding-right: 12px;
+                padding-right: 8px;
+            }
+            
+            /* Social media icons styling */
+            .social-nav {
+                padding-left: 20px !important;
+            }
+            
+            .social-link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                color: var(--primary-gold);
+                border: 2px solid var(--primary-gold);
+                background: transparent;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                margin: 0 5px;
+            }
+            
+            .social-link:hover {
+                color: white;
+                background: var(--primary-gold);
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-gold);
+                text-decoration: none;
+            }
+            
+            .social-link.facebook:hover {
+                background: #1877f2;
+                border-color: #1877f2;
+            }
+            
+            .social-link.linkedin:hover {
+                background: #0077b5;
+                border-color: #0077b5;
+            }
+            
+            .social-link.instagram:hover {
+                background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+                border-color: #e6683c;
+            }
+            
+            .social-link.twitter:hover {
+                background: #1da1f2;
+                border-color: #1da1f2;
+            }
+            
+            .social-link.lang-switch {
+                width: 35px;
+                height: 35px;
+                padding: 2px;
+            }
+            
+            .lang-flag {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                object-fit: cover;
             }
 
             i.fa {
@@ -773,10 +891,25 @@
 
             a.ld {
                 color: #d1ad56 !important;
-                padding-left: var(--mdb-navbar-nav-link-padding-x);
-                padding-right: var(--mdb-navbar-nav-link-padding-x);
-                padding-top: var(--mdb-navbar-nav-link-padding-x);
+                padding: 12px 20px;
                 display: block;
+                font-weight: 500;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                border-radius: 8px;
+                margin: 2px 0;
+            }
+            
+            a.ld:hover {
+                color: white !important;
+                background: rgba(209, 173, 86, 0.1);
+                transform: translateY(-1px);
+            }
+            
+            a.ld.active {
+                color: white !important;
+                background: var(--gradient-gold);
+                box-shadow: var(--shadow-gold);
             }
 
             a.bttel {
@@ -960,52 +1093,63 @@
                     <span class="fa fa-bars" style="color: #b78632"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav mx-auto">
                         <li class="nav-item">
                             <a class="ld <%= currentPage === 'home' ? 'active' : '' %>" href="/?lang=<%= lang %>">الرئيسية</a>
                         </li>
                         <li class="nav-item">
-                            <a class="ld <%= currentPage === 'news' ? 'active' : '' %>" href="/posts?lang=<%= lang %>">المستجدات</a>
+                            <a class="ld <%= currentPage === 'about' ? 'active' : '' %>" href="/about?lang=<%= lang %>">من نحن</a>
                         </li>
                         <li class="nav-item">
-                            <a class="ld <%= currentPage === 'services' ? 'active' : '' %>" href="/services?lang=<%= lang %>">الخدمات الاكثر طلباً</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="ld <%= currentPage === 'partners' ? 'active' : '' %>" href="/partners?lang=<%= lang %>">شركاء النجاح</a>
+                            <a class="ld <%= currentPage === 'services' ? 'active' : '' %>" href="/services?lang=<%= lang %>">الخدمات</a>
                         </li>
                         <li class="nav-item">
                             <a class="ld <%= currentPage === 'team' ? 'active' : '' %>" href="/team?lang=<%= lang %>">فريق العمل</a>
                         </li>
                         <li class="nav-item">
-                            <a class="ld <%= currentPage === 'consultation' ? 'active' : '' %>" href="/consultation?lang=<%= lang %>">حجز مواعيد او استشارات</a>
+                            <a class="ld <%= currentPage === 'gallery' ? 'active' : '' %>" href="/gallery?lang=<%= lang %>">مكتبة الصور</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'partners' ? 'active' : '' %>" href="/partners?lang=<%= lang %>">شركاء النجاح</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'news' ? 'active' : '' %>" href="/posts?lang=<%= lang %>">المستجدات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld <%= currentPage === 'consultation' ? 'active' : '' %>" href="/consultation?lang=<%= lang %>">استشارات</a>
                         </li>
                     </ul>
                 </div>
                 <div id="soc" class="d-sm-none d-md-block">
-                    <ul class="navbar-nav" style="padding-left:48px;">
+                    <ul class="navbar-nav social-nav">
                         <li class="nav-item">
-                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
-                                <i class="fa fa-facebook-f"></i>
+                            <a class="social-link facebook" target="_blank" href="#" role="button" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
-                                <i class="fa fa-linkedin"></i>
+                            <a class="social-link linkedin" target="_blank" href="#" role="button" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1" target="_blank" href="#" role="button">
-                                <i class="fa fa-instagram"></i>
+                            <a class="social-link instagram" target="_blank" href="#" role="button" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link twitter" target="_blank" href="#" role="button" title="Twitter">
+                                <i class="fab fa-twitter"></i>
                             </a>
                         </li>
                         <li class="nav-item">
                             <% if (lang === "en") { %>
-                            <a href="/lang?lang=ar" class="lang">
-                                <img src="/Content/ar.png" class="lang"/>
+                            <a href="/lang?lang=ar" class="social-link lang-switch" title="العربية">
+                                <img src="/Content/ar.png" class="lang-flag"/>
                             </a>
                             <% } else { %>
-                            <a href="/lang?lang=en" class="lang">
-                                <img src="/Content/en.png" class="lang"/>
+                            <a href="/lang?lang=en" class="social-link lang-switch" title="English">
+                                <img src="/Content/en.png" class="lang-flag"/>
                             </a>
                             <% } %>
                         </li>
@@ -1159,24 +1303,32 @@
         <!-- Section: Social media -->
         <section class="mb-4">
             <!-- Facebook -->
-            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
-                <i class="fa fa-facebook-f"></i>
+            <a class="footer-social-link facebook" target="_blank" href="#" role="button" title="Facebook">
+                <i class="fab fa-facebook-f"></i>
             </a>
             <!-- Instagram -->
-            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
-                <i class="fa fa-instagram"></i>
+            <a class="footer-social-link instagram" target="_blank" href="#" role="button" title="Instagram">
+                <i class="fab fa-instagram"></i>
             </a>
-            <!-- Linkedin -->
-            <a data-mdb-ripple-init class="btn btn-outline btn-floating m-1 social-btn" target="_blank" href="#" role="button" style="border-color: var(--primary-gold); color: var(--primary-gold);">
-                <i class="fa fa-linkedin"></i>
+            <!-- LinkedIn -->
+            <a class="footer-social-link linkedin" target="_blank" href="#" role="button" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <!-- Twitter -->
+            <a class="footer-social-link twitter" target="_blank" href="#" role="button" title="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <!-- WhatsApp -->
+            <a class="footer-social-link whatsapp" target="_blank" href="#" role="button" title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
             </a>
             <% if (lang === "en") { %>
-            <a data-mdb-ripple-init href="/lang?lang=ar" class="btn btn-outline btn-floating btn m-1 social-btn" role="button" style="border-color: var(--primary-gold);">
-                <img src="/Content/ar.png" class="lang"/>
+            <a href="/lang?lang=ar" class="footer-social-link lang-switch" role="button" title="العربية">
+                <img src="/Content/ar.png" class="lang-flag"/>
             </a>
             <% } else { %>
-            <a data-mdb-ripple-init href="/lang?lang=en" class="btn btn-outline btn-floating btn m-1 social-btn" role="button" style="border-color: var(--primary-gold);">
-                <img src="/Content/en.png" class="lang"/>
+            <a href="/lang?lang=en" class="footer-social-link lang-switch" role="button" title="English">
+                <img src="/Content/en.png" class="lang-flag"/>
             </a>
             <% } %>
         </section>
