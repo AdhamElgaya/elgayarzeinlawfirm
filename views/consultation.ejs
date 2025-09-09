@@ -30,24 +30,15 @@
                                     <label for="phone" class="form-label">
                                         <i class="fa fa-phone me-2"></i>رقم التليفون
                                     </label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="رقم التليفون" required>
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="ادخل رقم الهاتف" required>
                                 </div>
                             </div>
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="nationalId" class="form-label">
-                                        <i class="fa fa-id-card me-2"></i>الرقم القومى
-                                    </label>
-                                    <input type="text" class="form-control" id="nationalId" name="nationalId" placeholder="الرقم القومى" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="city" class="form-label">
-                                        <i class="fa fa-map-marker me-2"></i>المدينة
-                                    </label>
-                                    <input type="text" class="form-control" id="city" name="city" placeholder="المدينة" required>
-                                </div>
+                            <div class="form-group">
+                                <label for="city" class="form-label">
+                                    <i class="fa fa-map-marker me-2"></i>المدينة
+                                </label>
+                                <input type="text" class="form-control" id="city" name="city" placeholder="ادخل المدينة" required>
                             </div>
                             
                             <div class="form-group">
@@ -178,6 +169,8 @@
             font-size: 1rem;
             color: #495057;
             transition: all 0.3s ease;
+            text-align: right;
+            direction: rtl;
         }
         
         .form-control:focus {
@@ -302,6 +295,81 @@
                 font-size: 1rem;
             }
         }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .notification-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .notification-error {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .notification-content {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification-content i {
+            font-size: 1.2rem;
+        }
+        
+        .notification-content span {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
     
     <script>
@@ -340,13 +408,6 @@
                         isValid = false;
                         errorMessage = 'يرجى إدخال رقم هاتف صحيح';
                     }
-                } else if (field.id === 'nationalId' && value) {
-                    const nationalIdRegex = /^[0-9]{14}$/;
-                    if (!nationalIdRegex.test(value)) {
-                        isValid = false;
-                        errorMessage = 'الرقم القومي يجب أن يكون 14 رقم';
-                    }
-                }
                 
                 if (!isValid) {
                     field.classList.add('is-invalid');
@@ -428,16 +489,15 @@
                 existingNotifications.forEach(notification => notification.remove());
                 
                 const notification = document.createElement('div');
-                notification.className = `notification notification-${type}`;
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                        <span>${message}</span>
-                        <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
-                `;
+                notification.className = 'notification notification-' + type;
+                notification.innerHTML = 
+                    '<div class="notification-content">' +
+                        '<i class="fa fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i>' +
+                        '<span>' + message + '</span>' +
+                        '<button class="notification-close" onclick="this.parentElement.parentElement.remove()">' +
+                            '<i class="fa fa-times"></i>' +
+                        '</button>' +
+                    '</div>';
                 
                 document.body.appendChild(notification);
                 
@@ -447,6 +507,7 @@
                         notification.remove();
                     }
                 }, 5000);
+            }
             }
         });
         

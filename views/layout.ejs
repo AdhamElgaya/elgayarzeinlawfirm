@@ -8,7 +8,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
-    <title><%= l.title %> - <%= pageTitle || 'Law Firm' %></title>
+    <title>مكتب الجيار وزين</title>
 
     <link href="/Content/ar/bootstrap.rtl.css" rel="stylesheet" />
     <script src="/Scripts/jquery-3.7.1.js"></script>
@@ -153,11 +153,366 @@
             border: 1px solid rgba(209, 173, 86, 0.2);
         }
 
+        /* ========================================
+           PROFESSIONAL RESPONSIVE DESIGN SYSTEM
+           ======================================== */
+        
+        /* CSS Custom Properties for Responsive Design */
+        :root {
+            /* Responsive Typography Scale */
+            --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+            --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+            --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+            --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+            --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+            --font-size-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+            --font-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+            --font-size-4xl: clamp(2.25rem, 1.8rem + 2.25vw, 3rem);
+            --font-size-5xl: clamp(3rem, 2.5rem + 2.5vw, 4rem);
+            
+            /* Responsive Spacing Scale */
+            --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+            --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+            --space-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+            --space-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+            --space-xl: clamp(2rem, 1.6rem + 2vw, 3rem);
+            --space-2xl: clamp(3rem, 2.4rem + 3vw, 4rem);
+            --space-3xl: clamp(4rem, 3.2rem + 4vw, 6rem);
+            
+            /* Responsive Container Widths */
+            --container-sm: 100%;
+            --container-md: min(100%, 720px);
+            --container-lg: min(100%, 960px);
+            --container-xl: min(100%, 1140px);
+            --container-xxl: min(100%, 1320px);
+            
+            /* Responsive Grid Gaps */
+            --grid-gap-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+            --grid-gap-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+            --grid-gap-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+            
+            /* Responsive Border Radius */
+            --radius-sm: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+            --radius-md: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+            --radius-lg: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);
+            --radius-xl: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+        }
+        
+        /* Fluid Typography System */
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        h4 { font-size: var(--font-size-xl); }
+        h5 { font-size: var(--font-size-lg); }
+        h6 { font-size: var(--font-size-base); }
+        p, body { font-size: var(--font-size-base); }
+        
+        /* Responsive Container System */
+        .container-fluid {
+            width: 100%;
+            padding-left: var(--space-md);
+            padding-right: var(--space-md);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: var(--container-xl);
+            padding-left: var(--space-md);
+            padding-right: var(--space-md);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Responsive Grid System */
+        .responsive-grid {
+            display: grid;
+            gap: var(--grid-gap-md);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .responsive-grid-sm {
+            display: grid;
+            gap: var(--grid-gap-sm);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        .responsive-grid-lg {
+            display: grid;
+            gap: var(--grid-gap-lg);
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+        
+        /* Responsive Flexbox Utilities */
+        .flex-responsive {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+        
+        .flex-responsive > * {
+            flex: 1 1 300px;
+            min-width: 0;
+        }
+        
+        /* Responsive Images */
+        .img-responsive {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+        
+        .img-responsive-circle {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        /* Responsive Cards */
+        .card-responsive {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(209, 173, 86, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-responsive:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-gold);
+            border-color: var(--primary-gold);
+        }
+        
+        /* Responsive Buttons */
+        .btn-responsive {
+            padding: var(--space-sm) var(--space-lg);
+            font-size: var(--font-size-base);
+            border-radius: var(--radius-lg);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* Responsive Forms */
+        .form-responsive {
+            width: 100%;
+            padding: var(--space-sm);
+            font-size: var(--font-size-base);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(209, 173, 86, 0.3);
+            background: rgba(26, 26, 26, 0.8);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .form-responsive:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+        }
+        
+        /* ========================================
+           BREAKPOINT-SPECIFIC STYLES
+           ======================================== */
+        
+        /* Extra Large Devices (1400px and up) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: var(--container-xxl);
+            }
+            
+            .hero-title {
+                font-size: 4.5rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.5rem !important;
+            }
+            
+            .service-card {
+                padding: 3rem;
+            }
+        }
+        
+        /* Large Devices (1200px and up) */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: var(--container-xl);
+            }
+            
+            .hero-title {
+                font-size: 4rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.4rem !important;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 1.1rem;
+            }
+            
+            .service-card {
+                padding: 2.5rem;
+            }
+        }
+        
+        /* Medium Devices (992px and up) */
+        @media (min-width: 992px) {
+            .container {
+                max-width: var(--container-lg);
+            }
+            
+            .hero-title {
+                font-size: 3.5rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.3rem !important;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.5rem 0.8rem;
+                font-size: 1rem;
+            }
+            
+            .service-card {
+                padding: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: row;
+                gap: 1.5rem;
+            }
+        }
+        
+        /* Small Devices (768px and up) */
+        @media (min-width: 768px) {
+            .container {
+                max-width: var(--container-md);
+            }
+            
+            .hero-title {
+                font-size: 3rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem !important;
+            }
+            
+            .service-card {
+                padding: 1.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+        
         /* Enhanced Mobile optimizations */
         @media (max-width: 768px) {
+            /* Responsive Container Adjustments */
+            .container {
+                padding-left: var(--space-sm);
+                padding-right: var(--space-sm);
+            }
+            
             /* Navbar improvements */
             .navbar-brand img {
                 height: 35px !important;
+            }
+            
+            /* Responsive Typography for Mobile */
+            .hero-title {
+                font-size: clamp(2rem, 4vw, 2.5rem) !important;
+                line-height: 1.2;
+                margin-bottom: var(--space-md);
+            }
+            
+            .hero-subtitle {
+                font-size: clamp(1rem, 2.5vw, 1.1rem) !important;
+                line-height: 1.4;
+                margin-bottom: var(--space-lg);
+            }
+            
+            /* Responsive Hero Buttons */
+            .hero-buttons {
+                flex-direction: column;
+                gap: var(--space-md);
+                width: 100%;
+                align-items: center;
+            }
+            
+            .hero-btn-primary, .hero-btn-secondary {
+                width: 100%;
+                max-width: 280px;
+                padding: var(--space-md) var(--space-lg);
+                font-size: var(--font-size-base);
+                text-align: center;
+                min-height: 50px;
+            }
+            
+            /* Responsive Service Cards */
+            .service-card {
+                margin-bottom: var(--space-lg);
+                padding: var(--space-lg);
+                border-radius: var(--radius-lg);
+            }
+            
+            .service-card h1 {
+                font-size: clamp(1.5rem, 3vw, 2rem) !important;
+                margin-bottom: var(--space-md);
+            }
+            
+            .service-card img {
+                margin-bottom: var(--space-lg);
+                width: 100%;
+                height: auto;
+                border-radius: var(--radius-md);
+            }
+            
+            .service-card p {
+                font-size: var(--font-size-sm);
+                line-height: 1.6;
+            }
+            
+            /* Responsive Grid Layouts */
+            .responsive-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
+            .responsive-grid-sm {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+            
+            .responsive-grid-lg {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            /* Responsive Flexbox */
+            .flex-responsive {
+                flex-direction: column;
+                gap: var(--space-md);
+            }
+            
+            .flex-responsive > * {
+                flex: 1 1 auto;
+                min-width: 0;
             }
             
             .navbar-nav .nav-link {
@@ -643,31 +998,44 @@
 
         /* Very small screens (320px and below) */
         @media (max-width: 320px) {
+            /* Ultra-compact responsive design */
+            .container {
+                padding-left: var(--space-xs);
+                padding-right: var(--space-xs);
+            }
+            
             .hero-title {
-                font-size: 1.6rem !important;
+                font-size: clamp(1.5rem, 5vw, 1.8rem) !important;
+                line-height: 1.1;
             }
             
             .hero-subtitle {
-                font-size: 0.9rem !important;
+                font-size: clamp(0.9rem, 3vw, 1rem) !important;
+                line-height: 1.3;
             }
             
             .page-title, .white-page-title {
-                font-size: 20px !important;
+                font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+            }
+            
+            .service-card {
+                padding: var(--space-md);
+                margin-bottom: var(--space-md);
             }
             
             .service-card h1 {
-                font-size: 18px !important;
+                font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
             }
             
-            .btn, .bttel {
-                padding: 10px 16px;
-                font-size: 13px;
-                min-height: 40px;
+            .btn, .bttel, .btn-responsive {
+                padding: var(--space-sm) var(--space-md);
+                font-size: var(--font-size-sm);
+                min-height: 44px;
             }
             
-            .form-control {
-                padding: 10px;
-                font-size: 16px;
+            .form-control, .form-responsive {
+                padding: var(--space-sm);
+                font-size: 16px; /* Prevents zoom on iOS */
             }
             
             .navbar-brand img {
@@ -682,6 +1050,206 @@
             
             .social-btn i {
                 font-size: 14px;
+            }
+            
+            /* Ultra-compact grid */
+            .responsive-grid,
+            .responsive-grid-sm,
+            .responsive-grid-lg {
+                gap: var(--space-sm);
+            }
+        }
+        
+        /* ========================================
+           ADVANCED RESPONSIVE FEATURES
+           ======================================== */
+        
+        /* Responsive Navigation Enhancements */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: rgba(0, 0, 0, 0.98);
+                border-radius: var(--radius-lg);
+                margin-top: var(--space-sm);
+                padding: var(--space-md);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(209, 173, 86, 0.2);
+            }
+            
+            .navbar-nav .nav-link {
+                padding: var(--space-sm) var(--space-md);
+                font-size: var(--font-size-base);
+                text-align: center;
+                border-bottom: 1px solid rgba(209, 173, 86, 0.1);
+                transition: all 0.3s ease;
+                margin-bottom: var(--space-xs);
+                border-radius: var(--radius-sm);
+            }
+            
+            .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+            
+            .navbar-nav .nav-link:hover {
+                background: rgba(209, 173, 86, 0.1);
+                color: var(--primary-gold) !important;
+                transform: translateX(-5px);
+            }
+        }
+        
+        /* Responsive Image Optimization */
+        @media (max-width: 768px) {
+            .img-responsive {
+                border-radius: var(--radius-sm);
+            }
+            
+            .service-card img,
+            .gallery-card img,
+            .team-member-card img {
+                aspect-ratio: 16/9;
+                object-fit: cover;
+            }
+        }
+        
+        /* Responsive Form Enhancements */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .form-group {
+                margin-bottom: var(--space-md);
+            }
+            
+            .form-control,
+            .form-responsive {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: var(--space-sm);
+                border-radius: var(--radius-md);
+                min-height: 44px;
+            }
+            
+            .form-label {
+                font-size: var(--font-size-base);
+                margin-bottom: var(--space-xs);
+                color: var(--text-light);
+            }
+        }
+        
+        /* Responsive Card System */
+        @media (max-width: 768px) {
+            .card,
+            .service-card,
+            .team-member-card,
+            .gallery-card,
+            .post-card,
+            .partner-card,
+            .content-card {
+                margin-bottom: var(--space-lg);
+                border-radius: var(--radius-lg);
+                padding: var(--space-lg);
+            }
+            
+            .card-body {
+                padding: var(--space-md);
+            }
+        }
+        
+        /* Responsive Button System */
+        @media (max-width: 768px) {
+            .btn,
+            .bttel,
+            .btn-responsive,
+            .hero-btn-primary,
+            .hero-btn-secondary {
+                padding: var(--space-sm) var(--space-lg);
+                font-size: var(--font-size-base);
+                border-radius: var(--radius-lg);
+                min-height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+        }
+        
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-social-link {
+                width: 50px;
+                height: 50px;
+                margin: var(--space-xs);
+            }
+            
+            .footer-social-link i {
+                font-size: 18px;
+            }
+        }
+        
+        /* Responsive White Page Wrappers */
+        @media (max-width: 768px) {
+            .white-page-wrapper {
+                padding: var(--space-lg) var(--space-sm);
+            }
+            
+            .white-page-title {
+                font-size: clamp(1.5rem, 4vw, 2rem) !important;
+                margin-bottom: var(--space-lg);
+            }
+        }
+        
+        /* Responsive Gallery */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
+            .gallery-card {
+                margin-bottom: var(--space-md);
+                border-radius: var(--radius-lg);
+            }
+        }
+        
+        /* Responsive Posts Layout */
+        @media (max-width: 768px) {
+            .posts-main {
+                margin-bottom: var(--space-xl);
+            }
+            
+            .post-card {
+                margin-bottom: var(--space-lg);
+                border-radius: var(--radius-lg);
+            }
+            
+            .sidebar {
+                margin-top: var(--space-xl);
+            }
+        }
+        
+        /* Responsive Partners */
+        @media (max-width: 768px) {
+            .partners-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
+            .partner-card {
+                margin-bottom: var(--space-md);
+                border-radius: var(--radius-lg);
+            }
+        }
+        
+        /* Responsive Consultation Form */
+        @media (max-width: 768px) {
+            .consultation-form-container {
+                padding: var(--space-lg);
+                border-radius: var(--radius-lg);
+                margin: var(--space-sm);
             }
         }
 
@@ -1468,30 +2036,259 @@
             });
         }
 
-        // Add typing effect to hero text
-        function typeWriter(element, text, speed = 100) {
-            let i = 0;
-            element.innerHTML = '';
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
+
+        // ========================================
+        // ADVANCED RESPONSIVE JAVASCRIPT FEATURES
+        // ========================================
+        
+        // Responsive breakpoint detection
+        const breakpoints = {
+            xs: 0,
+            sm: 576,
+            md: 768,
+            lg: 992,
+            xl: 1200,
+            xxl: 1400
+        };
+        
+        function getCurrentBreakpoint() {
+            const width = window.innerWidth;
+            if (width >= breakpoints.xxl) return 'xxl';
+            if (width >= breakpoints.xl) return 'xl';
+            if (width >= breakpoints.lg) return 'lg';
+            if (width >= breakpoints.md) return 'md';
+            if (width >= breakpoints.sm) return 'sm';
+            return 'xs';
+        }
+        
+        // Responsive image loading
+        function loadResponsiveImages() {
+            const images = document.querySelectorAll('img[data-src]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const breakpoint = getCurrentBreakpoint();
+                        const src = img.dataset.src;
+                        
+                        // Load appropriate image size based on breakpoint
+                        if (breakpoint === 'xs' || breakpoint === 'sm') {
+                            img.src = src.replace('.jpg', '_mobile.jpg') || src;
+                        } else if (breakpoint === 'md') {
+                            img.src = src.replace('.jpg', '_tablet.jpg') || src;
+                        } else {
+                            img.src = src;
+                        }
+                        
+                        img.classList.remove('lazy');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        }
+        
+        // Responsive navigation enhancement
+        function enhanceResponsiveNavigation() {
+            const navbar = document.querySelector('.navbar');
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            
+            if (navbarToggler && navbarCollapse) {
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbar.contains(event.target) && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                });
+                
+                // Auto-close menu when clicking nav links on mobile
+                document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 991) {
+                            const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                                toggle: false
+                            });
+                            bsCollapse.hide();
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Responsive grid system
+        function initializeResponsiveGrids() {
+            const grids = document.querySelectorAll('.responsive-grid, .responsive-grid-sm, .responsive-grid-lg');
+            
+            grids.forEach(grid => {
+                const items = grid.children;
+                const breakpoint = getCurrentBreakpoint();
+                
+                // Adjust grid based on screen size
+                if (breakpoint === 'xs' || breakpoint === 'sm') {
+                    grid.style.gridTemplateColumns = '1fr';
+                } else if (breakpoint === 'md') {
+                    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+                } else {
+                    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+                }
+            });
+        }
+        
+        // Responsive form validation
+        function enhanceResponsiveForms() {
+            const forms = document.querySelectorAll('form');
+            
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('input, textarea, select');
+                
+                inputs.forEach(input => {
+                    // Real-time validation
+                    input.addEventListener('blur', function() {
+                        validateField(this);
+                    });
+                    
+                    input.addEventListener('input', function() {
+                        if (this.classList.contains('is-invalid')) {
+                            validateField(this);
+                        }
+                    });
+                });
+            });
+        }
+        
+        function validateField(field) {
+            const value = field.value.trim();
+            const type = field.type;
+            const required = field.hasAttribute('required');
+            
+            // Remove existing validation classes
+            field.classList.remove('is-valid', 'is-invalid');
+            
+            // Required field validation
+            if (required && !value) {
+                field.classList.add('is-invalid');
+                return false;
+            }
+            
+            // Email validation
+            if (type === 'email' && value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    field.classList.add('is-invalid');
+                    return false;
                 }
             }
-            type();
-        }
-
-        // Initialize typing effect on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const heroTitle = document.querySelector('#intro h1');
-            if (heroTitle && window.location.pathname === '/') {
-                const originalText = heroTitle.textContent;
-                setTimeout(() => {
-                    typeWriter(heroTitle, originalText, 80);
-                }, 500);
+            
+            // Phone validation
+            if (type === 'tel' && value) {
+                const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+                if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+                    field.classList.add('is-invalid');
+                    return false;
+                }
             }
+            
+            // If we get here, field is valid
+            if (value) {
+                field.classList.add('is-valid');
+            }
+            return true;
+        }
+        
+        // Responsive performance optimization
+        function optimizeForDevice() {
+            const breakpoint = getCurrentBreakpoint();
+            const isMobile = breakpoint === 'xs' || breakpoint === 'sm';
+            const isTablet = breakpoint === 'md';
+            
+            // Disable heavy animations on mobile
+            if (isMobile) {
+                document.documentElement.style.setProperty('--animation-duration', '0.1s');
+                document.documentElement.style.setProperty('--transition-duration', '0.1s');
+            }
+            
+            // Optimize images for device
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                if (isMobile && img.dataset.mobileSrc) {
+                    img.src = img.dataset.mobileSrc;
+                } else if (isTablet && img.dataset.tabletSrc) {
+                    img.src = img.dataset.tabletSrc;
+                }
+            });
+        }
+        
+        // Responsive scroll behavior
+        function enhanceScrollBehavior() {
+            let ticking = false;
+            
+            function updateScrollEffects() {
+                const scrollY = window.pageYOffset;
+                const breakpoint = getCurrentBreakpoint();
+                
+                // Parallax effect (disabled on mobile for performance)
+                if (breakpoint !== 'xs' && breakpoint !== 'sm') {
+                    const parallaxElements = document.querySelectorAll('[data-parallax]');
+                    parallaxElements.forEach(element => {
+                        const speed = element.dataset.parallax || 0.5;
+                        const yPos = -(scrollY * speed);
+                        element.style.transform = `translateY(${yPos}px)`;
+                    });
+                }
+                
+                // Navbar scroll effect
+                const navbar = document.querySelector('.navbar');
+                if (navbar) {
+                    if (scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+                
+                ticking = false;
+            }
+            
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollEffects);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', requestTick, { passive: true });
+        }
+        
+        // Initialize all responsive features
+        function initializeResponsiveFeatures() {
+            loadResponsiveImages();
+            enhanceResponsiveNavigation();
+            initializeResponsiveGrids();
+            enhanceResponsiveForms();
+            optimizeForDevice();
+            enhanceScrollBehavior();
+        }
+        
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                initializeResponsiveGrids();
+                optimizeForDevice();
+            }, 250);
         });
+        
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', initializeResponsiveFeatures);
+        
+        // Re-initialize on page load (for SPA-like behavior)
+        window.addEventListener('load', initializeResponsiveFeatures);
     </script>
 
 </body>

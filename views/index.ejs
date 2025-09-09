@@ -49,20 +49,20 @@
         /* Hero buttons styling */
         .hero-buttons {
             display: flex;
-            gap: 20px;
+            gap: var(--space-lg);
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 2rem;
+            margin-top: var(--space-xl);
         }
 
         .hero-btn-primary {
             background: var(--gradient-gold);
             border: none;
-            padding: 15px 35px;
-            border-radius: 50px;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-xl);
             color: white;
             font-weight: 600;
-            font-size: 16px;
+            font-size: var(--font-size-base);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -71,6 +71,7 @@
             box-shadow: var(--shadow-gold);
             position: relative;
             overflow: hidden;
+            min-height: 50px;
         }
 
         .hero-btn-primary::before {
@@ -98,11 +99,11 @@
         .hero-btn-secondary {
             background: transparent;
             border: 2px solid var(--primary-gold);
-            padding: 15px 35px;
-            border-radius: 50px;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-xl);
             color: var(--primary-gold);
             font-weight: 600;
-            font-size: 16px;
+            font-size: var(--font-size-base);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -110,6 +111,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            min-height: 50px;
         }
 
         .hero-btn-secondary::before {
@@ -139,9 +141,9 @@
         .service-card {
             background: rgba(26, 26, 26, 0.8);
             border: 1px solid rgba(209, 173, 86, 0.2);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
             transition: all 0.4s ease;
             backdrop-filter: blur(10px);
             position: relative;
@@ -170,8 +172,11 @@
         }
 
         .service-card img {
-            border-radius: 15px;
+            border-radius: var(--radius-lg);
             transition: all 0.3s ease;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
         }
 
         .service-card:hover img {
@@ -181,17 +186,36 @@
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .hero-title {
-                font-size: 2.5rem !important;
+                font-size: clamp(2rem, 4vw, 2.5rem) !important;
+                line-height: 1.2;
             }
             
             .hero-subtitle {
-                font-size: 1.1rem !important;
+                font-size: clamp(1rem, 2.5vw, 1.1rem) !important;
+                line-height: 1.4;
             }
             
-            .hero-buttons .btn {
-                display: block;
-                margin: 10px auto;
-                width: 200px;
+            .hero-buttons {
+                flex-direction: column;
+                gap: var(--space-md);
+                align-items: center;
+            }
+            
+            .hero-btn-primary,
+            .hero-btn-secondary {
+                width: 100%;
+                max-width: 280px;
+                margin: 0;
+            }
+            
+            .service-card {
+                padding: var(--space-lg);
+                margin-bottom: var(--space-lg);
+            }
+            
+            .service-card img {
+                aspect-ratio: 16/9;
+                object-fit: cover;
             }
         }
     </style>

@@ -147,13 +147,13 @@ app.post('/api/contact', async (req, res) => {
 
 app.post('/api/consultation', async (req, res) => {
     try {
-        const { name, phone, nationalId, city, subject } = req.body;
+        const { name, phone, city, subject } = req.body;
         await dbHelpers.createContactRequest({ 
             name, 
             email: '', 
             phone, 
             subject: 'استشارة قانونية', 
-            message: `الاسم: ${name}\nرقم الهاتف: ${phone}\nالرقم القومي: ${nationalId}\nالمدينة: ${city}\nموضوع الاستشارة: ${subject}` 
+            message: `الاسم: ${name}\nرقم الهاتف: ${phone}\nالمدينة: ${city}\nموضوع الاستشارة: ${subject}` 
         });
         res.json({ success: true, message: 'Consultation request sent successfully' });
     } catch (error) {
