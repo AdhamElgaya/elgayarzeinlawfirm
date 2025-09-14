@@ -228,6 +228,6 @@ app.get('/lang', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT} or http://YOUR-IP-ADDRESS:${PORT}`);
     console.log('Law firm website is ready!');
 });

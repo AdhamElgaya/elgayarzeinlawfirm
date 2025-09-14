@@ -163,8 +163,8 @@
         /* Hero Section */
         .hero-section {
             min-height: 100vh;
-            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(15, 15, 15, 0.95) 100%),
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="legal-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="%231a1a1a"/><path d="M20 20 L80 20 L80 80 L20 80 Z" fill="none" stroke="%23d1ad56" stroke-width="1" opacity="0.1"/></pattern></defs><rect width="1200" height="800" fill="url(%23legal-pattern)"/></svg>');
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 0.6) 100%),
+                        url('https://via.placeholder.com/1920x1080/1a1a1a/d1ad56?text=Legal+Office+Background');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -297,29 +297,19 @@
             background-clip: text;
         }
 
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--grid-gap);
-            margin-top: var(--space-xl);
-        }
-
+        /* Service Cards */
         .service-card {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid rgba(209, 173, 86, 0.3);
-            border-radius: var(--border-radius);
-            padding: var(--space-lg);
-            text-align: center;
-            transition: all 0.3s ease;
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid rgba(209, 173, 86, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-gold);
-            box-shadow: var(--shadow-gold);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            cursor: default;
         }
 
         .service-card::before {
@@ -330,33 +320,73 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(209, 173, 86, 0.1), transparent);
-            transition: left 0.5s;
+            transition: left 0.6s;
         }
 
         .service-card:hover::before {
             left: 100%;
         }
 
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(209, 173, 86, 0.2);
+            border-color: var(--primary-gold);
+        }
+
         .service-card img {
+            border-radius: 15px;
+            transition: all 0.3s ease;
             width: 100%;
             height: auto;
             object-fit: cover;
-            aspect-ratio: 16/9;
-            border-radius: var(--border-radius);
-            margin-bottom: var(--space-md);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .service-card h3 {
+        .service-card h1 {
+            color: #d1ad56 !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            padding: 0.2rem 0;
+            height: auto;
+            min-height: auto;
+            cursor: default;
+        }
+
+        .service-card ul {
+            list-style: none;
+            line-height: 40px;
+            color: #f8f9fa;
+            padding-right: 0;
+        }
+
+        .service-card ul li {
+            position: relative;
+            padding-right: 20px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .service-card ul li::before {
+            content: "▶";
             color: var(--primary-gold);
-            font-size: var(--font-size-xl);
-            font-weight: 600;
-            margin-bottom: var(--space-md);
+            font-size: 12px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        .service-card p {
-            color: var(--text-light);
-            opacity: 0.9;
-            line-height: 1.6;
+        .service-card ul li:hover {
+            color: var(--primary-gold);
+            transform: translateX(-5px);
         }
 
         /* Footer */
@@ -430,10 +460,6 @@
                 max-width: 300px;
             }
 
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-
             .navbar .nav-link {
                 margin: var(--space-sm) 0;
                 text-align: center;
@@ -446,6 +472,18 @@
 
             .footer-social {
                 justify-content: center;
+            }
+
+            .service-card {
+                padding: var(--space-lg);
+                margin-bottom: var(--space-lg);
+            }
+
+            .service-card h1 {
+                font-size: clamp(1.2rem, 4vw, 1.8rem) !important;
+                line-height: 1.4;
+                margin-bottom: 1rem;
+                padding: 0.3rem 0;
             }
         }
 
@@ -462,32 +500,6 @@
             .hero-subtitle {
                 font-size: var(--font-size-base);
             }
-
-            .service-card {
-                padding: var(--space-md);
-            }
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(209, 173, 86, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-gold);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Glass Morphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* Custom Scrollbar */
@@ -528,25 +540,19 @@
                         <a class="nav-link active" href="#home">الرئيسية</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#about">من نحن</a>
+                        <a class="nav-link" href="#about">المستجدات</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#services">الخدمات</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#team">فريق العمل</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#gallery">مكتبة الصور</a>
+                        <a class="nav-link" href="#services">الخدمات الاكثر طلباً</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#partners">شركاء النجاح</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#news">المستجدات</a>
+                        <a class="nav-link" href="#team">فريق العمل</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#consultation">استشارات</a>
+                        <a class="nav-link" href="#consultation">حجز مواعيد او استشارات</a>
                     </li>
                 </ul>
                 
@@ -602,47 +608,231 @@
     <section id="services" class="services-section">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up" data-aos-duration="1000">
-                خدماتنا المتميزة
+                خدماتنا القانونية
             </h2>
             <p class="text-center text-light mb-5" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                نقدم مجموعة شاملة من الخدمات القانونية المتخصصة لتلبية احتياجاتكم
+                نقدم مجموعة واسعة من الخدمات القانونية المتخصصة لتلبية احتياجاتكم
             </p>
             
-            <div class="services-grid">
-                <div class="service-card" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/d1ad56/ffffff?text=الاستشارات+القانونية" alt="الاستشارات القانونية">
-                    <h3>الاستشارات القانونية</h3>
-                    <p>نقدم استشارات قانونية متخصصة في جميع المجالات القانونية لضمان حماية حقوقكم ومصالحكم.</p>
+            <!-- Service Card 1 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/d1ad56/ffffff?text=المنازعات+المدنية" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">المنازعات المدنية</h1>
+                                <ul class="lst">
+                                    <li>دعاوى التعويض عن الأضرار المادية والمعنوية الناشئة عن الفعل الضار أو الإخلال بالتعاقد</li>
+                                    <li>منازعات الإيجار بمختلف صورها</li>
+                                    <li>دعاوى الحيازة</li>
+                                    <li>دعاوى الملكية، بما يشمل دعاوى الشفعة والفرز والتجنيب وقسمة المال الشائع</li>
+                                    <li>دعاوى صحة ونفاذ العقود و ثبوت الملكية</li>
+                                    <li>منازعات العقود المدنية: البيع، الإيجار، المقاولة، الوكالة، والقرض</li>
+                                    <li>دعاوى المسؤولية العقدية والتقصيرية</li>
+                                    <li>منازعات التسجيل والسجل العيني جميع المنازعات العقارية</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="service-card" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/b78632/ffffff?text=التمثيل+القضائي" alt="التمثيل القضائي">
-                    <h3>التمثيل القضائي</h3>
-                    <p>نمثل عملاءنا أمام جميع المحاكم والجهات القضائية المختلفة باحترافية عالية وخبرة واسعة.</p>
+            </div>
+
+            <!-- Service Card 2 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/b78632/ffffff?text=القضايا+الجنائية" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">القضايا الجنائية</h1>
+                                <ul class="lst">
+                                    <li>الجرائم الواقعة على النفس: القتل العمد، الشروع فيه، والضرب المفضي إلى عاهة مستديمة</li>
+                                    <li>الجرائم الواقعة على المال: السرقة، النصب، خيانة الأمانة، التبديد، والإتلاف العمدي</li>
+                                    <li>جرائم التزوير واستعمال المحررات المزورة</li>
+                                    <li>الجرائم المتعلقة بالشيكات بدون رصيد</li>
+                                    <li>جرائم المواد المخدرة: الاتجار، الحيازة، التعاطي، والجلب</li>
+                                    <li>الجرائم الإلكترونية: السب والقذف عبر الوسائط الرقمية، الابتزاز</li>
+                                    <li>تمثيل المتهمين في جميع مراحل الدعوى الجنائية</li>
+                                    <li>إعداد الطعون بالنقض والتماس إعادة النظر في الأحكام الجنائية</li>
+                                    <li>قضايا الأحداث والقُصّر أمام محاكم الطفل</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="service-card" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/8b6914/ffffff?text=صياغة+العقود" alt="صياغة العقود">
-                    <h3>صياغة العقود</h3>
-                    <p>نقوم بصياغة العقود والاتفاقيات القانونية المختلفة بمنتهى الدقة والاحترافية.</p>
+            </div>
+
+            <!-- Service Card 3 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/8b6914/ffffff?text=قضايا+الاسرة" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">قضايا الاسرة</h1>
+                                <ul class="lst">
+                                    <li>دعاوى الطلاق، والخلع، والطاعة</li>
+                                    <li>دعاوى النفقة بأنواعها: نفقة الزوجة، نفقة الصغار، نفقة العدة، والمؤخر</li>
+                                    <li>دعاوى الحضانة، والرؤية، والاستضافة، والضم</li>
+                                    <li>دعاوى إثبات النسب أو إنكاره وفقًا للضوابط الشرعية والقانونية</li>
+                                    <li>دعاوى النشوز، والاعتراض على الإنذارات بالطاعة</li>
+                                    <li>توثيق عقود الزواج العرفي، وإثبات الطلاق</li>
+                                    <li>دعاوى إعلام الوراثة وتقسيم التركات</li>
+                                    <li>تنفيذ الأحكام القضائية المتعلقة بالأسرة</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="service-card" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/d1ad56/ffffff?text=التسوية+الودية" alt="التسوية الودية">
-                    <h3>التسوية الودية</h3>
-                    <p>نساعد في حل النزاعات والخلافات القانونية بالطرق الودية والتفاوض المباشر.</p>
+            </div>
+
+            <!-- Service Card 4 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/d1ad56/ffffff?text=قضايا+الاسرة+للاجانب" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">قضايا الأسرة للأجانب</h1>
+                                <ul class="lst">
+                                    <li>توثيق عقود الزواج والطلاق للأجانب داخل جمهورية مصر العربية</li>
+                                    <li>منازعات الحضانة والنفقة في العلاقات المختلطة</li>
+                                    <li>تقديم الاستشارات القانونية للأجانب في مسائل الأسرة</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="service-card" data-aos="fade-up" data-aos-delay="500" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/b78632/ffffff?text=الخدمات+التجارية" alt="الخدمات التجارية">
-                    <h3>الخدمات التجارية</h3>
-                    <p>نقدم خدمات قانونية متخصصة للشركات والمؤسسات التجارية في جميع المجالات.</p>
+            </div>
+
+            <!-- Service Card 5 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="500" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/b78632/ffffff?text=منازعات+العمل" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">منازعات العمل والعلاقات العمالية</h1>
+                                <ul class="lst">
+                                    <li>دعاوى الفصل التعسفي والمطالبة بالتعويض</li>
+                                    <li>دعاوى الأجور والبدلات والمستحقات العمالية المتأخرة</li>
+                                    <li>قضايا إصابات العمل وتعويضاتها</li>
+                                    <li>مراجعة وصياغة عقود العمل الفردية والجماعية</li>
+                                    <li>التمثيل أمام مكاتب العمل والمحاكم العمالية</li>
+                                    <li>منازعات التأمينات الاجتماعية والمعاشات</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="service-card" data-aos="fade-up" data-aos-delay="600" data-aos-duration="1000">
-                    <img src="https://via.placeholder.com/400x225/8b6914/ffffff?text=القانون+العقاري" alt="القانون العقاري">
-                    <h3>القانون العقاري</h3>
-                    <p>نقدم خدمات قانونية متخصصة في مجال العقارات والاستثمار العقاري.</p>
+            </div>
+
+            <!-- Service Card 6 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="600" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/8b6914/ffffff?text=تأسيس+الشركات" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">تأسيس الشركات و منازعاتها</h1>
+                                <ul class="lst">
+                                    <li>تأسيس الشركات بجميع أنواعها وفقًا لأحكام قانون الشركات والاستثمار</li>
+                                    <li>تعديل عقود التأسيس، تغيير النشاط، وزيادة أو تخفيض رأس المال</li>
+                                    <li>إعداد وصياغة محاضر الجمعيات العمومية ومجالس الإدارة</li>
+                                    <li>تسجيل الشركات لدى الجهات المختصة واستخراج التراخيص اللازمة</li>
+                                    <li>التمثيل القانوني في منازعات الشركاء أو المساهمين</li>
+                                    <li>تصفية الشركات اختيارياً أو قضائياً</li>
+                                    <li>تقديم الاستشارات القانونية المستمرة للشركات</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Card 7 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="700" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/d1ad56/ffffff?text=المنازعات+التجارية" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">المنازعات التجارية</h1>
+                                <ul class="lst">
+                                    <li>منازعات العقود التجارية بجميع انواعها</li>
+                                    <li>قضايا الشيكات</li>
+                                    <li>دعاوى المنافسة غير المشروعة والاحتكار</li>
+                                    <li>منازعات العلامات التجارية والأسماء التجارية</li>
+                                    <li>جميع النزاعات الناشئة عن الشراكات التجارية</li>
+                                    <li>دعاوى التعويض الناتجة عن الإخلال بالعقود التجارية</li>
+                                    <li>التحكيم التجاري المحلي والدولي</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Card 8 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="800" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/b78632/ffffff?text=المنازعات+الضريبية" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">المنازعات الضريبية</h1>
+                                <ul class="lst">
+                                    <li>الطعن على قرارات مصلحة الضرائب</li>
+                                    <li>التظلمات أمام لجان الطعن الضريبي</li>
+                                    <li>قضايا التهرب الضريبي</li>
+                                    <li>تسوية النزاعات الضريبية وفق القوانين السارية</li>
+                                    <li>قضايا ضرائب القيمة المضافة، الدخل، والمبيعات</li>
+                                    <li>المنازعات المتعلقة بالضرائب العقارية</li>
+                                    <li>الطعن على قرارات الحجز الإداري والتسويات الودية</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Card 9 -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-12 col-lg-10">
+                    <div class="service-card" data-aos="fade-up" data-aos-delay="900" data-aos-duration="1000">
+                        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                            <div class="col-12 col-lg-6">
+                                <img src="https://via.placeholder.com/700x500/8b6914/ffffff?text=القضاء+الاداري" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy">
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <h1 class="display-5 fw-bold lh-1 mb-3">القضاء الإدارى ومجلس الدولة</h1>
+                                <ul class="lst">
+                                    <li>دعاوى إلغاء القرارات الإدارية الصريحة أو السلبية</li>
+                                    <li>الطعن على قرارات التعيين أو الإقصاء من الوظائف العامة</li>
+                                    <li>منازعات الترقيات والجزاءات التأديبية</li>
+                                    <li>قضايا المعاشات والمستحقات المالية</li>
+                                    <li>الطعن على قرارات الهيئات والنقابات المهنية</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -676,10 +866,10 @@
                 
                 <div class="footer-section">
                     <h5>خدماتنا</h5>
-                    <p><a href="#services">الاستشارات القانونية</a></p>
-                    <p><a href="#services">التمثيل القضائي</a></p>
-                    <p><a href="#services">صياغة العقود</a></p>
-                    <p><a href="#services">التسوية الودية</a></p>
+                    <p><a href="#services">المنازعات المدنية</a></p>
+                    <p><a href="#services">القضايا الجنائية</a></p>
+                    <p><a href="#services">قضايا الأسرة</a></p>
+                    <p><a href="#services">منازعات العمل</a></p>
                 </div>
                 
                 <div class="footer-section">
@@ -743,15 +933,6 @@
                     bsCollapse.hide();
                 }
             });
-        });
-
-        // Parallax effect for hero section
-        window.addEventListener('scroll', function() {
-            const scrolled = window.pageYOffset;
-            const heroSection = document.querySelector('.hero-section');
-            if (heroSection && window.innerWidth > 768) {
-                heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
-            }
         });
 
         // Responsive breakpoint detection

@@ -1,23 +1,23 @@
 <%- include('layout', { 
     body: `
-    <div class="container py-5">
-        <h1 class="page-title"><i class="bi bi-gear-fill me-2"></i>الخدمات الاكثر طلباً</h1>
+    <div class="white-page-wrapper" style="background: white; min-height: 100vh; padding: 80px 0;">
+        <div class="container">
+            <h1 class="white-page-title" style="color: #333; text-align: center; margin-bottom: 3rem; font-size: 2.5rem; font-weight: 700;">
+                <i class="bi bi-gear-fill me-2" style="color: var(--primary-gold);"></i>الخدمات الاكثر طلباً
+            </h1>
         
         <div class="row">
             <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card h-100 shadow-lg service-card-enhanced">
+                <div class="card h-100 content-card service-card-enhanced">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
-                                    <i class="fa fa-home me-2"></i>الدراسات الخاصة بشراء العقارات
+                                    <i class="fa fa-home me-2"></i>بحث الملكية الخاصة بالعقارات
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
-                                    إعداد دراسات قانونية ومالية شاملة قبل شراء العقارات، بما في ذلك مراجعة المستندات والتحقق من الوضع القانوني للعقار.
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    إجراء بحث شامل لدى الجهات المختصة للتأكد من صحة وسلامة الملكية العقارية، وضمان عدم وجود نزاعات أو حجوزات أو حقوق للغير.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
@@ -30,23 +30,20 @@
             </div>
             
             <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card h-100 shadow-lg service-card-enhanced">
+                <div class="card h-100 content-card service-card-enhanced">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
-                                    <i class="fa fa-search me-2"></i>بحث الملكية الخاصة بالعقارات
+                                    <i class="fa fa-building me-2"></i>دراسة المشاريع
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
-                                    إجراء بحث شامل لدى الجهات المختصة للتأكد من صحة وسلامة ملكية العقارات وضمان عدم وجود نزاعات أو تبعات.
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    تحليل الوضع القانوني للمشروعات التجارية أو الخدمية، وتقديم تقارير قانونية تشمل التراخيص والعقود والنطاق التشريعي المنظم للنشاط.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
-                                    <i class="fa fa-search"></i>
+                                    <i class="fa fa-building"></i>
                                 </div>
                             </div>
                         </div>
@@ -55,19 +52,16 @@
             </div>
             
             <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="card h-100 shadow-lg service-card-enhanced">
+                <div class="card h-100 content-card service-card-enhanced">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
                                     <i class="fa fa-balance-scale me-2"></i>تقسيم التركات (عقارات - شركات - أسهم)
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
-                                    تقديم الدعم القانوني في تقسيم التركات سواء كانت عقارية أو تجارية أو مالية، وإعداد عقود التقسيم أو النقل القانونية.
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    تقديم دراسات قانونية دقيقة للقضايا الجنائية قبل السير في إجراءات التقاضي، وتقييم الموقف القانوني بناءً على الوقائع والأدلة.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
@@ -80,23 +74,20 @@
             </div>
             
             <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="400">
-                <div class="card h-100 shadow-lg service-card-enhanced">
+                <div class="card h-100 content-card service-card-enhanced">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
-                                    <i class="fa fa-chart-line me-2"></i>الدراسة العامة للمواضيع الاستثمارية
+                                    <i class="fa fa-line-chart me-2"></i>الدراسة العامة للمواضيع الاستثمارية
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
-                                    تقديم دراسات استشارية قانونية أولية حول الفرص الاستثمارية ومدى توافقها مع القوانين المحلية، وتحديد المخاطر القانونية المحتملة.
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    تقديم دراسات قانونية استشارية أولية حول فرص الاستثمار ومدى توافقها مع القوانين المحلية، وتحديد المخاطر القانونية المحتملة.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
-                                    <i class="fa fa-chart-line"></i>
+                                    <i class="fa fa-line-chart"></i>
                                 </div>
                             </div>
                         </div>
@@ -105,23 +96,20 @@
             </div>
             
             <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="500">
-                <div class="card h-100 shadow-lg service-card-enhanced">
+                <div class="card h-100 content-card service-card-enhanced">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
-                                    <i class="fa fa-project-diagram me-2"></i>دراسة المشاريع
+                                    <i class="fa fa-sitemap me-2"></i>الدراسات الخاصة بشراء العقارات
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
-                                    تحليل الوضع القانوني للمشاريع التجارية أو الخدمية وتقديم تقارير قانونية تشمل التراخيص والعقود والإطار التنظيمي للنشاط.
+                                <p class="card-text" style="color: #000 !important; line-height: 1.9;">
+                                    إعداد دراسات قانونية ومالية متكاملة قبل شراء العقارات، تشمل مراجعة المستندات، والتحقق من الوضع القانوني، والتأكد من خلو العقار من أي حقوق أو التزامات.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
-                                    <i class="fa fa-project-diagram"></i>
+                                    <i class="fa fa-sitemap"></i>
                                 </div>
                             </div>
                         </div>
@@ -137,12 +125,9 @@
                                 <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
                                     <i class="fa fa-gavel me-2"></i>دراسات القضايا الجنائية (جنايات وجنح)
                                 </h4>
-                                <p class="card-text" style="color: var(--text-light); line-height: 1.8;">
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
                                     تقديم دراسات قانونية دقيقة للقضايا الجنائية قبل المضي في إجراءات التقاضي، وتقييم الموقف القانوني بناءً على الوقائع والأدلة.
                                 </p>
-                                <a href="/contact?lang=${lang}" class="btn btn-sm" style="background: var(--gradient-gold); color: white; border-radius: 20px; padding: 8px 20px;">
-                                    <i class="fa fa-arrow-left me-1"></i>اطلب الخدمة
-                                </a>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="service-icon">
@@ -153,18 +138,77 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="700">
+                <div class="card h-100 content-card service-card-enhanced">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
+                                    <i class="fa fa-file-text me-2"></i>الرأي القانوني
+                                </h4>
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    إصدار مذكرات أو تقارير بالرأي القانوني المعتمد بشأن المسائل محل النزاع أو الاستشارة، بناءً على القوانين السارية وأحكام القضاء.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="service-icon">
+                                    <i class="fa fa-file-text"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="800">
+                <div class="card h-100 content-card service-card-enhanced">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="card-title" style="color: var(--primary-gold); font-weight: 700;">
+                                    <i class="fa fa-university me-2"></i>بحث التركة في البنك المركزي والحسابات البنكية
+                                </h4>
+                                <p class="card-text" style="color: #333; line-height: 1.8;">
+                                    إجراء طلبات واستعلامات رسمية لبحث أموال التركة المحتملة داخل الحسابات البنكية أو لدى البنك المركزي، وفقًا للإجراءات القانونية المنظمة لذلك.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="service-icon">
+                                    <i class="fa fa-university"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
     
     <style>
         .service-card-enhanced {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid rgba(209, 173, 86, 0.2);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            transition: all 0.4s ease;
+            background: #ffffff !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            border-radius: 16px;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            color: #222 !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .service-card-enhanced.card {
+            background: #ffffff !important;
+        }
+        
+        .service-card-enhanced .card-body {
+            background: #ffffff !important;
+            color: #222 !important;
+        }
+        
+        .service-card-enhanced .card-title {
+            color: var(--primary-gold) !important;
         }
 
         .service-card-enhanced::before {
@@ -183,9 +227,9 @@
         }
 
         .service-card-enhanced:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(209, 173, 86, 0.2);
-            border-color: var(--primary-gold);
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: rgba(0,0,0,0.12);
         }
 
         .service-icon {
@@ -197,7 +241,6 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto;
-            transition: all 0.3s ease;
         }
 
         .service-icon i {
@@ -206,8 +249,14 @@
         }
 
         .service-card-enhanced:hover .service-icon {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 10px 20px rgba(209, 173, 86, 0.3);
+            transform: none !important;
+            box-shadow: none !important;
+            scale: 1 !important;
+        }
+        
+        .service-icon:hover {
+            transform: none !important;
+            scale: 1 !important;
         }
 
         .service-card-enhanced .btn {
@@ -234,6 +283,34 @@
         .service-card-enhanced .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(209, 173, 86, 0.4);
+        }
+
+        .service-card-enhanced {
+            cursor: default;
+        }
+        
+        .service-card-enhanced .card-text {
+            cursor: default;
+        }
+        
+        .service-card-enhanced .card-title {
+            cursor: default;
+        }
+
+        .white-page-title {
+            position: relative;
+        }
+        
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
         }
     </style>
     
