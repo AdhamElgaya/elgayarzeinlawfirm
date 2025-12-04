@@ -1,100 +1,206 @@
 <%- include('layout', { 
     body: `
-    <div class="container py-5">
-        <h1 class="page-title">تواصل معنا</h1>
-        
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card shadow-lg">
-                    <div class="card-body p-5">
-                        <form id="contactForm" action="/api/contact" method="POST">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="name" class="form-label">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="phone" class="form-label">رقم الهاتف</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="subject" class="form-label">الموضوع</label>
-                                    <select class="form-control" id="subject" name="subject" required>
-                                        <option value="">اختر الموضوع</option>
-                                        <option value="consultation">استشارة قانونية</option>
-                                        <option value="representation">تمثيل قانوني</option>
-                                        <option value="contract">صياغة عقد</option>
-                                        <option value="other">أخرى</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="message" class="form-label">الرسالة</label>
-                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-lg sss">إرسال الرسالة</button>
-                            </div>
-                        </form>
+    <div class="white-page-wrapper">
+        <div class="container py-5">
+            <h1 class="white-page-title">
+                <i class="fas fa-phone me-2" style="color: #d1ad56;"></i>تواصل معنا
+            </h1>
+            <p class="text-center text-muted mb-5">نحن هنا لمساعدتك في جميع احتياجاتك القانونية</p>
+            
+            <!-- Contact Methods Grid -->
+            <div class="row mb-5">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="contact-method-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h5>اتصل بنا</h5>
+                        <p>+201507044556</p>
+                        <a href="tel:+201507044556" class="contact-btn">
+                            <i class="fas fa-phone me-2"></i>اتصال مباشر
+                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <div class="row mt-5">
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fa fa-map-marker fa-3x mb-3" style="color: #d1ad56;"></i>
-                        <h4>العنوان</h4>
-                        <p>شارع الملك فهد<br>الرياض، المملكة العربية السعودية</p>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="contact-method-card">
+                        <div class="contact-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h5>واتساب</h5>
+                        <p>تواصل معنا عبر واتساب</p>
+                        <a href="https://wa.me/201507044556" class="contact-btn whatsapp-btn" target="_blank">
+                            <i class="fab fa-whatsapp me-2"></i>واتساب
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="contact-method-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h5>البريد الإلكتروني</h5>
+                        <p>elgayarzein@gmail.com</p>
+                        <a href="mailto:elgayarzein@gmail.com" class="contact-btn">
+                            <i class="fas fa-envelope me-2"></i>إرسال بريد
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="contact-method-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h5>حجز موعد</h5>
+                        <p>احجز استشارة قانونية</p>
+                        <a href="/consultation?lang=` + lang + `" class="contact-btn">
+                            <i class="fas fa-calendar-alt me-2"></i>احجز موعد
+                        </a>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fa fa-phone fa-3x mb-3" style="color: #d1ad56;"></i>
-                        <h4>الهاتف</h4>
-                        <p>+966 11 123 4567<br>+966 50 123 4567</p>
+            <!-- Office Locations -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h2 class="section-title text-center mb-5">
+                        <i class="fas fa-map-marker-alt me-2"></i>مكاتبنا
+                    </h2>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="office-card">
+                        <div class="office-header">
+                            <div class="office-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="office-info">
+                                <h4>مكتب الإسكندرية</h4>
+                                <p class="office-address">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    عمارات الطابية، بجوار فندق المحروسة، سيدي بشر - كورنيش الإسكندرية
+                                </p>
+                            </div>
+                        </div>
+                        <div class="office-details">
+                            <div class="detail-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+201507044556</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>السبت - الخميس: 10 ص - 10 م</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>elgayarzein@gmail.com</span>
+                            </div>
+                        </div>
+                        <div class="office-actions">
+                            <a href="tel:+201507044556" class="btn btn-outline-primary">
+                                <i class="fas fa-phone me-2"></i>اتصال
+                            </a>
+                            <a href="https://wa.me/201507044556" class="btn btn-outline-success" target="_blank">
+                                <i class="fab fa-whatsapp me-2"></i>واتساب
+                            </a>
+                        </div>
+                        <div class="office-map mt-3">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3412.123456789!2d29.9123456!3d31.2345678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzHCsDE0JzA0LjQiTiAyOcKwNTQnNDQuNCJF!5e0!3m2!1sen!2seg!4v1234567890123!5m2!1sen!2seg" width="100%" height="200" style="border:0; border-radius: 10px;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="office-card">
+                        <div class="office-header">
+                            <div class="office-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="office-info">
+                                <h4>مكتب القاهرة</h4>
+                                <p class="office-address">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    ٣ عمارات كومباوند حياة امتداد ش الطيران حي السفارات مدينة نصر
+                                </p>
+                            </div>
+                        </div>
+                        <div class="office-details">
+                            <div class="detail-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+201507044556</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>السبت - الخميس: 10 ص - 10 م</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>elgayarzein@gmail.com</span>
+                            </div>
+                        </div>
+                        <div class="office-actions">
+                            <a href="tel:+201507044556" class="btn btn-outline-primary">
+                                <i class="fas fa-phone me-2"></i>اتصال
+                            </a>
+                            <a href="https://wa.me/201507044556" class="btn btn-outline-success" target="_blank">
+                                <i class="fab fa-whatsapp me-2"></i>واتساب
+                            </a>
+                        </div>
+                        <div class="office-map mt-3">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3456.789012345!2d31.3456789!3d30.1234567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDA3JzI0LjQiTiAzMcKwMjAnNDQuNCJF!5e0!3m2!1sen!2seg!4v1234567890123!5m2!1sen!2seg" width="100%" height="200" style="border:0; border-radius: 10px;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fa fa-envelope fa-3x mb-3" style="color: #d1ad56;"></i>
-                        <h4>البريد الإلكتروني</h4>
-                        <p>info@gzlawfirm.net<br>contact@gzlawfirm.net</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row mt-5">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h3 style="color: #d1ad56;">ساعات العمل</h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>الأحد - الخميس:</strong> 8:00 ص - 6:00 م</p>
-                                <p><strong>الجمعة:</strong> 2:00 م - 6:00 م</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>السبت:</strong> 9:00 ص - 2:00 م</p>
-                                <p><strong>الطوارئ:</strong> 24/7</p>
+            <!-- Working Hours -->
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <div class="working-hours-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clock me-2"></i>ساعات العمل</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="working-day">
+                                        <span class="day">السبت</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                        <span class="time">6:00 م - 10:00 م</span>
+                                    </div>
+                                    <div class="working-day">
+                                        <span class="day">الأحد</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                        <span class="time">6:00 م - 10:00 م</span>
+                                    </div>
+                                    <div class="working-day">
+                                        <span class="day">الاثنين</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                        <span class="time">6:00 م - 10:00 م</span>
+                                    </div>
+                                    <div class="working-day">
+                                        <span class="day">الثلاثاء</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                        <span class="time">6:00 م - 10:00 م</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="working-day">
+                                        <span class="day">الأربعاء</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                        <span class="time">6:00 م - 10:00 م</span>
+                                    </div>
+                                    <div class="working-day">
+                                        <span class="day">الخميس</span>
+                                        <span class="time">10:00 ص - 2:00 م</span>
+                                    </div>
+                                    <div class="working-day">
+                                        <span class="day">الجمعة</span>
+                                        <span class="time closed">مغلق</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -103,235 +209,406 @@
         </div>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('contactForm');
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            
-            // Real-time validation
-            const inputs = form.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => {
-                input.addEventListener('blur', validateField);
-                input.addEventListener('input', clearFieldError);
-            });
-            
-            function validateField(e) {
-                const field = e.target;
-                const value = field.value.trim();
-                let isValid = true;
-                let errorMessage = '';
-                
-                // Remove existing error styling
-                field.classList.remove('is-invalid');
-                const existingError = field.parentNode.querySelector('.invalid-feedback');
-                if (existingError) {
-                    existingError.remove();
-                }
-                
-                // Validation rules
-                if (field.hasAttribute('required') && !value) {
-                    isValid = false;
-                    errorMessage = 'هذا الحقل مطلوب';
-                } else if (field.type === 'email' && value) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(value)) {
-                        isValid = false;
-                        errorMessage = 'يرجى إدخال بريد إلكتروني صحيح';
-                    }
-                } else if (field.type === 'tel' && value) {
-                    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-                    if (!phoneRegex.test(value)) {
-                        isValid = false;
-                        errorMessage = 'يرجى إدخال رقم هاتف صحيح';
-                    }
-                }
-                
-                if (!isValid) {
-                    field.classList.add('is-invalid');
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback';
-                    errorDiv.textContent = errorMessage;
-                    field.parentNode.appendChild(errorDiv);
-                }
-                
-                return isValid;
-            }
-            
-            function clearFieldError(e) {
-                const field = e.target;
-                field.classList.remove('is-invalid');
-                const existingError = field.parentNode.querySelector('.invalid-feedback');
-                if (existingError) {
-                    existingError.remove();
-                }
-            }
-            
-            function validateForm() {
-                let isFormValid = true;
-                inputs.forEach(input => {
-                    if (!validateField({ target: input })) {
-                        isFormValid = false;
-                    }
-                });
-                return isFormValid;
-            }
-            
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!validateForm()) {
-                    // Scroll to first invalid field
-                    const firstInvalid = form.querySelector('.is-invalid');
-                    if (firstInvalid) {
-                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalid.focus();
-                    }
-                    return;
-                }
-                
-                // Show loading state
-                submitBtn.innerHTML = '<span class="loading"></span> جاري الإرسال...';
-                submitBtn.disabled = true;
-                
-                const formData = new FormData(this);
-                
-                fetch('/api/contact', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        showNotification('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.', 'success');
-                        form.reset();
-                    } else {
-                        showNotification('حدث خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('حدث خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.', 'error');
-                })
-                .finally(() => {
-                    // Reset button state
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                });
-            });
-            
-            function showNotification(message, type) {
-                // Remove existing notifications
-                const existingNotifications = document.querySelectorAll('.notification');
-                existingNotifications.forEach(notification => notification.remove());
-                
-                const notification = document.createElement('div');
-                notification.className = `notification notification-${type}`;
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                        <span>${message}</span>
-                        <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                // Auto remove after 5 seconds
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 5000);
-            }
-        });
-    </script>
-    
     <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 400px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideInRight 0.3s ease-out;
+        .white-page-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 3rem 0;
         }
         
-        .notification-success {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
+        .white-page-title {
+            color: #333;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            position: relative;
+            font-size: 2.5rem;
         }
         
-        .notification-error {
-            background: linear-gradient(135deg, #dc3545, #e74c3c);
-            color: white;
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
         }
         
-        .notification-content {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .contact-method-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(209, 173, 86, 0.2);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            animation: contactCardReveal 0.8s ease-out forwards;
         }
-        
-        .notification-content i:first-child {
-            font-size: 20px;
-        }
-        
-        .notification-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: auto;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background 0.3s ease;
-        }
-        
-        .notification-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        @keyframes slideInRight {
+
+        .contact-method-card:nth-child(1) { animation-delay: 0.1s; }
+        .contact-method-card:nth-child(2) { animation-delay: 0.2s; }
+        .contact-method-card:nth-child(3) { animation-delay: 0.3s; }
+        .contact-method-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes contactCardReveal {
             from {
-                transform: translateX(100%);
                 opacity: 0;
+                transform: translateY(50px) scale(0.9);
             }
             to {
-                transform: translateX(0);
                 opacity: 1;
+                transform: translateY(0) scale(1);
             }
         }
-        
-        .is-invalid {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+
+        .contact-method-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(209, 173, 86, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
         }
         
-        .invalid-feedback {
-            display: block;
+        .contact-method-card:hover {
+            transform: translateY(-15px) scale(1.05) rotateY(2deg);
+            box-shadow: 0 25px 50px rgba(209, 173, 86, 0.3), 0 0 40px rgba(209, 173, 86, 0.1);
+            border-color: #d1ad56;
+        }
+
+        .contact-method-card:hover::before {
+            opacity: 1;
+        }
+        
+        .contact-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: white;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 20px rgba(209, 173, 86, 0.3);
+        }
+
+        .contact-icon::before {
+            content: '';
+            position: absolute;
             width: 100%;
-            margin-top: 0.25rem;
-            font-size: 0.875rem;
-            color: #dc3545;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
         }
+        
+        .contact-method-card:hover .contact-icon {
+            transform: scale(1.2) rotateY(360deg);
+            box-shadow: 0 12px 30px rgba(209, 173, 86, 0.5);
+        }
+
+        .contact-method-card:hover .contact-icon::before {
+            opacity: 0.3;
+            transform: scale(1.5);
+        }
+        
+        .contact-method-card h5 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-method-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-btn {
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+        }
+        
+        .contact-btn:hover {
+            background: linear-gradient(135deg, #b78632 0%, #8b6914 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(209, 173, 86, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        }
+        
+        .whatsapp-btn:hover {
+            background: linear-gradient(135deg, #128c7e 0%, #075e54 100%);
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .office-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(209, 173, 86, 0.2);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: officeCardReveal 0.8s ease-out forwards;
+        }
+
+        .office-card:nth-child(1) { animation-delay: 0.2s; }
+        .office-card:nth-child(2) { animation-delay: 0.4s; }
+
+        @keyframes officeCardReveal {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .office-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(209, 173, 86, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+        
+        .office-card:hover {
+            transform: translateY(-10px) scale(1.02) rotateY(1deg);
+            box-shadow: 0 25px 50px rgba(209, 173, 86, 0.3), 0 0 40px rgba(209, 173, 86, 0.1);
+            border-color: #d1ad56;
+        }
+
+        .office-card:hover::before {
+            left: 100%;
+        }
+        
+        .office-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .office-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-left: 1rem;
+        }
+        
+        .office-info h4 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .office-address {
+            color: #666;
+            margin: 0;
+        }
+        
+        .office-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #555;
+        }
+        
+        .detail-item i {
+            color: #d1ad56;
+            margin-left: 0.75rem;
+            width: 20px;
+        }
+        
+        .office-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .office-actions .btn {
+            flex: 1;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .office-map {
+            margin-top: 1rem;
+        }
+        
+        .working-hours-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid rgba(209, 173, 86, 0.1);
+        }
+        
+        .working-hours-card .card-header {
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .working-hours-card .card-header h3 {
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .working-hours-card .card-body {
+            padding: 2rem;
+        }
+        
+        .working-day {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-right: 4px solid #d1ad56;
+        }
+        
+        .working-day .day {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .working-day .time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .working-day .time.closed {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
         
         @media (max-width: 768px) {
-            .notification {
-                right: 10px;
-                left: 10px;
-                max-width: none;
+            .white-page-title {
+                font-size: 2rem;
+            }
+            
+            .contact-method-card {
+                margin-bottom: 2rem;
+            }
+            
+            .office-actions {
+                flex-direction: column;
+            }
+            
+            
+            .working-day {
+                margin-bottom: 1rem;
             }
         }
+        
+        @media (max-width: 576px) {
+            .white-page-wrapper {
+                padding: 2rem 0;
+            }
+            
+            .office-card,
+            .working-hours-card .card-body {
+                padding: 1.5rem;
+            }
+            
+        }
     </style>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+
+        // Enhanced card interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.contact-method-card, .office-card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 30;
+                    const rotateY = (centerX - x) / 30;
+                    
+                    if (this.classList.contains('contact-method-card')) {
+                        this.style.transform = 'translateY(-15px) scale(1.05) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+                    } else {
+                        this.style.transform = 'translateY(-10px) scale(1.02) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1) rotateX(0deg) rotateY(0deg)';
+                });
+            });
+        });
+    </script>
     `,
     currentPage: 'contact',
-    pageTitle: 'تواصل معنا'
+    pageTitle: 'Contact Us'
 }) %>

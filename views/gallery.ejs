@@ -4,7 +4,7 @@
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-lg-11">
-                    <h1 class="white-page-title"><i class="bi bi-images me-2"></i>معرض الصور</h1>
+                    <h1 class="white-page-title" style="margin-top: 2rem; padding-top: 2rem;"><i class="bi bi-images me-2"></i>معرض الصور</h1>
                     
                     <div class="gallery-grid">
                         <div class="gallery-item" data-aos="fade-up" data-aos-delay="100">
@@ -147,6 +147,7 @@
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             min-height: 100vh;
             padding: 0;
+            margin-top: 80px;
         }
         
         .white-page-title {
@@ -156,6 +157,9 @@
             color: #2c3e50;
             margin-bottom: 3rem;
             position: relative;
+            z-index: 10;
+            padding-top: 2rem;
+            margin-top: 2rem;
         }
         
         .white-page-title::after {
@@ -223,9 +227,9 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(5px);
-            animation: fadeIn 0.3s ease;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .lightbox-content {
@@ -237,32 +241,55 @@
             top: 50%;
             transform: translateY(-50%);
             text-align: center;
+            animation: lightboxSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes lightboxSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-50%) scale(1);
+            }
         }
 
         .lightbox-close {
             position: absolute;
-            top: 15px;
-            right: 35px;
+            top: 20px;
+            right: 40px;
             color: #f1f1f1;
-            font-size: 40px;
+            font-size: 45px;
             font-weight: bold;
             cursor: pointer;
             z-index: 10000;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(209, 173, 86, 0.2);
+            backdrop-filter: blur(10px);
         }
 
         .lightbox-close:hover {
             color: var(--primary-gold);
-            transform: scale(1.1);
+            transform: scale(1.2) rotate(90deg);
+            background: rgba(209, 173, 86, 0.4);
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.5);
         }
 
         #lightbox-image {
             max-width: 100%;
             max-height: 80vh;
             object-fit: contain;
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            animation: zoomIn 0.3s ease;
+            border-radius: 15px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 50px rgba(209, 173, 86, 0.3);
+            animation: zoomIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid rgba(209, 173, 86, 0.3);
         }
 
         .lightbox-caption {
@@ -309,18 +336,68 @@
             width: 100%;
         }
         
+        .gallery-item {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            animation: galleryItemReveal 0.8s ease-out forwards;
+        }
+
+        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+        .gallery-item:nth-child(2) { animation-delay: 0.15s; }
+        .gallery-item:nth-child(3) { animation-delay: 0.2s; }
+        .gallery-item:nth-child(4) { animation-delay: 0.25s; }
+        .gallery-item:nth-child(5) { animation-delay: 0.3s; }
+        .gallery-item:nth-child(6) { animation-delay: 0.35s; }
+        .gallery-item:nth-child(7) { animation-delay: 0.4s; }
+        .gallery-item:nth-child(8) { animation-delay: 0.45s; }
+        .gallery-item:nth-child(9) { animation-delay: 0.5s; }
+        .gallery-item:nth-child(10) { animation-delay: 0.55s; }
+        .gallery-item:nth-child(11) { animation-delay: 0.6s; }
+
+        @keyframes galleryItemReveal {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         .gallery-card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(209, 173, 86, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(209, 173, 86, 0.2);
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(209, 173, 86, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 1;
+            pointer-events: none;
         }
         
         .gallery-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-15px) scale(1.05) rotateY(2deg);
+            box-shadow: 0 25px 50px rgba(209, 173, 86, 0.3), 0 0 40px rgba(209, 173, 86, 0.1);
+            border-color: var(--primary-gold);
+        }
+
+        .gallery-card:hover::before {
+            opacity: 1;
         }
         
         .gallery-image {
@@ -334,7 +411,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: all 0.3s ease;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: brightness(0.95);
         }
         
         .gallery-overlay {
@@ -343,25 +421,50 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(209, 173, 86, 0.8);
+            background: linear-gradient(135deg, rgba(209, 173, 86, 0.9) 0%, rgba(183, 134, 50, 0.9) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+
+        .gallery-overlay::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid white;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.4s ease;
         }
         
         .gallery-overlay i {
             color: white;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            position: relative;
+            z-index: 1;
+            transform: scale(0);
+            transition: transform 0.4s ease 0.1s;
         }
         
         .gallery-card:hover .gallery-overlay {
             opacity: 1;
         }
+
+        .gallery-card:hover .gallery-overlay::before {
+            transform: scale(1);
+        }
+        
+        .gallery-card:hover .gallery-overlay i {
+            transform: scale(1);
+        }
         
         .gallery-card:hover .gallery-image img {
-            transform: scale(1.1);
+            transform: scale(1.15) translateZ(20px);
+            filter: brightness(1.1);
         }
         
         .gallery-info {
@@ -463,6 +566,28 @@
             if (event.target === this) {
                 closeLightbox();
             }
+        });
+
+        // Enhanced gallery card interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleryCards = document.querySelectorAll('.gallery-card');
+            galleryCards.forEach(card => {
+                card.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 20;
+                    const rotateY = (centerX - x) / 20;
+                    
+                    this.style.transform = 'translateY(-15px) scale(1.05) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1) rotateX(0deg) rotateY(0deg)';
+                });
+            });
         });
 
         // Add touch/swipe support for mobile

@@ -9,6 +9,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
     <title>مكتب الجيار وزين</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/Content/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="/Content/favicon.png">
+    <link rel="apple-touch-icon" href="/Content/favicon.png">
 
     <link href="/Content/ar/bootstrap.rtl.css" rel="stylesheet" />
     <script src="/Scripts/jquery-3.7.1.js"></script>
@@ -646,18 +651,7 @@
                 transition: all 0.3s ease;
             }
             
-            /* Footer mobile optimization */
-            .footer-social-link {
-                width: 50px;
-                height: 50px;
-                margin: 5px;
-            }
-            
-            .footer-social-link i {
-                font-size: 18px;
-            }
-            
-            /* Footer social media links styling */
+            /* Footer social media links styling - unified */
             .footer-social-link {
                 display: inline-flex;
                 align-items: center;
@@ -671,6 +665,12 @@
                 transition: all 0.3s ease;
                 text-decoration: none;
                 margin: 0 8px;
+                font-size: 18px;
+            }
+            
+            .footer-social-link i {
+                font-size: 18px;
+                color: inherit;
             }
             
             .footer-social-link:hover {
@@ -1272,7 +1272,7 @@
     </style>
     
     <link rel="stylesheet" href="/Content/ar/src/css/mdb.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/Scripts/jquery.lazyload-any.js"></script>
     <script src="/Scripts/jquery.isonscreen.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -1685,22 +1685,22 @@
                 <div id="soc" class="d-sm-none d-md-block">
                     <ul class="navbar-nav social-nav">
                         <li class="nav-item">
-                            <a class="social-link facebook" target="_blank" href="#" role="button" title="Facebook">
+                            <a class="social-link facebook" target="_blank" href="https://facebook.com" role="button" title="Facebook">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="social-link linkedin" target="_blank" href="#" role="button" title="LinkedIn">
+                            <a class="social-link linkedin" target="_blank" href="https://linkedin.com" role="button" title="LinkedIn">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="social-link instagram" target="_blank" href="#" role="button" title="Instagram">
+                            <a class="social-link instagram" target="_blank" href="https://instagram.com" role="button" title="Instagram">
                                 <i class="fab fa-instagram"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="social-link twitter" target="_blank" href="#" role="button" title="Twitter">
+                            <a class="social-link twitter" target="_blank" href="https://twitter.com" role="button" title="Twitter">
                                 <i class="fab fa-twitter"></i>
                             </a>
                         </li>
@@ -1803,6 +1803,16 @@
             overflow: hidden;
         }
 
+        .footer-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-gold);
+            opacity: 0.3;
+        }
 
         .footer-top {
             margin-bottom: 50px;
@@ -1889,6 +1899,31 @@
 
         .footer-nav-link:hover::before {
             width: 100%;
+        }
+
+        .footer-contact {
+            margin-top: 20px;
+        }
+
+        .footer-contact-item {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .footer-contact-item:hover {
+            color: var(--primary-gold);
+            transform: translateX(5px);
+        }
+
+        .footer-contact-item i {
+            font-size: 1.1rem;
+            margin-left: 10px;
+            width: 20px;
+            text-align: center;
         }
 
         .footer-social {
@@ -2049,6 +2084,16 @@
             .footer-bottom .row {
                 text-align: center;
             }
+
+            .footer-contact-item {
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+
+            .footer-contact-item i {
+                font-size: 1rem;
+                margin-left: 8px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -2074,17 +2119,45 @@
         <div class="container">
             <!-- Footer Top Section -->
             <div class="footer-top">
-                <div class="row align-items-center">
+                <div class="row">
                     <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                         <div class="footer-logo">
                             <img src="/Content/img/logo1.png" alt="Logo" class="footer-logo-img">
                             <img src="/Content/img/slogan.png" alt="Slogan" class="footer-slogan-img">
                         </div>
+                        <p class="footer-description">
+                            مكتب محاماة متخصص في تقديم الحلول القانونية الشاملة والاستشارات المهنية
+                        </p>
                     </div>
-                    <div class="col-lg-8 col-md-6">
-                        <div class="footer-tagline">
-                            <p class="footer-description">
-                                مكتب محاماة متخصص في تقديم الحلول القانونية الشاملة
+                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                        <h5 class="footer-section-title">روابط سريعة</h5>
+                        <ul class="footer-nav-list">
+                            <li><a href="/?lang=<%= lang %>" class="footer-nav-link">الرئيسية</a></li>
+                            <li><a href="/services?lang=<%= lang %>" class="footer-nav-link">الخدمات</a></li>
+                            <li><a href="/team?lang=<%= lang %>" class="footer-nav-link">فريق العمل</a></li>
+                            <li><a href="/gallery?lang=<%= lang %>" class="footer-nav-link">مكتبة الصور</a></li>
+                            <li><a href="/consultation?lang=<%= lang %>" class="footer-nav-link">حجز مواعيد</a></li>
+                            <li><a href="/contact?lang=<%= lang %>" class="footer-nav-link">تواصل معنا</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <h5 class="footer-section-title">معلومات التواصل</h5>
+                        <div class="footer-contact">
+                            <p class="footer-contact-item">
+                                <i class="fas fa-map-marker-alt" style="color: var(--primary-gold); margin-left: 10px;"></i>
+                                القاهرة: ٣ عمارات كومباوند حياة امتداد ش الطيران حي السفارات مدينة نصر
+                            </p>
+                            <p class="footer-contact-item">
+                                <i class="fas fa-map-marker-alt" style="color: var(--primary-gold); margin-left: 10px;"></i>
+                                الإسكندرية: عمارات الطابية، بجوار فندق المحروسة، سيدي بشر - كورنيش الإسكندرية
+                            </p>
+                            <p class="footer-contact-item">
+                                <i class="fas fa-phone" style="color: var(--primary-gold); margin-left: 10px;"></i>
+                                الهاتف: +201507044556
+                            </p>
+                            <p class="footer-contact-item">
+                                <i class="fas fa-envelope" style="color: var(--primary-gold); margin-left: 10px;"></i>
+                                البريد الإلكتروني: elgayarzein@gmail.com
                             </p>
                         </div>
                     </div>
@@ -2097,19 +2170,19 @@
                 <div class="row align-items-center">
                     <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
                         <div class="social-links">
-                            <a href="#" class="social-link facebook" target="_blank" title="Facebook">
+                            <a href="https://facebook.com" class="footer-social-link facebook" target="_blank" title="Facebook">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="#" class="social-link instagram" target="_blank" title="Instagram">
+                            <a href="https://instagram.com" class="footer-social-link instagram" target="_blank" title="Instagram">
                                 <i class="fab fa-instagram"></i>
                             </a>
-                            <a href="#" class="social-link linkedin" target="_blank" title="LinkedIn">
+                            <a href="https://linkedin.com" class="footer-social-link linkedin" target="_blank" title="LinkedIn">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
-                            <a href="#" class="social-link twitter" target="_blank" title="Twitter">
+                            <a href="https://twitter.com" class="footer-social-link twitter" target="_blank" title="Twitter">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="#" class="social-link whatsapp" target="_blank" title="WhatsApp">
+                            <a href="https://wa.me/1234567890" class="footer-social-link whatsapp" target="_blank" title="WhatsApp">
                                 <i class="fab fa-whatsapp"></i>
                             </a>
                         </div>

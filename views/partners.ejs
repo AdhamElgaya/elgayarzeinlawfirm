@@ -4,7 +4,9 @@
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <h1 class="white-page-title"><i class="bi bi-award-fill me-2"></i>شركاء النجاح</h1>
+                    <h1 class="white-page-title" style="margin-top: 2rem; padding-top: 2rem;">
+                        <i class="fas fa-shield-alt me-2" style="color: #d1ad56;"></i>شركاء النجاح
+                    </h1>
                     
                     <div class="partners-intro" data-aos="fade-up" data-aos-delay="100">
                         <p class="intro-text">
@@ -42,19 +44,18 @@
                                 </div>
                                 <div class="partner-info">
                                     <h5 class="partner-name">الجمعية العربية للملاحة</h5>
-                                    <p class="partner-location">مصر</p>
+                                    <p class="partner-location">جمهورية مصر العربية</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="partners-notice" data-aos="fade-up" data-aos-delay="600">
+                    <div class="partners-notice" data-aos="fade-up" data-aos-delay="700">
                         <div class="notice-card">
-                            <div class="notice-icon">
-                                <i class="fa fa-shield"></i>
-                            </div>
                             <div class="notice-content">
-                                <h6 class="notice-title">ملاحظة مهمة</h6>
+                                <h6 class="notice-title">
+                                    <i class="fas fa-shield-alt me-2" style="color: #d1ad56;"></i>ملاحظة مهمة
+                                </h6>
                                 <p class="notice-text">
                                     مع العلم إن حرصنا على السرية وخصوصية عملائنا يمنعنا من عرض جميع الشراكات بشكل علني.
                                 </p>
@@ -71,6 +72,7 @@
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             min-height: 100vh;
             padding: 0;
+            margin-top: 80px;
         }
         
         .white-page-title {
@@ -80,6 +82,9 @@
             color: #2c3e50;
             margin-bottom: 3rem;
             position: relative;
+            z-index: 10;
+            padding-top: 2rem;
+            margin-top: 2rem;
         }
         
         .white-page-title::after {
@@ -111,11 +116,24 @@
         }
         
         .partners-subtitle {
-            color: #d1ad56;
+            color: #2c3e50;
             font-size: 1.5rem;
             font-weight: 600;
             text-align: center;
             margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .partners-subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
         }
         
         .partners-grid {
@@ -131,13 +149,48 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(209, 173, 86, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(209, 173, 86, 0.2);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .partner-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(209, 173, 86, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .partner-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(209, 173, 86, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
         }
         
         .partner-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-15px) scale(1.05) rotateY(2deg);
+            box-shadow: 0 25px 50px rgba(209, 173, 86, 0.3), 0 0 40px rgba(209, 173, 86, 0.1);
+            border-color: var(--primary-gold);
+        }
+
+        .partner-card:hover::before {
+            left: 100%;
+        }
+
+        .partner-card:hover::after {
+            opacity: 1;
         }
         
         .partner-logo-container {
@@ -147,16 +200,27 @@
         .partner-logo {
             height: 80px;
             width: auto;
-            background: linear-gradient(45deg, #d1ad56, #b78632);
-            padding: 15px;
+            max-width: 200px;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+        
+        .partner-logo-placeholder {
+            height: 80px;
+            width: 200px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 2px dashed #d1ad56;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(209, 173, 86, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
         
         .partner-card:hover .partner-logo {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.4);
+            transform: scale(1.2) translateZ(20px);
+            box-shadow: 0 12px 30px rgba(209, 173, 86, 0.5);
+            filter: brightness(1.1);
         }
         
         .partner-name {
@@ -181,30 +245,11 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
             border: 1px solid rgba(209, 173, 86, 0.1);
         }
         
-        .notice-icon {
-            flex-shrink: 0;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .notice-icon i {
-            color: white;
-            font-size: 1.5rem;
-        }
-        
         .notice-content {
-            flex: 1;
+            text-align: center;
         }
         
         .notice-title {
@@ -250,18 +295,7 @@
             }
             
             .notice-card {
-                flex-direction: column;
-                text-align: center;
                 padding: 1.5rem;
-            }
-            
-            .notice-icon {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .notice-icon i {
-                font-size: 1.2rem;
             }
         }
         
@@ -302,6 +336,28 @@
             easing: 'ease-in-out',
             once: true,
             offset: 100
+        });
+
+        // Enhanced partner card interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const partnerCards = document.querySelectorAll('.partner-card');
+            partnerCards.forEach(card => {
+                card.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 25;
+                    const rotateY = (centerX - x) / 25;
+                    
+                    this.style.transform = 'translateY(-15px) scale(1.05) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1) rotateX(0deg) rotateY(0deg)';
+                });
+            });
         });
     </script>
     `,

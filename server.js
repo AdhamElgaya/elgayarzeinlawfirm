@@ -10,6 +10,9 @@ const { dbHelpers } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Load environment variables
+require('dotenv').config();
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,10 +21,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
 app.use(session({
-    secret: 'law-firm-secret-key',
+    secret: process.env.SESSION_SECRET || 'law-firm-secret-key-change-in-production',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, maxAge: 720 * 60 * 1000 } // 720 minutes like original
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production' ? true : false, 
+        maxAge: 720 * 60 * 1000 // 720 minutes like original
+    }
 }));
 
 // Set EJS as template engine

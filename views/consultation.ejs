@@ -7,9 +7,13 @@
                     <h1 class="white-page-title"><i class="bi bi-calendar-check-fill me-2"></i>نموذج الاستشارة</h1>
                     
                     <div class="consultation-form-container" data-aos="fade-up" data-aos-delay="100">
+                        <!-- Animated Background Pattern -->
+                        <div class="form-bg-pattern"></div>
+                        
                         <div class="form-header">
                             <div class="form-icon">
                                 <i class="fa fa-gavel"></i>
+                                <div class="icon-pulse"></div>
                             </div>
                             <h3 class="form-subtitle">احجز استشارتك القانونية</h3>
                             <p class="form-description">
@@ -23,14 +27,20 @@
                                     <label for="name" class="form-label">
                                         <i class="fa fa-user me-2"></i>الاسم الكامل
                                     </label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="ادخل اسمك الكامل" required>
+                                    <div class="input-wrapper">
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="ادخل اسمك الكامل" required>
+                                        <span class="input-focus-line"></span>
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="phone" class="form-label">
                                         <i class="fa fa-phone me-2"></i>رقم الهاتف
                                     </label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="ادخل رقم الهاتف" required>
+                                    <div class="input-wrapper">
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="ادخل رقم الهاتف" required>
+                                        <span class="input-focus-line"></span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -38,19 +48,30 @@
                                 <label for="city" class="form-label">
                                     <i class="fa fa-map-marker me-2"></i>المدينة
                                 </label>
-                                <input type="text" class="form-control" id="city" name="city" placeholder="ادخل المدينة" required>
+                                <div class="input-wrapper">
+                                    <input type="text" class="form-control" id="city" name="city" placeholder="ادخل المدينة" required>
+                                    <span class="input-focus-line"></span>
+                                </div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="subject" class="form-label">
                                     <i class="fa fa-file-text me-2"></i>موضوع الاستشارة
                                 </label>
-                                <textarea class="form-control" id="subject" name="subject" rows="5" placeholder="اكتب تفاصيل موضوع الاستشارة القانونية" required></textarea>
+                                <div class="input-wrapper">
+                                    <textarea class="form-control" id="subject" name="subject" rows="5" placeholder="اكتب تفاصيل موضوع الاستشارة القانونية" required></textarea>
+                                    <span class="input-focus-line"></span>
+                                </div>
                             </div>
                             
                             <div class="form-submit">
                                 <button type="submit" class="submit-btn">
-                                    <i class="fa fa-paper-plane me-2"></i>إرسال طلب الاستشارة
+                                    <span class="btn-content">
+                                        <i class="fa fa-paper-plane me-2"></i>
+                                        <span class="btn-text">إرسال طلب الاستشارة</span>
+                                    </span>
+                                    <span class="btn-shine"></span>
+                                    <span class="btn-ripple"></span>
                                 </button>
                             </div>
                         </form>
@@ -64,7 +85,7 @@
         .white-page-wrapper {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             min-height: 100vh;
-            padding: 0;
+            padding: 80px 0 0 0;
         }
         
         .white-page-title {
@@ -72,8 +93,9 @@
             font-weight: 700;
             text-align: center;
             color: #2c3e50;
-            margin-bottom: 3rem;
+            margin: 2rem 0 3rem 0;
             position: relative;
+            padding-top: 1rem;
         }
         
         .white-page-title::after {
@@ -94,11 +116,34 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
             padding: 3rem;
             border: 1px solid rgba(209, 173, 86, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(209, 173, 86, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(209, 173, 86, 0.05) 0%, transparent 50%);
+            opacity: 0.5;
+            z-index: 0;
+            animation: patternMove 20s ease-in-out infinite;
+        }
+
+        @keyframes patternMove {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-10px, -10px) scale(1.1); }
         }
         
         .form-header {
             text-align: center;
             margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
         }
         
         .form-icon {
@@ -111,11 +156,40 @@
             justify-content: center;
             margin: 0 auto 1.5rem;
             box-shadow: 0 10px 25px rgba(209, 173, 86, 0.3);
+            position: relative;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .icon-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(209, 173, 86, 0.5);
+            animation: pulse 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
         }
         
         .form-icon i {
             color: white;
             font-size: 2rem;
+            position: relative;
+            z-index: 1;
         }
         
         .form-subtitle {
@@ -134,6 +208,8 @@
         
         .consultation-form {
             max-width: 100%;
+            position: relative;
+            z-index: 1;
         }
         
         .form-row {
@@ -145,6 +221,7 @@
         
         .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
         }
         
         .form-label {
@@ -154,11 +231,25 @@
             display: flex;
             align-items: center;
             font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-group:focus-within .form-label {
+            color: #d1ad56;
         }
         
         .form-label i {
             color: #d1ad56;
             font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:focus-within .form-label i {
+            transform: scale(1.2);
+        }
+
+        .input-wrapper {
+            position: relative;
         }
         
         .form-control {
@@ -168,20 +259,50 @@
             padding: 12px 16px;
             font-size: 1rem;
             color: #495057;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: right;
             direction: rtl;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-focus-line {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #d1ad56, #b78632);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            z-index: 2;
         }
         
         .form-control:focus {
             background: white;
             border-color: #d1ad56;
-            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.15), 0 4px 12px rgba(209, 173, 86, 0.1);
             color: #495057;
+            transform: translateY(-2px);
+        }
+
+        .form-control:focus + .input-focus-line {
+            width: 100%;
+        }
+
+        .form-control:not(:placeholder-shown) {
+            background: white;
+            border-color: rgba(209, 173, 86, 0.5);
         }
         
         .form-control::placeholder {
             color: #adb5bd;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-control:focus::placeholder {
+            opacity: 0.5;
         }
         
         .form-submit {
@@ -198,30 +319,81 @@
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 8px 25px rgba(209, 173, 86, 0.3);
             position: relative;
             overflow: hidden;
+            min-width: 200px;
         }
-        
-        .submit-btn::before {
-            content: '';
+
+        .btn-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-shine {
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+
+        .btn-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
         }
         
         .submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-btn:hover .btn-shine {
             left: 100%;
         }
         
         .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(209, 173, 86, 0.4);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(209, 173, 86, 0.5), 0 0 30px rgba(209, 173, 86, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .submit-btn:active .btn-ripple {
+            animation: ripple 0.6s ease-out;
         }
         
         .submit-btn:disabled {
@@ -232,9 +404,14 @@
         
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .white-page-wrapper {
+                padding: 100px 0 0 0;
+            }
+            
             .white-page-title {
                 font-size: 2rem;
-                margin-bottom: 2rem;
+                margin: 1.5rem 0 2rem 0;
+                padding-top: 0.5rem;
             }
             
             .consultation-form-container {
@@ -269,8 +446,14 @@
         }
         
         @media (max-width: 576px) {
+            .white-page-wrapper {
+                padding: 120px 0 0 0;
+            }
+            
             .white-page-title {
                 font-size: 1.8rem;
+                margin: 1rem 0 1.5rem 0;
+                padding-top: 0.5rem;
             }
             
             .consultation-form-container {
@@ -376,13 +559,51 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('consultationForm');
             const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
+            const originalBtnText = submitBtn.querySelector('.btn-content').innerHTML;
             
-            // Real-time validation
+            // Ripple effect on button click
+            submitBtn.addEventListener('click', function(e) {
+                const ripple = this.querySelector('.btn-ripple');
+                if (ripple) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.width = ripple.style.height = '0px';
+                    ripple.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        ripple.style.width = ripple.style.height = '200px';
+                        ripple.style.opacity = '0';
+                        ripple.style.transform = 'translate(-50%, -50%) scale(4)';
+                    }, 10);
+                }
+            });
+            
+            // Enhanced input animations and validation
             const inputs = form.querySelectorAll('input, textarea');
             inputs.forEach(input => {
-                input.addEventListener('blur', validateField);
+                // Focus animations
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.classList.remove('focused');
+                    }
+                    validateField({ target: this });
+                });
+                
+                // Real-time validation
                 input.addEventListener('input', clearFieldError);
+                
+                // Animate label on input
+                if (input.value) {
+                    input.parentElement.classList.add('focused');
+                }
             });
             
             function validateField(e) {
@@ -453,7 +674,8 @@
                 }
                 
                 // Show loading state
-                submitBtn.innerHTML = '<span class="loading"></span> جاري الإرسال...';
+                const btnContent = submitBtn.querySelector('.btn-content');
+                btnContent.innerHTML = '<span class="loading"></span> جاري الإرسال...';
                 submitBtn.disabled = true;
                 
                 const formData = new FormData(this);
@@ -478,7 +700,8 @@
                 })
                 .finally(() => {
                     // Reset button state
-                    submitBtn.innerHTML = originalBtnText;
+                    const btnContent = submitBtn.querySelector('.btn-content');
+                    btnContent.innerHTML = originalBtnText;
                     submitBtn.disabled = false;
                 });
             });

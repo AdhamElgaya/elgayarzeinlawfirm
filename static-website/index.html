@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ar" dir="rtl" style="overflow:auto;">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
+    <title>مكتب الجيار وزين</title>
+
+    <link href="Content/ar/bootstrap.rtl.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.7.1.js"></script>
+    <script src="Scripts/bootstrap.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        @font-face {
+            font-family: 'droid';
+            src: url('fonts/DroidKufi-Regular.woff');
+        }
+        @font-face {
+            font-family: 'droid-b';
+            src: url('fonts/DroidKufi-Bold.woff');
+        }
+        
+        :root {
+            --primary-gold: #d1ad56;
+            --secondary-gold: #b78632;
+            --dark-gold: #8b6914;
+            --light-gold: #e1dd84;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+            --gradient-gold: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            --shadow-gold: 0 4px 20px rgba(209, 173, 86, 0.3);
+            --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            font-family: "Noto Kufi Arabic", "Cairo", sans-serif;
+            font-weight: 400;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--gradient-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        ul.lst {
+            list-style: none;
+            line-height: 2.5;
+            padding-left: 0;
+        }
+
+        ul.lst li {
+            position: relative;
+            padding-right: 20px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ul.lst li:before {
+            content: "▶";
+            color: var(--primary-gold);
+            font-size: 12px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        ul.lst li:hover {
+            color: var(--primary-gold);
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            font-size: 36px !important;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hero section */
+        .hero-section {
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 0.6) 100%), url('Content/img/Counting_Money.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Background overlay */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.55) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* Vignette for extra edge darkness */
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .hero-section .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            color: #d1ad56;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .hero-subtitle {
+            line-height: 1.8;
+            font-size: 1.3rem;
+            color: #f8f9fa;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(209, 173, 86, 0.3); }
+            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 30px rgba(209, 173, 86, 0.6); }
+        }
+
+        /* Hero buttons styling */
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .hero-btn-primary {
+            background: var(--gradient-gold);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-gold);
+            position: relative;
+            overflow: hidden;
+            min-height: 50px;
+        }
+
+        .hero-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .hero-btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary-gold);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            color: var(--primary-gold);
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 50px;
+        }
+
+        .hero-btn-secondary:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.3);
+            text-decoration: none;
+            background: var(--primary-gold);
+        }
+
+        /* Service cards enhancements */
+        .service-card {
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid rgba(209, 173, 86, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(209, 173, 86, 0.2);
+            border-color: var(--primary-gold);
+        }
+
+        .service-card img {
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .service-card:hover img {
+            transform: scale(1.05);
+        }
+
+        h1.hh{
+            color:#d1ad56 !important;
+        }
+        div.npm ul, .service-card ul
+        {
+            list-style: none;
+            line-height: 40px;
+            color: #f8f9fa;
+        }
+        
+        .service-card ul {
+            padding-right: 0;
+        }
+        .service-card ul li {
+            list-style: none;
+            position: relative;
+            padding-right: 1.4rem; /* space for the triangle on the right (RTL) */
+        }
+        /* Gold triangle bullet on the right, pointing left (RTL-friendly) */
+        .service-card ul li::before {
+            content: '';
+            position: absolute;
+            right: 0.4rem;
+            top: 0.95em;
+            transform: translateY(-50%);
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 8px solid var(--primary-gold); /* points left */
+        }
+        .service-card h1 {
+            color: #d1ad56 !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            padding: 0.2rem 0;
+            height: auto;
+            min-height: auto;
+        }
+        .service-card {
+            color: #f8f9fa;
+            cursor: default;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: clamp(2rem, 4vw, 2.5rem) !important;
+                line-height: 1.2;
+            }
+            
+            .hero-subtitle {
+                font-size: clamp(1rem, 2.5vw, 1.1rem) !important;
+                line-height: 1.4;
+            }
+            
+            .service-card h1 {
+                font-size: clamp(1.2rem, 4vw, 1.8rem) !important;
+                line-height: 1.4;
+                margin-bottom: 1rem;
+                padding: 0.3rem 0;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+            
+            .hero-btn-primary,
+            .hero-btn-secondary {
+                width: 100%;
+                max-width: 280px;
+                margin: 0;
+            }
+            
+            .service-card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .service-card img {
+                aspect-ratio: 16/9;
+                object-fit: cover;
+            }
+        }
+
+        /* Navigation styles */
+        .navbar {
+            background: rgba(0, 0, 0, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(209, 173, 86, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link {
+            color: var(--text-light) !important;
+            position: relative;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: var(--primary-gold) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar .nav-link.active {
+            color: var(--primary-gold) !important;
+        }
+
+        .navbar .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 2px;
+            background: var(--gradient-gold);
+            border-radius: 1px;
+        }
+
+        .navbar-brand {
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-toggler {
+            border: 1px solid var(--primary-gold);
+            border-radius: 5px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.25);
+        }
+
+        a.ld {
+            color: #d1ad56 !important;
+            padding: 12px 20px;
+            display: block;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 0;
+            text-decoration: none;
+        }
+        
+        a.ld:hover {
+            color: white !important;
+            background: rgba(209, 173, 86, 0.1);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+        
+        a.ld.active {
+            color: white !important;
+            background: var(--gradient-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Footer styles */
+        .footer-modern {
+            background: var(--gradient-dark);
+            border-top: 1px solid rgba(209, 173, 86, 0.2);
+            padding: 60px 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-top {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .footer-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .footer-logo-img,
+        .footer-slogan-img {
+            max-height: 60px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
+        }
+
+        .footer-logo-img:hover,
+        .footer-slogan-img:hover {
+            filter: brightness(0) sepia(1) saturate(2) hue-rotate(35deg);
+        }
+
+        .footer-description {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .footer-social {
+            margin-bottom: 30px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(209, 173, 86, 0.1);
+            border-bottom: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(209, 173, 86, 0.1);
+            border: 1px solid rgba(209, 173, 86, 0.2);
+            border-radius: 50%;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link:hover {
+            color: var(--dark-bg);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(209, 173, 86, 0.3);
+            background: var(--primary-gold);
+        }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .copyright-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .website-url {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="Content/ar/src/css/mdb.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="Scripts/jquery.lazyload-any.js"></script>
+    <script src="Scripts/jquery.isonscreen.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+</head>
+<body style="overflow-x:hidden;">
+
+    <header>
+        <nav class="navbar navbar-inverse fixed-top navbar-expand-lg navbar-dark bg-dark navbar-default" style="background-color:black !important;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="index.html" style="color: #e1dd84 !important;">
+                    <img src="Content/img/logo1.png" height="48"/>
+                    <img src="Content/img/slogan.png" height="48" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa fa-bars" style="color: #b78632"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="ld active" href="index.html">الرئيسية</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="posts.html">المستجدات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="services.html">الخدمات الاكثر طلباً</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="partners.html">شركاء النجاح</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="team.html">فريق العمل</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="consultation.html">حجز مواعيد او استشارات</a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="soc" class="d-sm-none d-md-block">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="social-link facebook" target="_blank" href="#" role="button" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link linkedin" target="_blank" href="#" role="button" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link instagram" target="_blank" href="#" role="button" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link twitter" target="_blank" href="#" role="button" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div style="margin-top:48px;">
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="container text-center">
+                <h1 class="mb-4 hero-title">
+                    مكتب الجيار وزين
+                </h1>
+                <h5 class="mb-5 hero-subtitle">
+                    أحد أكبر وأحسن مكاتب المحاماه فى مصر
+                </h5>
+                <div class="hero-buttons">
+                    <a class="btn hero-btn-primary" href="contact.html">تواصل معنا</a>
+                    <a class="btn hero-btn-secondary" href="services.html">
+                        <i class="fa fa-info-circle me-2"></i>تعرف على خدماتنا
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" style="background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); padding: 100px 0; border-top: 3px solid var(--primary-gold);">
+            <div class="container text-center">
+                <h1 class="display-5 fw-bold text-white mb-4" style="color: var(--primary-gold) !important;">خدماتنا القانونية</h1>
+                <div class="col-lg-6 mx-auto">
+                    <p class="fs-5 mb-5" style="color: var(--text-light); font-weight: 600;">نقدم مجموعة واسعة من الخدمات القانونية المتخصصة</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Cards Section -->
+        <section id="service-cards" style="background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); padding: 80px 0;">
+            <div class="container">
+                <!-- Service Card 1 -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-12 col-lg-10">
+                        <div class="service-card">
+                            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                                <div class="col-12 col-lg-6">
+                                    <img src="Content/img/sr1.jpg" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">المنازعات المدنية</h1>
+                                    <ul class="lst">
+                                        <li>دعاوى التعويض عن الأضرار المادية والمعنوية الناشئة عن الفعل الضار أو الإخلال بالتعاقد</li>
+                                        <li>منازعات الإيجار بمختلف صورها</li>
+                                        <li>دعاوى الحيازة</li>
+                                        <li>دعاوى الملكية، بما يشمل دعاوى الشفعة والفرز والتجنيب وقسمة المال الشائع</li>
+                                        <li>دعاوى صحة ونفاذ العقود و ثبوت الملكية</li>
+                                        <li>منازعات العقود المدنية: البيع، الإيجار، المقاولة، الوكالة، والقرض</li>
+                                        <li>دعاوى المسؤولية العقدية والتقصيرية</li>
+                                        <li>منازعات التسجيل والسجل العيني جميع المنازعات العقارية</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Card 2 -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-12 col-lg-10">
+                        <div class="service-card">
+                            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                                <div class="col-12 col-lg-6">
+                                    <img src="Content/img/sr2.jpg" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">القضايا الجنائية</h1>
+                                    <ul class="lst">
+                                        <li>الجرائم الواقعة على النفس: القتل العمد، الشروع فيه، والضرب المفضي إلى عاهة مستديمة</li>
+                                        <li>الجرائم الواقعة على المال: السرقة، النصب، خيانة الأمانة، التبديد، والإتلاف العمدي</li>
+                                        <li>جرائم التزوير واستعمال المحررات المزورة</li>
+                                        <li>الجرائم المتعلقة بالشيكات بدون رصيد</li>
+                                        <li>جرائم المواد المخدرة: الاتجار، الحيازة، التعاطي، والجلب</li>
+                                        <li>الجرائم الإلكترونية: السب والقذف عبر الوسائط الرقمية، الابتزاز</li>
+                                        <li>تمثيل المتهمين في جميع مراحل الدعوى الجنائية</li>
+                                        <li>إعداد الطعون بالنقض والتماس إعادة النظر في الأحكام الجنائية</li>
+                                        <li>قضايا الأحداث والقُصّر أمام محاكم الطفل</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Service Card 3 -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-12 col-lg-10">
+                        <div class="service-card">
+                            <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+                                <div class="col-12 col-lg-6">
+                                    <img src="Content/img/sr3.jpg" class="d-block mx-auto img-fluid" width="700" height="500" loading="lazy" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <h1 class="display-5 fw-bold lh-1 mb-3 hh">قضايا الاسرة</h1>
+                                    <ul class="lst">
+                                        <li>دعاوى الطلاق، والخلع، والطاعة</li>
+                                        <li>دعاوى النفقة بأنواعها: نفقة الزوجة، نفقة الصغار، نفقة العدة، والمؤخر</li>
+                                        <li>دعاوى الحضانة، والرؤية، والاستضافة، والضم</li>
+                                        <li>دعاوى إثبات النسب أو إنكاره وفقًا للضوابط الشرعية والقانونية</li>
+                                        <li>دعاوى النشوز، والاعتراض على الإنذارات بالطاعة</li>
+                                        <li>توثيق عقود الزواج العرفي، وإثبات الطلاق</li>
+                                        <li>دعاوى إعلام الوراثة وتقسيم التركات</li>
+                                        <li>تنفيذ الأحكام القضائية المتعلقة بالأسرة</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-modern">
+        <div class="container">
+            <!-- Footer Top Section -->
+            <div class="footer-top">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                        <div class="footer-logo">
+                            <img src="Content/img/logo1.png" alt="Logo" class="footer-logo-img">
+                            <img src="Content/img/slogan.png" alt="Slogan" class="footer-slogan-img">
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-6">
+                        <div class="footer-tagline">
+                            <p class="footer-description">
+                                مكتب محاماة متخصص في تقديم الحلول القانونية الشاملة
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Social Section -->
+            <div class="footer-social">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
+                        <div class="social-links">
+                            <a href="#" class="social-link facebook" target="_blank" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link instagram" target="_blank" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link linkedin" target="_blank" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link twitter" target="_blank" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link whatsapp" target="_blank" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright-text">
+                            © 2024 مكتب الجيار وزين. جميع الحقوق محفوظة.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-end">
+                            <span class="website-url">2024 © Elgayar & Zein Law Firm - All Rights Reserved</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+        var mobile = (/iphone|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+        if (mobile) {
+            $('#soc').css('display', 'none');
+        }
+
+        // Enhanced navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialize AOS
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-in-out',
+                once: true,
+                offset: 100
+            });
+        }
+    </script>
+
+</body>
+</html>
