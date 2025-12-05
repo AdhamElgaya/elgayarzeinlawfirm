@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="ar" dir="rtl" style="overflow:auto;">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
+    <title>حجز مواعيد او استشارات - مكتب الجيار وزين</title>
+
+    <link href="Content/ar/bootstrap.rtl.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.7.1.js"></script>
+    <script src="Scripts/bootstrap.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Sans+Arabic:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        @font-face {
+            font-family: 'droid';
+            src: url('fonts/DroidKufi-Regular.woff');
+        }
+        @font-face {
+            font-family: 'droid-b';
+            src: url('fonts/DroidKufi-Bold.woff');
+        }
+        
+        :root {
+            --primary-gold: #d1ad56;
+            --secondary-gold: #b78632;
+            --dark-gold: #8b6914;
+            --light-gold: #e1dd84;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+            --gradient-gold: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            --shadow-gold: 0 4px 20px rgba(209, 173, 86, 0.3);
+            --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            font-family: "Noto Kufi Arabic", "Cairo", sans-serif;
+            font-weight: 400;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--gradient-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        h1 {
+            font-size: 36px !important;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .white-page-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 80px 0 0 0;
+        }
+        
+        .white-page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #2c3e50;
+            margin: 2rem 0 3rem 0;
+            position: relative;
+            padding-top: 1rem;
+        }
+        
+        .white-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 2px;
+        }
+        
+        .consultation-form-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            border: 1px solid rgba(209, 173, 86, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(209, 173, 86, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(209, 173, 86, 0.05) 0%, transparent 50%);
+            opacity: 0.5;
+            z-index: 0;
+            animation: patternMove 20s ease-in-out infinite;
+        }
+
+        @keyframes patternMove {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-10px, -10px) scale(1.1); }
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 25px rgba(209, 173, 86, 0.3);
+            position: relative;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .icon-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(209, 173, 86, 0.5);
+            animation: pulse 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        .form-icon i {
+            color: white;
+            font-size: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-subtitle {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .form-description {
+            color: #6c757d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .consultation-form {
+            max-width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .form-label {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-group:focus-within .form-label {
+            color: #d1ad56;
+        }
+        
+        .form-label i {
+            color: #d1ad56;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:focus-within .form-label i {
+            transform: scale(1.2);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .form-control {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            color: #495057;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: right;
+            direction: rtl;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-focus-line {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #d1ad56, #b78632);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+        
+        .form-control:focus {
+            background: white;
+            border-color: #d1ad56;
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.15), 0 4px 12px rgba(209, 173, 86, 0.1);
+            color: #495057;
+            transform: translateY(-2px);
+        }
+
+        .form-control:focus + .input-focus-line {
+            width: 100%;
+        }
+
+        .form-control:not(:placeholder-shown) {
+            background: white;
+            border-color: rgba(209, 173, 86, 0.5);
+        }
+        
+        .form-control::placeholder {
+            color: #adb5bd;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-control:focus::placeholder {
+            opacity: 0.5;
+        }
+        
+        .form-submit {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(209, 173, 86, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .btn-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+
+        .btn-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-btn:hover .btn-shine {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(209, 173, 86, 0.5), 0 0 30px rgba(209, 173, 86, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .submit-btn:active .btn-ripple {
+            animation: ripple 0.6s ease-out;
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Navigation styles */
+        .navbar {
+            background: rgba(0, 0, 0, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(209, 173, 86, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link {
+            color: var(--text-light) !important;
+            position: relative;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: var(--primary-gold) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar .nav-link.active {
+            color: var(--primary-gold) !important;
+        }
+
+        a.ld {
+            color: #d1ad56 !important;
+            padding: 12px 20px;
+            display: block;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 0;
+            text-decoration: none;
+        }
+        
+        a.ld:hover {
+            color: white !important;
+            background: rgba(209, 173, 86, 0.1);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+        
+        a.ld.active {
+            color: white !important;
+            background: var(--gradient-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Footer styles */
+        .footer-modern {
+            background: var(--gradient-dark);
+            border-top: 1px solid rgba(209, 173, 86, 0.2);
+            padding: 60px 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-top {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .footer-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .footer-logo-img,
+        .footer-slogan-img {
+            max-height: 60px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
+        }
+
+        .footer-logo-img:hover,
+        .footer-slogan-img:hover {
+            filter: brightness(0) sepia(1) saturate(2) hue-rotate(35deg);
+        }
+
+        .footer-description {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .footer-social {
+            margin-bottom: 30px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(209, 173, 86, 0.1);
+            border-bottom: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(209, 173, 86, 0.1);
+            border: 1px solid rgba(209, 173, 86, 0.2);
+            border-radius: 50%;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link:hover {
+            color: var(--dark-bg);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(209, 173, 86, 0.3);
+            background: var(--primary-gold);
+        }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid rgba(209, 173, 86, 0.1);
+        }
+
+        .copyright-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .website-url {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .notification-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .notification-error {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .notification-content {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification-content i {
+            font-size: 1.2rem;
+        }
+        
+        .notification-content span {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .white-page-wrapper {
+                padding: 100px 0 0 0;
+            }
+            
+            .white-page-title {
+                font-size: 2rem;
+                margin: 1.5rem 0 2rem 0;
+                padding-top: 0.5rem;
+            }
+            
+            .consultation-form-container {
+                padding: 2rem;
+            }
+            
+            .form-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .form-icon i {
+                font-size: 1.5rem;
+            }
+            
+            .form-subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .form-description {
+                font-size: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .white-page-wrapper {
+                padding: 120px 0 0 0;
+            }
+            
+            .white-page-title {
+                font-size: 1.8rem;
+                margin: 1rem 0 1.5rem 0;
+                padding-top: 0.5rem;
+            }
+            
+            .consultation-form-container {
+                padding: 1.5rem;
+            }
+            
+            .form-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .form-icon i {
+                font-size: 1.2rem;
+            }
+            
+            .form-subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .submit-btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+    
+    <link rel="stylesheet" href="Content/ar/src/css/mdb.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="Scripts/jquery.lazyload-any.js"></script>
+    <script src="Scripts/jquery.isonscreen.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+</head>
+<body style="overflow-x:hidden;">
+
+    <header>
+        <nav class="navbar navbar-inverse fixed-top navbar-expand-lg navbar-dark bg-dark navbar-default" style="background-color:black !important;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="index.html" style="color: #e1dd84 !important;">
+                    <img src="Content/img/logo1.png" height="48"/>
+                    <img src="Content/img/slogan.png" height="48" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa fa-bars" style="color: #b78632"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="ld" href="index.html">الرئيسية</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="posts.html">المستجدات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="services.html">الخدمات الاكثر طلباً</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="partners.html">شركاء النجاح</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld" href="team.html">فريق العمل</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="ld active" href="consultation.html">حجز مواعيد او استشارات</a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="soc" class="d-sm-none d-md-block">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="social-link facebook" target="_blank" href="#" role="button" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link linkedin" target="_blank" href="#" role="button" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link instagram" target="_blank" href="#" role="button" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="social-link twitter" target="_blank" href="#" role="button" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div style="margin-top:48px;">
+        <div class="white-page-wrapper">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h1 class="white-page-title"><i class="bi bi-calendar-check-fill me-2"></i>نموذج الاستشارة</h1>
+                        
+                        <div class="consultation-form-container" data-aos="fade-up" data-aos-delay="100">
+                            <!-- Animated Background Pattern -->
+                            <div class="form-bg-pattern"></div>
+                            
+                            <div class="form-header">
+                                <div class="form-icon">
+                                    <i class="fa fa-gavel"></i>
+                                    <div class="icon-pulse"></div>
+                                </div>
+                                <h3 class="form-subtitle">احجز استشارتك القانونية</h3>
+                                <p class="form-description">
+                                    املأ النموذج أدناه وسنتواصل معك في أقرب وقت ممكن لتحديد موعد الاستشارة
+                                </p>
+                            </div>
+                            
+                            <!-- Static Consultation Form - Using Formspree for form handling -->
+                            <form id="consultationForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="consultation-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="name" class="form-label">
+                                            <i class="fa fa-user me-2"></i>الاسم الكامل
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="ادخل اسمك الكامل" required>
+                                            <span class="input-focus-line"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="phone" class="form-label">
+                                            <i class="fa fa-phone me-2"></i>رقم الهاتف
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="ادخل رقم الهاتف" required>
+                                            <span class="input-focus-line"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city" class="form-label">
+                                        <i class="fa fa-map-marker me-2"></i>المدينة
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" class="form-control" id="city" name="city" placeholder="ادخل المدينة" required>
+                                        <span class="input-focus-line"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject" class="form-label">
+                                        <i class="fa fa-file-text me-2"></i>موضوع الاستشارة
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="subject" name="subject" rows="5" placeholder="اكتب تفاصيل موضوع الاستشارة القانونية" required></textarea>
+                                        <span class="input-focus-line"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-submit">
+                                    <button type="submit" class="submit-btn">
+                                        <span class="btn-content">
+                                            <i class="fa fa-paper-plane me-2"></i>
+                                            <span class="btn-text">إرسال طلب الاستشارة</span>
+                                        </span>
+                                        <span class="btn-shine"></span>
+                                        <span class="btn-ripple"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-modern">
+        <div class="container">
+            <!-- Footer Top Section -->
+            <div class="footer-top">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                        <div class="footer-logo">
+                            <img src="Content/img/logo1.png" alt="Logo" class="footer-logo-img">
+                            <img src="Content/img/slogan.png" alt="Slogan" class="footer-slogan-img">
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-6">
+                        <div class="footer-tagline">
+                            <p class="footer-description">
+                                مكتب محاماة متخصص في تقديم الحلول القانونية الشاملة
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Social Section -->
+            <div class="footer-social">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
+                        <div class="social-links">
+                            <a href="#" class="social-link facebook" target="_blank" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link instagram" target="_blank" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link linkedin" target="_blank" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link twitter" target="_blank" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link whatsapp" target="_blank" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright-text">
+                            © 2024 مكتب الجيار وزين. جميع الحقوق محفوظة.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-end">
+                            <span class="website-url">2024 © Elgayar & Zein Law Firm - All Rights Reserved</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+        var mobile = (/iphone|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+        if (mobile) {
+            $('#soc').css('display', 'none');
+        }
+
+        // Enhanced navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('consultationForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.querySelector('.btn-content').innerHTML;
+            
+            // Ripple effect on button click
+            submitBtn.addEventListener('click', function(e) {
+                const ripple = this.querySelector('.btn-ripple');
+                if (ripple) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.width = ripple.style.height = '0px';
+                    ripple.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        ripple.style.width = ripple.style.height = '200px';
+                        ripple.style.opacity = '0';
+                        ripple.style.transform = 'translate(-50%, -50%) scale(4)';
+                    }, 10);
+                }
+            });
+            
+            // Enhanced input animations and validation
+            const inputs = form.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                // Focus animations
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.classList.remove('focused');
+                    }
+                    validateField({ target: this });
+                });
+                
+                // Real-time validation
+                input.addEventListener('input', clearFieldError);
+                
+                // Animate label on input
+                if (input.value) {
+                    input.parentElement.classList.add('focused');
+                }
+            });
+            
+            function validateField(e) {
+                const field = e.target;
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Remove existing error styling
+                field.classList.remove('is-invalid');
+                const existingError = field.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                // Validation rules
+                if (field.hasAttribute('required') && !value) {
+                    isValid = false;
+                    errorMessage = 'هذا الحقل مطلوب';
+                } else if (field.type === 'tel' && value) {
+                    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+                    if (!phoneRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'يرجى إدخال رقم هاتف صحيح';
+                    }
+                }
+                
+                if (!isValid) {
+                    field.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = errorMessage;
+                    field.parentNode.appendChild(errorDiv);
+                }
+                
+                return isValid;
+            }
+            
+            function clearFieldError(e) {
+                const field = e.target;
+                field.classList.remove('is-invalid');
+                const existingError = field.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+            
+            function validateForm() {
+                let isFormValid = true;
+                inputs.forEach(input => {
+                    if (!validateField({ target: input })) {
+                        isFormValid = false;
+                    }
+                });
+                return isFormValid;
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    // Scroll to first invalid field
+                    const firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                    return;
+                }
+                
+                // Show loading state
+                const btnContent = submitBtn.querySelector('.btn-content');
+                btnContent.innerHTML = '<span class="loading"></span> جاري الإرسال...';
+                submitBtn.disabled = true;
+                
+                const formData = new FormData(this);
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showNotification('تم إرسال طلب الاستشارة بنجاح! سنتواصل معك قريباً.', 'success');
+                        form.reset();
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+                })
+                .finally(() => {
+                    // Reset button state
+                    const btnContent = submitBtn.querySelector('.btn-content');
+                    btnContent.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+            });
+            
+            function showNotification(message, type) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = 'notification notification-' + type;
+                notification.innerHTML = 
+                    '<div class="notification-content">' +
+                        '<i class="fa fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i>' +
+                        '<span>' + message + '</span>' +
+                        '<button class="notification-close" onclick="this.parentElement.parentElement.remove()">' +
+                            '<i class="fa fa-times"></i>' +
+                        '</button>' +
+                    '</div>';
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+        });
+        
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+    </script>
+
+</body>
+</html>
+
