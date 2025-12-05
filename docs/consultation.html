@@ -238,7 +238,7 @@
         
         .form-control {
             background: #f8f9fa;
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(209, 173, 86, 0.3);
             border-radius: 12px;
             padding: 12px 16px;
             font-size: 1rem;
@@ -249,6 +249,10 @@
             width: 100%;
             position: relative;
             z-index: 1;
+        }
+        
+        .form-control:not(:focus):not(.is-invalid) {
+            border-color: rgba(209, 173, 86, 0.3);
         }
 
         .input-focus-line {
@@ -593,8 +597,19 @@
         }
         
         .form-control.is-invalid {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+        
+        /* Ensure untouched fields have gold border, not red */
+        .form-control.untouched,
+        .form-control:not(.touched):not(.is-invalid) {
+            border-color: rgba(209, 173, 86, 0.3) !important;
+        }
+        
+        /* Only show invalid state after user has interacted */
+        .form-control.touched.is-invalid {
+            border-color: #dc3545 !important;
         }
         
         @keyframes slideInRight {
@@ -781,7 +796,7 @@
                             <!-- Static Consultation Form - Using Formspree for form handling -->
                             <!-- IMPORTANT: Replace YOUR_FORM_ID with your actual Formspree form ID -->
                             <!-- Get your form ID from https://formspree.io/forms after creating a form -->
-                            <form id="consultationForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="consultation-form">
+                            <form id="consultationForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="consultation-form" novalidate>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="name" class="form-label">
@@ -952,24 +967,41 @@
             // Enhanced input animations and validation
             const inputs = form.querySelectorAll('input, textarea');
             inputs.forEach(input => {
+                // Mark field as untouched initially
+                input.classList.add('untouched');
+                
                 // Focus animations
                 input.addEventListener('focus', function() {
                     this.parentElement.classList.add('focused');
+                    this.classList.remove('untouched');
+                    this.classList.add('touched');
                 });
                 
                 input.addEventListener('blur', function() {
+                    this.classList.remove('untouched');
+                    this.classList.add('touched');
                     if (!this.value) {
                         this.parentElement.classList.remove('focused');
                     }
-                    validateField({ target: this });
+                    // Only validate after user has interacted
+                    if (this.classList.contains('touched')) {
+                        validateField({ target: this });
+                    }
                 });
                 
-                // Real-time validation
-                input.addEventListener('input', clearFieldError);
+                // Real-time validation - only if field has been touched
+                input.addEventListener('input', function() {
+                    clearFieldError({ target: this });
+                    if (this.classList.contains('touched')) {
+                        validateField({ target: this });
+                    }
+                });
                 
                 // Animate label on input
                 if (input.value) {
                     input.parentElement.classList.add('focused');
+                    input.classList.remove('untouched');
+                    input.classList.add('touched');
                 }
             });
             
@@ -979,6 +1011,11 @@
                 let isValid = true;
                 let errorMessage = '';
                 
+                // Only validate if field has been touched/interacted with
+                if (!field.classList.contains('touched') && !field.value) {
+                    return true; // Don't show errors for untouched empty fields
+                }
+                
                 // Remove existing error styling
                 field.classList.remove('is-invalid');
                 const existingError = field.parentNode.querySelector('.invalid-feedback');
@@ -987,7 +1024,7 @@
                 }
                 
                 // Validation rules
-                if (field.hasAttribute('required') && !value) {
+                if (field.hasAttribute('required') && !value && field.classList.contains('touched')) {
                     isValid = false;
                     errorMessage = 'هذا الحقل مطلوب';
                 } else if (field.type === 'tel' && value) {
@@ -1021,6 +1058,9 @@
             function validateForm() {
                 let isFormValid = true;
                 inputs.forEach(input => {
+                    // Mark all fields as touched when form is submitted
+                    input.classList.add('touched');
+                    input.classList.remove('untouched');
                     if (!validateField({ target: input })) {
                         isFormValid = false;
                     }
