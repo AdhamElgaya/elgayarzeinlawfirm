@@ -1084,7 +1084,7 @@
             // Automatically detect if running on GitHub Pages or locally
             const isProduction = window.location.hostname.includes('github.io');
             const API_URL = isProduction 
-                ? 'https://YOUR-RAILWAY-URL.up.railway.app/api/consultation'  // ⚠️ REPLACE THIS with your Railway URL
+                ? 'https://elgayarzeinlawfirm-production.up.railway.app/api/consultation'  // Railway production server
                 : 'http://localhost:3001/api/consultation';  // Local development
             
             form.addEventListener('submit', function(e) {
