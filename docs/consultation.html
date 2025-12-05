@@ -1080,21 +1080,20 @@
                 return isFormValid;
             }
             
-            // Check if Formspree form ID is configured
-            const formAction = form.getAttribute('action');
-            if (formAction && formAction.includes('YOUR_FORM_ID')) {
-                console.warn('⚠️ Formspree form ID not configured! Please replace YOUR_FORM_ID with your actual Formspree form ID.');
-                // Show a developer notice (only visible in console, won't affect users until they try to submit)
-            }
+            // Backend server URL
+            // Automatically detect if running on GitHub Pages or locally
+            const isProduction = window.location.hostname.includes('github.io');
+            const API_URL = isProduction 
+                ? 'https://YOUR-RAILWAY-URL.up.railway.app/api/consultation'  // ⚠️ REPLACE THIS with your Railway URL
+                : 'http://localhost:3001/api/consultation';  // Local development
             
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Check if form ID is still a placeholder
-                const formAction = this.getAttribute('action');
-                if (formAction && formAction.includes('YOUR_FORM_ID')) {
-                    showNotification('⚠️ يرجى تكوين معرف نموذج Formspree قبل استخدام هذا النموذج. يرجى الاتصال بالمسؤول.', 'error');
-                    console.error('Formspree form ID not configured. Form action:', formAction);
+                // Check if server URL is configured
+                if (API_URL === 'YOUR_SERVER_URL/api/consultation') {
+                    showNotification('⚠️ يرجى تكوين عنوان الخادم قبل استخدام هذا النموذج. يرجى الاتصال بالمسؤول.', 'error');
+                    console.error('Server URL not configured. Please set API_URL in consultation.html');
                     return;
                 }
                 
@@ -1113,21 +1112,34 @@
                 btnContent.innerHTML = '<span class="loading"></span> جاري الإرسال...';
                 submitBtn.disabled = true;
                 
-                const formData = new FormData(this);
+                // Prepare form data
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    city: document.getElementById('city').value.trim(),
+                    subject: document.getElementById('subject').value.trim()
+                };
                 
-                fetch(this.action, {
+                // Send to backend server
+                fetch(API_URL, {
                     method: 'POST',
-                    body: formData,
                     headers: {
-                        'Accept': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
                 })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
                         showNotification('تم إرسال طلب الاستشارة بنجاح! سنتواصل معك قريباً.', 'success');
                         form.reset();
+                        // Reset touched classes
+                        inputs.forEach(input => {
+                            input.classList.remove('touched');
+                            input.classList.add('untouched');
+                        });
                     } else {
-                        throw new Error('Network response was not ok');
+                        throw new Error(data.message || 'فشل إرسال الطلب');
                     }
                 })
                 .catch(error => {
