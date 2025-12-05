@@ -96,9 +96,9 @@
         
         .consultation-form-container {
             background: white;
-            border-radius: 25px;
+            border-radius: 30px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-            padding: 3rem;
+            padding: 3.5rem;
             border: 1px solid rgba(209, 173, 86, 0.1);
             position: relative;
             overflow: hidden;
@@ -204,18 +204,23 @@
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             position: relative;
+        }
+        
+        .form-row .form-group {
+            margin-bottom: 1.5rem;
         }
         
         .form-label {
             color: #2c3e50;
             font-weight: 600;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
-            font-size: 1rem;
+            font-size: 1.05rem;
             transition: color 0.3s ease;
+            gap: 0.5rem;
         }
 
         .form-group:focus-within .form-label {
@@ -237,10 +242,10 @@
         }
         
         .form-control {
-            background: #f8f9fa;
+            background: #ffffff;
             border: 2px solid rgba(209, 173, 86, 0.3);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border-radius: 15px;
+            padding: 14px 18px;
             font-size: 1rem;
             color: #495057;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -249,10 +254,16 @@
             width: 100%;
             position: relative;
             z-index: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         
         .form-control:not(:focus):not(.is-invalid) {
             border-color: rgba(209, 173, 86, 0.3);
+        }
+        
+        .form-control:hover {
+            border-color: rgba(209, 173, 86, 0.5);
+            box-shadow: 0 2px 12px rgba(209, 173, 86, 0.1);
         }
 
         .input-focus-line {
@@ -268,11 +279,12 @@
         }
         
         .form-control:focus {
-            background: white;
+            background: #ffffff;
             border-color: #d1ad56;
-            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.15), 0 4px 12px rgba(209, 173, 86, 0.1);
+            box-shadow: 0 0 0 0.2rem rgba(209, 173, 86, 0.15), 0 4px 16px rgba(209, 173, 86, 0.15);
             color: #495057;
             transform: translateY(-2px);
+            outline: none;
         }
 
         .form-control:focus + .input-focus-line {
@@ -280,7 +292,7 @@
         }
 
         .form-control:not(:placeholder-shown) {
-            background: white;
+            background: #ffffff;
             border-color: rgba(209, 173, 86, 0.5);
         }
         
@@ -302,7 +314,7 @@
             background: linear-gradient(135deg, #d1ad56 0%, #b78632 100%);
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 16px 45px;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: 600;
@@ -311,7 +323,7 @@
             box-shadow: 0 8px 25px rgba(209, 173, 86, 0.3);
             position: relative;
             overflow: hidden;
-            min-width: 200px;
+            min-width: 220px;
         }
 
         .btn-content {
