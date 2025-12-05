@@ -498,6 +498,8 @@
                     <div class="card shadow-lg">
                         <div class="card-body p-5">
                             <!-- Static Contact Form - Using Formspree for form handling -->
+                            <!-- IMPORTANT: Replace YOUR_FORM_ID with your actual Formspree form ID -->
+                            <!-- Get your form ID from https://formspree.io/forms after creating a form -->
                             <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -750,8 +752,23 @@
                 return isFormValid;
             }
             
+            // Check if Formspree form ID is configured
+            const formAction = form.getAttribute('action');
+            if (formAction && formAction.includes('YOUR_FORM_ID')) {
+                console.warn('⚠️ Formspree form ID not configured! Please replace YOUR_FORM_ID with your actual Formspree form ID.');
+                // Show a developer notice (only visible in console, won't affect users until they try to submit)
+            }
+            
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                
+                // Check if form ID is still a placeholder
+                const formAction = this.getAttribute('action');
+                if (formAction && formAction.includes('YOUR_FORM_ID')) {
+                    showNotification('⚠️ يرجى تكوين معرف نموذج Formspree قبل استخدام هذا النموذج. يرجى الاتصال بالمسؤول.', 'error');
+                    console.error('Formspree form ID not configured. Form action:', formAction);
+                    return;
+                }
                 
                 if (!validateForm()) {
                     // Scroll to first invalid field
