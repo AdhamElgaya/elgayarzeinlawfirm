@@ -175,13 +175,19 @@ ${subject}
         // Recipient email (send to yourself)
         const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.GMAIL_USER;
 
-        // Send email using utility method
-        const emailResult = await sendEmail(
+        // Send email with timeout (30 seconds max for email sending)
+        const emailPromise = sendEmail(
             recipientEmail,
             emailSubject,
             textEmail,
             htmlEmail
         );
+        
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
+        });
+        
+        const emailResult = await Promise.race([emailPromise, timeoutPromise]);
 
         // Check if email was sent successfully
         if (!emailResult.success) {

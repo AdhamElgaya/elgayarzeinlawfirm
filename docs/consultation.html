@@ -1124,7 +1124,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => {
                     controller.abort();
-                }, 30000); // 30 second timeout
+                }, 60000); // 60 second timeout (email sending can take time)
                 
                 fetch(API_URL, {
                     method: 'POST',
@@ -1161,8 +1161,8 @@
                     
                     // Check for abort/timeout errors
                     if (error.name === 'AbortError' || error.message.includes('aborted') || error.message.includes('signal is aborted')) {
-                        errorMessage = 'انتهت مهلة الاتصال (30 ثانية). يرجى التحقق من أن خادم Railway يعمل والمحاولة مرة أخرى.';
-                        console.error('Request timed out - Railway server may be down or sleeping');
+                        errorMessage = 'انتهت مهلة الاتصال (60 ثانية). قد يكون الخادم بطيئاً في إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.';
+                        console.error('Request timed out after 60 seconds - Railway server may be slow or email sending is taking too long');
                     } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('Network request failed') || error.message.includes('ERR_')) {
                         errorMessage = 'لا يمكن الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت أو أن خادم Railway متاح.';
                         console.error('Network error - cannot reach Railway server');
