@@ -1120,15 +1120,25 @@
                     subject: document.getElementById('subject').value.trim()
                 };
                 
-                // Send to backend server
+                // Send to backend server with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
                 fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    signal: controller.signal
                 })
-                .then(response => response.json())
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         showNotification('تم إرسال طلب الاستشارة بنجاح! سنتواصل معك قريباً.', 'success');
@@ -1143,8 +1153,15 @@
                     }
                 })
                 .catch(error => {
+                    clearTimeout(timeoutId);
                     console.error('Error:', error);
-                    showNotification('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+                    let errorMessage = 'حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.';
+                    if (error.name === 'AbortError') {
+                        errorMessage = 'انتهت مهلة الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                        errorMessage = 'لا يمكن الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.';
+                    }
+                    showNotification(errorMessage, 'error');
                 })
                 .finally(() => {
                     // Reset button state
