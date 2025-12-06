@@ -178,21 +178,33 @@ ${subject}
         const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.GMAIL_USER;
         console.log('📧 Attempting to send email to:', recipientEmail);
 
-        // Send email with timeout (30 seconds max for email sending)
+        // Send email with timeout wrapper
         let emailResult;
         try {
-            const emailPromise = sendEmail(
-                recipientEmail,
-                emailSubject,
-                textEmail,
-                htmlEmail
-            );
+            // Create a timeout wrapper
+            const sendEmailWithTimeout = async () => {
+                return new Promise(async (resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Email sending timeout after 30 seconds'));
+                    }, 30000);
+                    
+                    try {
+                        const result = await sendEmail(
+                            recipientEmail,
+                            emailSubject,
+                            textEmail,
+                            htmlEmail
+                        );
+                        clearTimeout(timeout);
+                        resolve(result);
+                    } catch (error) {
+                        clearTimeout(timeout);
+                        reject(error);
+                    }
+                });
+            };
             
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
-            });
-            
-            emailResult = await Promise.race([emailPromise, timeoutPromise]);
+            emailResult = await sendEmailWithTimeout();
             console.log('✅ Email result:', emailResult);
             
             // Check if email was sent successfully
@@ -204,12 +216,14 @@ ${subject}
                     error: emailResult?.error || 'Email sending failed'
                 });
             }
-        } catch (timeoutError) {
-            console.error('⏱️ Email sending timeout or error:', timeoutError);
+        } catch (error) {
+            console.error('⏱️ Email sending error or timeout:', error);
             return res.status(500).json({
                 success: false,
-                message: 'انتهت مهلة إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.',
-                error: timeoutError.message
+                message: error.message.includes('timeout') 
+                    ? 'انتهت مهلة إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.'
+                    : 'حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.',
+                error: error.message
             });
         }
         
