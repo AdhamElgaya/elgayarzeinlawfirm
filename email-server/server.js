@@ -13,8 +13,10 @@ app.use(express.urlencoded({ extended: true, charset: 'utf-8' }));
 
 // Consultation form endpoint
 app.post('/api/consultation', async (req, res) => {
+    console.log('📥 Received consultation form submission');
     try {
         const { name, phone, city, subject } = req.body;
+        console.log('📋 Form data:', { name, phone, city, subject: subject?.substring(0, 50) + '...' });
 
         // Validate required fields
         if (!name || !phone || !city || !subject) {
@@ -174,28 +176,40 @@ ${subject}
 
         // Recipient email (send to yourself)
         const recipientEmail = process.env.RECIPIENT_EMAIL || process.env.GMAIL_USER;
+        console.log('📧 Attempting to send email to:', recipientEmail);
 
         // Send email with timeout (30 seconds max for email sending)
-        const emailPromise = sendEmail(
-            recipientEmail,
-            emailSubject,
-            textEmail,
-            htmlEmail
-        );
-        
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
-        });
-        
-        const emailResult = await Promise.race([emailPromise, timeoutPromise]);
-
-        // Check if email was sent successfully
-        if (!emailResult.success) {
-            console.error('Failed to send email:', emailResult.error);
+        let emailResult;
+        try {
+            const emailPromise = sendEmail(
+                recipientEmail,
+                emailSubject,
+                textEmail,
+                htmlEmail
+            );
+            
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
+            });
+            
+            emailResult = await Promise.race([emailPromise, timeoutPromise]);
+            console.log('✅ Email result:', emailResult);
+            
+            // Check if email was sent successfully
+            if (!emailResult || !emailResult.success) {
+                console.error('❌ Failed to send email:', emailResult?.error || 'Unknown error');
+                return res.status(500).json({
+                    success: false,
+                    message: 'حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.',
+                    error: emailResult?.error || 'Email sending failed'
+                });
+            }
+        } catch (timeoutError) {
+            console.error('⏱️ Email sending timeout or error:', timeoutError);
             return res.status(500).json({
                 success: false,
-                message: 'حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.',
-                error: emailResult.error
+                message: 'انتهت مهلة إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.',
+                error: timeoutError.message
             });
         }
         
