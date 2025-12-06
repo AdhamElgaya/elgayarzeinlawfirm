@@ -716,7 +716,7 @@
             .member-details {
                 display: flex;
                 gap: 20px;
-                align-items: flex-start;
+                align-items: center;
             }
             
             .member-qualifications {
@@ -750,6 +750,9 @@
                 flex-shrink: 0;
                 width: 150px;
                 height: 150px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .member-photo {
@@ -760,10 +763,11 @@
                 border: 3px solid #8b6914;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 transform: scale(1);
+                display: block;
             }
             
             .team-member-card:hover .member-photo {
-                transform: scale(1.1) rotate(5deg);
+                transform: scale(1.05);
                 border-color: #b78632;
                 box-shadow: 0 5px 20px rgba(139, 105, 20, 0.3);
             }
