@@ -1081,11 +1081,9 @@
             }
             
             // Backend server URL
-            // Automatically detect if running on GitHub Pages or locally
-            const isProduction = window.location.hostname.includes('github.io');
-            const API_URL = isProduction 
-                ? 'https://elgayarzeinlawfirm-production.up.railway.app/api/consultation'  // Railway production server for GitHub Pages
-                : 'http://localhost:3001/api/consultation';  // Local development server
+            // Using localhost for testing (NOTE: This only works when you're on your local machine!)
+            // Visitors to GitHub Pages won't be able to use the form since they can't access your localhost
+            const API_URL = 'http://localhost:3001/api/consultation';
             
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
