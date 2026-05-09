@@ -28,6 +28,9 @@ if (menuBtn && nav) {
 }
 
 const revealItems = document.querySelectorAll(".reveal");
+/* Tall sections (services grid, team page) can be far taller than the viewport.
+   Ratio = visibleHeight / sectionHeight stays below ~0.18 until almost scrolled past,
+   so threshold 0.18 never fired → sections stayed opacity:0 on mobile. */
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
@@ -37,7 +40,7 @@ const observer = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.18 }
+  { threshold: 0, rootMargin: "48px 0px 48px 0px" }
 );
 
 revealItems.forEach((item) => observer.observe(item));
