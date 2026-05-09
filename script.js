@@ -11,8 +11,19 @@ window.addEventListener("pageshow", () => {
 });
 
 if (menuBtn && nav) {
+  const setOpen = (open) => {
+    nav.classList.toggle("open", open);
+    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
   menuBtn.addEventListener("click", () => {
-    nav.classList.toggle("open");
+    setOpen(!nav.classList.contains("open"));
+  });
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      setOpen(false);
+    });
   });
 }
 
