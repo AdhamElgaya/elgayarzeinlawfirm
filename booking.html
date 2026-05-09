@@ -87,6 +87,14 @@
         <p>©٢٠٢٦ مكتب الجيار و زين. جميع الحقوق محفوظة</p>
       </div>
     </footer>
-    <script src="script.js"></script>
+    <div id="booking-toast" class="booking-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <span class="booking-toast-icon" aria-hidden="true"></span>
+      <span class="booking-toast-msg"></span>
+    </div>
+    <script defer src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+    <script defer src="firebase-config.js"></script>
+    <script defer src="booking-firebase.js"></script>
+    <script defer src="script.js"></script>
   </body>
 </html>

@@ -82,15 +82,6 @@ const observer = new IntersectionObserver(
 
 revealItems.forEach((item) => observer.observe(item));
 
-const bookingForm = document.querySelector(".booking-form");
-if (bookingForm) {
-  bookingForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    alert("تم استلام طلبك بنجاح. سنقوم بالتواصل معك قريباً.");
-    bookingForm.reset();
-  });
-}
-
 const internalLinks = document.querySelectorAll("a[href]");
 internalLinks.forEach((link) => {
   link.addEventListener("click", (event) => {

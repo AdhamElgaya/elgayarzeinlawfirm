@@ -32,6 +32,54 @@ body {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.28s ease, transform 0.28s ease;
+  cursor: default;
+}
+
+/* Arrow cursor over copy (no I-beam); interactive controls keep sensible cursors */
+body * {
+  cursor: default;
+}
+
+body a,
+body button,
+body select,
+body summary,
+body .btn,
+body .menu-btn,
+body [role="button"],
+body input[type="submit"],
+body input[type="button"],
+body input[type="checkbox"],
+body input[type="radio"],
+body label,
+body .footer-social-link,
+body .contact-channel-cta,
+body .team-more-btn {
+  cursor: pointer;
+}
+
+body textarea,
+body input[type="text"],
+body input[type="email"],
+body input[type="tel"],
+body input[type="search"],
+body input[type="url"],
+body input[type="password"],
+body input:not([type]),
+body input[type="number"] {
+  cursor: text;
+}
+
+body input[type="file"] {
+  cursor: pointer;
+}
+
+.leaflet-grab {
+  cursor: grab;
+}
+
+.leaflet-dragging .leaflet-grab {
+  cursor: grabbing;
 }
 
 main {
@@ -182,11 +230,11 @@ body.page-exit {
   display: none;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(197, 160, 89, 0.78);
+  border: none;
   background: transparent;
   color: var(--gold-brand);
   padding: 0.45rem;
-  border-radius: 0.55rem;
+  border-radius: 0;
   cursor: pointer;
   flex-shrink: 0;
   line-height: 0;
@@ -205,6 +253,11 @@ body.page-exit {
   height: 2px;
   border-radius: 1px;
   background: var(--gold-brand);
+}
+
+.menu-btn:focus-visible {
+  outline: 2px solid var(--gold-soft);
+  outline-offset: 3px;
 }
 
 .nav-backdrop {
@@ -624,15 +677,6 @@ h1 {
   background: linear-gradient(90deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.85), rgba(212, 175, 55, 0));
 }
 
-.service-card:hover {
-  transform: translateY(-5px);
-  border-color: #7f6a2b;
-  background: #151515;
-  box-shadow:
-    inset 0 0 0 1px rgba(212, 175, 55, 0.12),
-    0 14px 30px rgba(0, 0, 0, 0.35);
-}
-
 .service-content h3 {
   color: var(--gold-soft);
   margin-bottom: 0.6rem;
@@ -788,10 +832,23 @@ h1 {
     background: rgba(212, 175, 55, 0.1);
     box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
   }
+
+  .service-card:hover {
+    transform: translateY(-5px);
+    border-color: #7f6a2b;
+    background: #151515;
+    box-shadow:
+      inset 0 0 0 1px rgba(212, 175, 55, 0.12),
+      0 14px 30px rgba(0, 0, 0, 0.35);
+  }
 }
 
 @media (max-width: 1024px) {
   .team-brief-card {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .service-card {
     -webkit-tap-highlight-color: transparent;
   }
 }
@@ -897,6 +954,87 @@ h1 {
   gap: 0.9rem;
   position: relative;
   margin-top: 1.2rem;
+}
+
+/* Booking page — toast (top-right, slide + fade) */
+.booking-toast {
+  --booking-toast-enter: 0.45s;
+  --booking-toast-exit: 0.38s;
+  position: fixed;
+  z-index: 220;
+  top: max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.45rem));
+  right: max(0.85rem, env(safe-area-inset-right, 0px));
+  left: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  max-width: min(22rem, calc(100vw - 1.25rem));
+  padding: 0.72rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(22, 22, 22, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: right;
+  direction: rtl;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(calc(100% + 1.5rem), 0, 0);
+  transition:
+    transform var(--booking-toast-enter) cubic-bezier(0.22, 1, 0.36, 1),
+    opacity var(--booking-toast-enter) ease;
+}
+
+.booking-toast.booking-toast--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.booking-toast.booking-toast--leaving {
+  opacity: 0;
+  transform: translate3d(calc(100% + 1.5rem), 0, 0);
+  transition:
+    transform var(--booking-toast-exit) ease-in,
+    opacity var(--booking-toast-exit) ease;
+}
+
+.booking-toast--success {
+  border-color: rgba(110, 180, 110, 0.45);
+}
+
+.booking-toast--error {
+  border-color: rgba(200, 90, 90, 0.5);
+}
+
+.booking-toast-msg {
+  color: #ececec;
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-toast--success .booking-toast-msg {
+  color: #b8e4b8;
+}
+
+.booking-toast--error .booking-toast-msg {
+  color: #f0b0b0;
+}
+
+.booking-toast-icon {
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  display: grid;
+  place-items: center;
+  margin-top: 0.06rem;
+}
+
+.booking-toast-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .form-top-icon {
@@ -1362,9 +1500,11 @@ textarea:focus {
     box-sizing: border-box;
   }
 
+  /* Icon sits main-end (physical left in RTL); inset slightly toward center */
   .menu-btn {
     display: inline-flex;
     padding: 0.42rem;
+    margin-inline-end: clamp(0.55rem, 3.5vw, 1rem);
   }
 
   .main-nav {
@@ -1431,6 +1571,10 @@ textarea:focus {
   .team-member-detail,
   .partner {
     padding: 0.9rem;
+  }
+
+  .service-card {
+    transition: none;
   }
 
   /* Pen badge was absolute + large desktop padding-top; mobile padding is small → overlap first field */
