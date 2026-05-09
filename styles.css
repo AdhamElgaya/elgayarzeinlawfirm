@@ -207,6 +207,17 @@ body.page-exit {
   background: var(--gold-brand);
 }
 
+.nav-backdrop {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .nav-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
 .btn {
   display: inline-block;
   border: 1px solid var(--gold);
@@ -364,6 +375,188 @@ h1 {
   color: var(--muted);
   margin-inline: auto;
   max-width: 72ch;
+}
+
+.contact-layout {
+  display: grid;
+  gap: 1.75rem;
+  margin-top: 1rem;
+}
+
+.contact-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.contact-detail-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.15rem 1.25rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.contact-detail-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  color: var(--gold-soft);
+}
+
+.contact-detail-card ul {
+  margin: 0;
+  padding-right: 1.15rem;
+  display: grid;
+  gap: 0.55rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.contact-detail-card a {
+  color: var(--gold-soft);
+  text-decoration: none;
+}
+
+.contact-detail-card a:hover {
+  text-decoration: underline;
+}
+
+.contact-channel-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.25rem 1.15rem 1.15rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 10px 24px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  min-height: 0;
+}
+
+.contact-channel-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #a6862c, var(--gold));
+  color: #141414;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 4px 14px rgba(0, 0, 0, 0.28);
+  flex-shrink: 0;
+}
+
+.contact-channel-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.contact-channel-icon--whatsapp {
+  width: 28px;
+  height: 28px;
+}
+
+.contact-channel-value {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--gold-soft);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.contact-channel-value--email {
+  font-size: 1.06rem;
+  font-weight: 600;
+}
+
+.contact-channel-cta {
+  margin-top: auto;
+  width: 100%;
+  display: block;
+  padding: 0.58rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  color: var(--gold-soft);
+  border: 1px solid var(--gold);
+  border-radius: 0.65rem;
+  background: transparent;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+  -webkit-tap-highlight-color: rgba(212, 175, 55, 0.15);
+}
+
+.contact-channel-cta:hover {
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.14);
+  transform: translateY(-1px);
+}
+
+.contact-map-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.contact-map-head {
+  padding: 0.95rem 1.15rem 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contact-map-head h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  color: var(--gold-soft);
+}
+
+.contact-map-head p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.contact-map-head code {
+  font-size: 0.84em;
+  color: var(--gold-soft);
+}
+
+#contact-map {
+  height: min(380px, 52vh);
+  min-height: 240px;
+  width: 100%;
+  background: #0f0f0f;
+}
+
+.contact-map-card .leaflet-container {
+  font-family: inherit;
+}
+
+.contact-map-card .leaflet-control-attribution {
+  font-size: 0.65rem;
+  background: rgba(17, 17, 17, 0.92) !important;
+  color: #888 !important;
+}
+
+.contact-map-card .leaflet-control-attribution a {
+  color: var(--gold-soft);
 }
 
 .mission-head {
@@ -566,11 +759,6 @@ h1 {
   transition: transform 0.28s ease, border-color 0.28s ease;
 }
 
-.team-brief-card:hover {
-  transform: translateY(-5px);
-  border-color: #7f6a2b;
-}
-
 .team-brief-card h3 {
   margin: 0.2rem 0 0;
   color: var(--gold-soft);
@@ -590,9 +778,22 @@ h1 {
   border: 1px solid var(--gold);
 }
 
-.team-more-btn:hover {
-  background: rgba(212, 175, 55, 0.1);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+@media (hover: hover) and (pointer: fine) {
+  .team-brief-card:hover {
+    transform: translateY(-5px);
+    border-color: #7f6a2b;
+  }
+
+  .team-more-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+  }
+}
+
+@media (max-width: 1024px) {
+  .team-brief-card {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 .team-member-detail {
@@ -755,14 +956,14 @@ textarea:focus {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 1.25rem 1.75rem;
   align-items: start;
   padding-bottom: 1rem;
 }
 
 .footer-grid h3 {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
   color: var(--gold-soft);
 }
 
@@ -784,6 +985,75 @@ textarea:focus {
 .footer-links a:hover {
   color: var(--gold-soft);
   transform: translateX(-2px);
+}
+
+.footer-site-nav {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.footer-site-nav a {
+  text-decoration: none;
+  color: #d7d7d7;
+  font-size: 0.95rem;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.footer-site-nav a:hover {
+  color: var(--gold-soft);
+  transform: translateX(-2px);
+}
+
+.footer-col-social {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0;
+}
+
+@media (min-width: 761px) {
+  .footer-col-social {
+    padding-top: 1rem;
+    margin-top: 0.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+}
+
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(197, 160, 89, 0.72);
+  border-radius: 0.55rem;
+  color: var(--gold-brand);
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--gold-soft);
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(200, 146, 46, 0.85);
+  transform: translateY(-2px);
+}
+
+.footer-social-link svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
 }
 
 .footer-bottom {
@@ -809,6 +1079,14 @@ textarea:focus {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .main-nav {
+    transition: none !important;
+  }
+
+  .nav-backdrop {
+    transition: none !important;
   }
 }
 
@@ -898,12 +1176,46 @@ textarea:focus {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --mobile-header-height: 62px;
+  }
+
+  body.nav-open {
+    overflow: hidden;
+  }
+
+  /* Below .site-header (z-index 100) so the menu + bar stay clickable; was 119 and covered them */
+  .nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    top: var(--mobile-header-height, 62px);
+    z-index: 90;
+    background: rgba(0, 0, 0, 0.34);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.38s ease, visibility 0.38s ease;
+  }
+
+  .nav-backdrop.nav-backdrop--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
   .container {
     width: min(100%, 92%);
   }
 
   .section {
     padding: 3.2rem 0;
+  }
+
+  /* Hero must fill one screen; section utility padding breaks “above the fold” layout */
+  section.hero.section {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .nav-wrap {
@@ -972,14 +1284,50 @@ textarea:focus {
   }
 
   .hero-scroll-cue {
-    bottom: 0.9rem;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    justify-self: center;
+    margin-top: 1.35rem;
+    padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
     font-size: 0.86rem;
   }
 
+  /* One viewport below header; scroll cue sits in bottom row so next section stays off-screen */
   .hero {
-    min-height: auto;
-    padding-top: 2rem;
-    padding-bottom: 4.4rem;
+    --hero-header-offset: 62px;
+    min-height: calc(100svh - var(--hero-header-offset));
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    padding-top: 0.65rem;
+    padding-bottom: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .hero > .container.hero-grid {
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    min-height: 0;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .hero .lead:empty {
+    display: none;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: 0.55rem;
+  }
+
+  .hero h1 {
+    margin-bottom: 0;
   }
 
   h1 {
@@ -996,8 +1344,8 @@ textarea:focus {
   }
 
   .hero-actions {
-    margin-top: 1rem;
-    gap: 0.6rem;
+    margin-top: 1.45rem;
+    gap: 0.65rem;
   }
 
   .hero-actions .btn {
@@ -1005,8 +1353,13 @@ textarea:focus {
     text-align: center;
   }
 
-  .hero-card {
-    padding: 1rem;
+  .hero .hero-card {
+    margin-top: 1.6rem;
+    margin-inline: auto;
+    width: calc(100% - 2.75rem);
+    max-width: 21.5rem;
+    padding: 0.9rem 1rem;
+    box-sizing: border-box;
   }
 
   .menu-btn {
@@ -1015,24 +1368,40 @@ textarea:focus {
   }
 
   .main-nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + 0.35rem);
-    right: 0;
-    left: 0;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+    position: fixed;
+    left: max(4vw, env(safe-area-inset-left, 0px));
+    right: max(4vw, env(safe-area-inset-right, 0px));
+    top: calc(var(--mobile-header-height, 62px) + 6px);
+    width: auto;
+    max-height: min(78vh, calc(100dvh - var(--mobile-header-height, 62px) - 12px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background: rgba(16, 16, 16, 0.98);
     border: 1px solid var(--line);
-    border-radius: 0.9rem;
-    padding: 0.8rem;
+    border-radius: 0.95rem;
+    padding: 0.85rem 0.95rem;
     gap: 0.15rem;
     z-index: 120;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+
+    transform: translateY(calc(-100% - 20px));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      transform 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.32s ease,
+      visibility 0.44s;
   }
 
   .main-nav a {
     font-size: 0.95rem;
     padding: 0.45rem 0.1rem;
+    text-align: center;
   }
 
   .main-nav .btn-nav {
@@ -1042,7 +1411,10 @@ textarea:focus {
   }
 
   .main-nav.open {
-    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .hero-grid,
@@ -1057,12 +1429,273 @@ textarea:focus {
   .service-card,
   .team-member,
   .team-member-detail,
-  .partner,
-  .booking-form {
+  .partner {
     padding: 0.9rem;
   }
 
-  .service-content ul,
+  /* Pen badge was absolute + large desktop padding-top; mobile padding is small → overlap first field */
+  .booking-form .form-top-icon {
+    position: static;
+    transform: none;
+    inset: auto;
+    justify-self: center;
+    width: 44px;
+    height: 44px;
+    font-size: 1.05rem;
+    margin: 0 auto 0.12rem;
+  }
+
+  .booking-form {
+    max-width: min(100%, 20rem);
+    width: 100%;
+    margin-inline: auto;
+    box-sizing: border-box;
+    padding: 0.68rem 0.78rem 0.72rem;
+    gap: 0.48rem;
+    margin-top: 0.55rem;
+  }
+
+  .booking-form .form-row {
+    gap: 0.2rem;
+  }
+
+  .booking-form label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .booking-form input,
+  .booking-form select,
+  .booking-form textarea {
+    padding: 0.48rem 0.62rem;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    border-radius: 0.52rem;
+  }
+
+  .booking-form textarea {
+    min-height: 3.85rem;
+    line-height: 1.42;
+  }
+
+  .booking-form > .btn {
+    margin-top: 0.08rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.88rem;
+  }
+
+  .contact-layout {
+    gap: 1.15rem;
+    margin-top: 0.55rem;
+  }
+
+  .contact-cards {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .contact-detail-card {
+    padding: 0.9rem 1rem;
+    border-radius: 0.88rem;
+  }
+
+  .contact-detail-card h3 {
+    font-size: 0.98rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-channel-card {
+    padding: 1.05rem 0.95rem 1rem;
+    gap: 0.52rem;
+  }
+
+  .contact-channel-icon-wrap {
+    width: 50px;
+    height: 50px;
+  }
+
+  .contact-channel-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .contact-channel-icon--whatsapp {
+    width: 24px;
+    height: 24px;
+  }
+
+  .contact-channel-value {
+    font-size: 0.92rem;
+  }
+
+  .contact-channel-value--email {
+    font-size: 0.98rem;
+  }
+
+  .contact-channel-cta {
+    padding: 0.52rem 0.72rem;
+    font-size: 0.84rem;
+  }
+
+  .contact-map-head {
+    padding: 0.78rem 0.88rem 0.52rem;
+  }
+
+  #contact-map {
+    height: min(300px, 42vh);
+    min-height: 220px;
+  }
+
+  /* شركاء النجاح — compact cards (page uses .partners-grid only) */
+  .partners-grid {
+    gap: 0.8rem;
+    max-width: 20rem;
+    margin-inline: auto;
+  }
+
+  .partners-grid .partner {
+    min-height: 0;
+    padding: 0.72rem 0.8rem;
+    border-radius: 0.82rem;
+  }
+
+  .partners-grid .partner h3 {
+    margin: 0.5rem 0 0.22rem;
+    font-size: 0.98rem;
+    line-height: 1.32;
+  }
+
+  .partners-grid .partner p {
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .partners-grid .partner-logo {
+    max-width: 148px;
+    height: 82px;
+    padding: 0.42rem;
+    border-radius: 0.45rem;
+  }
+
+  /* فريق العمل — عرض مريح؛ صور بورتريه (aspect-ratio) لتقليل قصّ الرؤوس */
+  .team-cards-grid {
+    gap: 0.78rem;
+    max-width: min(100%, 21.5rem);
+    margin-inline: auto;
+  }
+
+  .team-brief-card {
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.85rem;
+    gap: 0.55rem;
+  }
+
+  .team-brief-card h3 {
+    font-size: 0.97rem;
+    line-height: 1.34;
+  }
+
+  .team-brief-card p {
+    font-size: 0.82rem;
+    line-height: 1.42;
+    min-height: 0;
+  }
+
+  .team-brief-card .team-photo {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 0.58rem;
+  }
+
+  .team-brief-card .team-more-btn {
+    padding: 0.52rem 0.78rem;
+    font-size: 0.82rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .team-member-detail {
+    max-width: min(100%, 21.5rem);
+    margin-inline: auto;
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.85rem;
+  }
+
+  .team-member-detail-head {
+    gap: 0.5rem;
+    margin-bottom: 0.72rem;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .team-member-detail-head .team-photo {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 0.58rem;
+  }
+
+  .team-member-detail-head h2 {
+    font-size: 0.97rem;
+    line-height: 1.34;
+    margin-bottom: 0.12rem;
+  }
+
+  .team-member-detail-head p {
+    font-size: 0.82rem;
+    line-height: 1.42;
+  }
+
+  .team-member-detail-body {
+    margin-bottom: 0.5rem;
+  }
+
+  .team-member-detail > .btn {
+    padding: 0.52rem 0.78rem;
+    font-size: 0.82rem;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .service-content h3 {
+    font-size: 1.06rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.38;
+  }
+
+  .service-content ul {
+    gap: 0.48rem;
+    line-height: 1.72;
+    font-size: 0.9rem;
+    padding-right: 1.05rem;
+  }
+
+  /* الخدمات الأكثر طلبا (paragraph cards). Cards with lists keep sizes above. */
+  .service-card:not(:has(ul)) .service-content h3 {
+    font-size: 0.97rem;
+    margin-bottom: 0.42rem;
+    line-height: 1.36;
+  }
+
+  .service-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.68;
+    color: var(--muted);
+  }
+
   .team-member-content ul,
   .team-member-detail-body ul {
     gap: 0.55rem;
@@ -1070,17 +1703,188 @@ textarea:focus {
     font-size: 0.94rem;
   }
 
+  .team-member-detail .team-member-detail-body ul {
+    font-size: 0.84rem;
+    line-height: 1.62;
+    gap: 0.42rem;
+    padding-right: 1rem;
+  }
+
+  .team-member-detail .team-member-detail-body p {
+    font-size: 0.84rem;
+    line-height: 1.62;
+    margin-bottom: 0.72rem;
+  }
+
+  .team-member-detail:has(.team-member-detail-body li:nth-child(8)) .team-member-detail-body {
+    max-height: min(52vh, 20rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-inline-end: 0.2rem;
+    margin-inline-end: -0.08rem;
+  }
+
   .service-image,
   .team-photo {
     min-height: 180px;
   }
 
+  /* يمنع قاعدة .team-photo العامة من فرض شريط منخفض يقطع الصور داخل بطاقات الفريق */
+  .team-brief-card .team-photo,
+  .team-member-detail-head .team-photo {
+    min-height: 0;
+  }
+
   .site-footer {
-    padding: 1.5rem 0 1rem;
+    padding: 1.35rem 0 0.85rem;
+  }
+
+  .footer-grid {
+    gap: 0;
+    padding-bottom: 0.25rem;
+  }
+
+  .footer-grid .footer-col {
+    padding: 1.05rem 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .footer-grid .footer-col:last-child {
+    border-bottom: none;
+    padding-bottom: 0.35rem;
+  }
+
+  .footer-grid h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .footer-col-contact p {
+    max-width: 34ch;
+    margin-inline: auto;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #aaa;
+  }
+
+  .footer-links {
+    justify-items: center;
+    gap: 0.45rem;
+    max-width: 22rem;
+    margin-inline: auto;
   }
 
   .footer-links a {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
+    padding: 0.35rem 0;
+    line-height: 1.5;
+    max-width: 100%;
+    transform: none;
+    background: transparent;
+    border-radius: 0;
+    -webkit-tap-highlight-color: rgba(200, 146, 46, 0.15);
+  }
+
+  .footer-links a:hover {
+    transform: none;
+    color: var(--gold-soft);
+    background: transparent;
+  }
+
+  .footer-links a:active {
+    opacity: 0.88;
+  }
+
+  .footer-site-nav {
+    justify-items: center;
+    gap: 0.42rem;
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+
+  .footer-site-nav a {
+    font-size: 0.93rem;
+    padding: 0.38rem 0;
+    line-height: 1.45;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+    display: block;
+    transform: none;
+    -webkit-tap-highlight-color: rgba(200, 146, 46, 0.15);
+  }
+
+  .footer-site-nav a:hover {
+    transform: none;
+    color: var(--gold-soft);
+    background: transparent;
+    border: none;
+  }
+
+  .footer-site-nav a:active {
+    opacity: 0.88;
+  }
+
+  .footer-col-social {
+    padding-top: 0.65rem;
+  }
+
+  .footer-social {
+    justify-content: center;
+    margin-top: 0;
+    gap: 0.85rem;
+  }
+
+  .footer-social-link {
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 0.65rem;
+    -webkit-tap-highlight-color: rgba(200, 146, 46, 0.2);
+  }
+
+  .footer-social-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .footer-social-link svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .footer-bottom {
+    margin-top: 0.65rem;
+    padding-top: 0.85rem;
+    padding-inline: 0.5rem;
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 700px) {
+  .hero h1 {
+    font-size: clamp(1.42rem, 5.2vw, 1.82rem);
+  }
+
+  .hero-card p {
+    font-size: 0.88rem;
+    line-height: 1.62;
+  }
+
+  .hero-actions {
+    margin-top: 1.15rem;
+  }
+
+  .hero .hero-card {
+    margin-top: 1.05rem;
+    padding: 0.75rem 0.85rem;
+    width: calc(100% - 2.5rem);
+  }
+
+  .hero-scroll-cue {
+    margin-top: 0.85rem;
+    font-size: 0.76rem;
   }
 }
 
@@ -1109,12 +1913,24 @@ textarea:focus {
   }
 
   .hero {
-    padding-top: 1.6rem;
-    padding-bottom: 4rem;
+    --hero-header-offset: 58px;
+    padding-top: 0.45rem;
   }
 
   .hero-scroll-cue {
     font-size: 0.78rem;
+    margin-top: 1.1rem;
+  }
+
+  .hero-actions {
+    margin-top: 1.25rem;
+  }
+
+  .hero .hero-card {
+    margin-top: 1.2rem;
+    padding: 0.8rem 0.9rem;
+    width: calc(100% - 2.5rem);
+    max-width: 20.5rem;
   }
 
   .btn {
@@ -1122,8 +1938,75 @@ textarea:focus {
     font-size: 0.92rem;
   }
 
+  .service-content h3 {
+    font-size: 1rem;
+  }
+
+  .service-content ul {
+    font-size: 0.86rem;
+    line-height: 1.68;
+    gap: 0.42rem;
+  }
+
+  .service-card:not(:has(ul)) .service-content h3 {
+    font-size: 0.93rem;
+  }
+
+  .service-content p {
+    font-size: 0.81rem;
+    line-height: 1.64;
+  }
+
+  .partners-grid {
+    gap: 0.68rem;
+    max-width: 18rem;
+  }
+
+  .partners-grid .partner {
+    padding: 0.62rem 0.68rem;
+    border-radius: 0.75rem;
+  }
+
+  .partners-grid .partner h3 {
+    font-size: 0.9rem;
+    margin-top: 0.42rem;
+  }
+
+  .partners-grid .partner p {
+    font-size: 0.76rem;
+  }
+
+  .partners-grid .partner-logo {
+    max-width: 128px;
+    height: 72px;
+    padding: 0.35rem;
+  }
+
+  .booking-form {
+    max-width: min(100%, 18rem);
+    padding: 0.58rem 0.68rem 0.65rem;
+    gap: 0.42rem;
+    margin-top: 0.45rem;
+  }
+
+  .booking-form .form-top-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 0.98rem;
+    margin-bottom: 0.06rem;
+  }
+
+  .booking-form textarea {
+    min-height: 3.45rem;
+  }
+
   .service-image,
   .team-photo {
     min-height: 160px;
+  }
+
+  .team-brief-card .team-photo,
+  .team-member-detail-head .team-photo {
+    min-height: 0;
   }
 }
