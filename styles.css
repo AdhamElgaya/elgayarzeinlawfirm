@@ -949,6 +949,323 @@ h1 {
   background: #0f0f0f;
 }
 
+/* عبد العزيز: التكبير داخل الإطار يظهر على الجوال فقط؛ الشاشات الأعرض كباقي الصور */
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--zoom-face {
+    display: contents;
+  }
+
+  .team-photo-frame--zoom-face .team-photo.team-photo--abdulaziz-elgayar {
+    transform: none;
+    transform-origin: unset;
+    width: 100%;
+    height: auto;
+    min-height: 210px;
+    aspect-ratio: unset;
+    border: 1px solid #2e2e2e;
+    border-radius: 0.8rem;
+    background: #0f0f0f;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+}
+
+/* محمد مجدي — جوال: إطار ٤/٥ مثل الباقي. شاشة أعرض: إطار أقل ارتفاعًا لمطابقة بطاقات مثل مى؛ قص أسفل الصورة (اليدين/الحجرة) */
+.team-photo-frame.team-photo-frame--magdy-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--magdy-face {
+    /* أقصر من ٤/٥ لمطابقة ارتفاع صور مثل مى في الشبكة متعددة الأعمدة */
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  /* نسبة أكبر = نقطة أدنى في الملف تُثبت في الإطار → يقل الفراغ فوق الرأس */
+  object-position: center 64%;
+  transform: scale(1.54);
+  transform-origin: center 62%;
+}
+
+/* ——— مكتبة الصور ——— */
+.gallery-section .gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 1.1rem;
+}
+
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gallery-item-media {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #101010;
+}
+
+.gallery-item-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #0f0f0f;
+}
+
+.gallery-item-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.38s ease;
+}
+
+.gallery-item-zoom {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.42);
+  color: var(--gold-soft);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.gallery-item-zoom svg {
+  width: 2.85rem;
+  height: 2.85rem;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.55));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gallery-item:hover .gallery-item-zoom {
+    opacity: 1;
+  }
+
+  .gallery-item:hover .gallery-item-photo img {
+    transform: scale(1.045);
+  }
+}
+
+/* مخفي على الشاشات الواسعة — النص يُعرض في المعاينة فقط */
+.gallery-item-caption {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .gallery-section .gallery-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+    padding-inline: 0.15rem;
+  }
+
+  .gallery-item {
+    width: 100%;
+    max-width: min(17.25rem, calc(100vw - 2.25rem));
+    cursor: default;
+  }
+
+  /* النص أسفل الصورة داخل نفس الإطار ذي الزوايا المدوّرة */
+  .gallery-item-caption {
+    display: block;
+    position: static;
+    flex: 0 0 auto;
+    padding: 0.62rem 0.72rem 0.72rem;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: rgba(236, 234, 228, 0.93);
+    text-align: start;
+    line-height: 1.55;
+    background: #151515;
+    border-top: 1px solid var(--line);
+    pointer-events: none;
+    max-height: 10.5rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  .gallery-item-zoom {
+    display: none !important;
+  }
+}
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: grid;
+  place-items: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+}
+
+.gallery-lightbox[hidden] {
+  display: none !important;
+}
+
+.gallery-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 6, 6, 0.93);
+  cursor: pointer;
+}
+
+/* المعاينة: تحريك الصورة بـ transform فقط (بدون تغيير flex/max-width) لتقليل التقطيع */
+.gallery-lightbox-stage {
+  position: relative;
+  z-index: 1;
+  direction: ltr;
+  width: 100%;
+  max-width: min(96vw, 1180px);
+  min-height: min(82vh, 840px);
+}
+
+.gallery-lightbox-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: min(78vh, 800px);
+}
+
+.gallery-lightbox-img {
+  position: relative;
+  max-width: min(52vw, 640px);
+  max-height: min(80vh, 740px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.45rem;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  transform: translate3d(0, 0, 0) scale(1.14);
+  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gallery-lightbox--gpu .gallery-lightbox-img {
+  will-change: transform;
+}
+
+.gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-img {
+  transform: translate3d(-10vw, 0, 0) scale(1);
+}
+
+.gallery-lightbox-caption-wrap {
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  right: max(0.25rem, env(safe-area-inset-right));
+  width: min(38vw, 22rem);
+  max-height: min(72vh, 620px);
+  padding-inline-start: 0.35rem;
+  transform: translateY(-50%);
+  opacity: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  pointer-events: none;
+  transition: opacity 0.55s ease 0.14s;
+}
+
+.gallery-lightbox-caption-wrap::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-caption-wrap {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gallery-lightbox-caption {
+  margin: 0;
+  padding: 0.35rem 0 0;
+  font-size: clamp(1rem, 1.35vw + 0.85rem, 1.28rem);
+  font-weight: 600;
+  line-height: 1.75;
+  color: rgba(248, 246, 240, 0.94);
+  letter-spacing: 0.01em;
+}
+
+.gallery-lightbox-close {
+  position: absolute;
+  top: max(0.65rem, env(safe-area-inset-top));
+  inset-inline-end: max(0.65rem, env(safe-area-inset-end));
+  z-index: 2;
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.55rem;
+  background: rgba(22, 22, 22, 0.92);
+  color: var(--text);
+  font-size: 1.65rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.gallery-lightbox-close:hover {
+  background: rgba(40, 40, 40, 0.98);
+  border-color: rgba(200, 146, 46, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-item-photo img,
+  .gallery-item-zoom {
+    transition: none;
+  }
+
+  .gallery-item:hover .gallery-item-photo img {
+    transform: none;
+  }
+
+  .gallery-lightbox-img,
+  .gallery-lightbox-caption-wrap {
+    transition: none !important;
+  }
+
+  .gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-img {
+    transform: translate3d(-10vw, 0, 0) scale(1);
+  }
+}
+
 .booking-form {
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -1763,6 +2080,35 @@ textarea:focus {
     border-radius: 0.48rem;
   }
 
+  /* عبد العزيز — إطار ٤/٥ + تكبير داخلي (جوال فقط) */
+  .team-photo-frame.team-photo-frame--zoom-face {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 0.48rem;
+    border: 1px solid #2e2e2e;
+    background: #0f0f0f;
+  }
+
+  .team-photo-frame--zoom-face .team-photo.team-photo--abdulaziz-elgayar {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: unset;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: cover;
+    object-position: center 11%;
+    transform: scale(1.52);
+    transform-origin: center 11%;
+  }
+
+  .team-brief-card .team-photo-frame.team-photo-frame--magdy-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face {
+    border-radius: 0.48rem;
+  }
+
   .team-brief-card .team-more-btn {
     padding: 0.44rem 0.62rem;
     font-size: 0.74rem;
@@ -1881,7 +2227,9 @@ textarea:focus {
 
   /* يمنع قاعدة .team-photo العامة من فرض شريط منخفض يقطع الصور داخل بطاقات الفريق */
   .team-brief-card .team-photo,
-  .team-member-detail-head .team-photo {
+  .team-member-detail-head .team-photo,
+  .team-photo-frame--zoom-face .team-photo.team-photo--abdulaziz-elgayar,
+  .team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy {
     min-height: 0;
   }
 
@@ -2153,6 +2501,19 @@ textarea:focus {
   }
 
   .team-brief-card .team-photo {
+    border-radius: 0.42rem;
+  }
+
+  .team-brief-card .team-photo-frame.team-photo-frame--zoom-face {
+    border-radius: 0.42rem;
+  }
+
+  .team-member-detail-head .team-photo-frame.team-photo-frame--zoom-face {
+    border-radius: 0.42rem;
+  }
+
+  .team-brief-card .team-photo-frame.team-photo-frame--magdy-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face {
     border-radius: 0.42rem;
   }
 

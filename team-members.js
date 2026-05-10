@@ -97,7 +97,7 @@ const teamMembersData = {
   "mohamed-magdy": {
     name: "أ / محمد مجدي",
     role: "المحامى",
-    image: "assets/team/mohamed-magdy.jpg",
+    image: "assets/team/mohamed-magdy.png",
     points: [],
   },
   "mai-hanafy": {
@@ -137,9 +137,18 @@ if (memberContainer) {
       ? `<ul>${member.points.map((point) => `<li>${point}</li>`).join("")}</ul>`
       : "<p>لا توجد تفاصيل إضافية حالياً.</p>";
 
+    let photoMarkup;
+    if (memberId === "abdulaziz-elgayar") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--zoom-face"><img class="team-photo team-photo--abdulaziz-elgayar" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else if (memberId === "mohamed-magdy") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--magdy-face"><img class="team-photo team-photo--mohamed-magdy" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else {
+      photoMarkup = `<img class="team-photo" src="${member.image}" alt="${member.name}" loading="lazy" />`;
+    }
+
     memberContainer.innerHTML = `
       <div class="team-member-detail-head">
-        <img class="team-photo" src="${member.image}" alt="${member.name}" loading="lazy" />
+        ${photoMarkup}
         <div>
           <h2>${member.name}</h2>
           <p>${member.role}</p>
