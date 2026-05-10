@@ -1728,27 +1728,27 @@ textarea:focus {
     border-radius: 0.45rem;
   }
 
-  /* فريق العمل — عرض مريح؛ صور بورتريه (aspect-ratio) لتقليل قصّ الرؤوس */
+  /* فريق العمل — بطاقات أصغر على الجوال؛ صور بورتريه (aspect-ratio) */
   .team-cards-grid {
-    gap: 0.78rem;
-    max-width: min(100%, 21.5rem);
+    gap: 0.62rem;
+    max-width: min(100%, 17.25rem);
     margin-inline: auto;
   }
 
   .team-brief-card {
-    padding: 0.85rem 0.95rem;
-    border-radius: 0.85rem;
-    gap: 0.55rem;
+    padding: 0.62rem 0.72rem;
+    border-radius: 0.72rem;
+    gap: 0.42rem;
   }
 
   .team-brief-card h3 {
-    font-size: 0.97rem;
-    line-height: 1.34;
+    font-size: 0.86rem;
+    line-height: 1.32;
   }
 
   .team-brief-card p {
-    font-size: 0.82rem;
-    line-height: 1.42;
+    font-size: 0.74rem;
+    line-height: 1.4;
     min-height: 0;
   }
 
@@ -1760,26 +1760,26 @@ textarea:focus {
     height: auto;
     object-fit: cover;
     object-position: center top;
-    border-radius: 0.58rem;
+    border-radius: 0.48rem;
   }
 
   .team-brief-card .team-more-btn {
-    padding: 0.52rem 0.78rem;
-    font-size: 0.82rem;
+    padding: 0.44rem 0.62rem;
+    font-size: 0.74rem;
     width: 100%;
     box-sizing: border-box;
   }
 
   .team-member-detail {
-    max-width: min(100%, 21.5rem);
+    max-width: min(100%, 17.25rem);
     margin-inline: auto;
-    padding: 0.85rem 0.95rem;
-    border-radius: 0.85rem;
+    padding: 0.62rem 0.72rem;
+    border-radius: 0.72rem;
   }
 
   .team-member-detail-head {
-    gap: 0.5rem;
-    margin-bottom: 0.72rem;
+    gap: 0.42rem;
+    margin-bottom: 0.62rem;
     text-align: center;
     justify-items: center;
   }
@@ -1793,27 +1793,27 @@ textarea:focus {
     height: auto;
     object-fit: cover;
     object-position: center top;
-    border-radius: 0.58rem;
+    border-radius: 0.48rem;
   }
 
   .team-member-detail-head h2 {
-    font-size: 0.97rem;
-    line-height: 1.34;
+    font-size: 0.86rem;
+    line-height: 1.32;
     margin-bottom: 0.12rem;
   }
 
   .team-member-detail-head p {
-    font-size: 0.82rem;
-    line-height: 1.42;
+    font-size: 0.74rem;
+    line-height: 1.4;
   }
 
   .team-member-detail-body {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.45rem;
   }
 
   .team-member-detail > .btn {
-    padding: 0.52rem 0.78rem;
-    font-size: 0.82rem;
+    padding: 0.44rem 0.62rem;
+    font-size: 0.74rem;
     width: 100%;
     box-sizing: border-box;
     text-align: center;
@@ -2130,6 +2130,58 @@ textarea:focus {
     max-width: 128px;
     height: 72px;
     padding: 0.35rem;
+  }
+
+  .team-cards-grid {
+    gap: 0.55rem;
+    max-width: min(100%, 15.75rem);
+  }
+
+  .team-brief-card {
+    padding: 0.55rem 0.62rem;
+    border-radius: 0.65rem;
+    gap: 0.36rem;
+  }
+
+  .team-brief-card h3 {
+    font-size: 0.8rem;
+  }
+
+  .team-brief-card p {
+    font-size: 0.7rem;
+    line-height: 1.38;
+  }
+
+  .team-brief-card .team-photo {
+    border-radius: 0.42rem;
+  }
+
+  .team-brief-card .team-more-btn {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .team-member-detail {
+    max-width: min(100%, 15.75rem);
+    padding: 0.55rem 0.62rem;
+    border-radius: 0.65rem;
+  }
+
+  .team-member-detail-head .team-photo {
+    border-radius: 0.42rem;
+  }
+
+  .team-member-detail-head h2 {
+    font-size: 0.8rem;
+  }
+
+  .team-member-detail-head p {
+    font-size: 0.7rem;
+  }
+
+  .team-member-detail > .btn {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.7rem;
   }
 
   .booking-form {
