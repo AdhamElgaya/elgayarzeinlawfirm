@@ -480,6 +480,40 @@ h1 {
   text-decoration: underline;
 }
 
+.work-hours-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.work-hours-list li {
+  display: grid;
+  grid-template-columns: minmax(88px, auto) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.work-hours-day {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.work-hours-slot {
+  color: var(--muted);
+  text-align: right;
+}
+
+.work-hours-closed {
+  color: var(--gold-soft);
+  font-weight: 700;
+  text-align: right;
+}
+
 .contact-channel-card {
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -1970,6 +2004,12 @@ textarea:focus {
   .contact-detail-card h3 {
     font-size: 0.98rem;
     margin-bottom: 0.5rem;
+  }
+
+  .work-hours-list li {
+    grid-template-columns: minmax(78px, auto) 1fr;
+    gap: 0.55rem;
+    font-size: 0.92rem;
   }
 
   .contact-channel-card {
