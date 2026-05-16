@@ -480,6 +480,22 @@ h1 {
   text-decoration: underline;
 }
 
+.contact-locations-card .contact-location-entry + .contact-location-entry {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.contact-locations-card .contact-location-entry h3 {
+  margin-bottom: 0.4rem;
+}
+
+.contact-location-address {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
 .work-hours-list {
   list-style: none;
   padding: 0;
@@ -675,6 +691,47 @@ h1 {
   border-radius: 0.9rem;
   padding: 1rem;
   transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.card h3 {
+  margin: 0 0 0.55rem;
+  color: var(--gold-soft);
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
+.card .update-date {
+  margin: 0 0 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(200, 146, 46, 0.9);
+}
+
+.cards:has(> .update-card:only-child) {
+  grid-template-columns: minmax(0, min(100%, 38rem));
+}
+
+.update-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.update-card-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-bottom: 1px solid var(--line);
+}
+
+.update-card-body {
+  padding: 1rem;
 }
 
 .card-link {
@@ -926,6 +983,46 @@ h1 {
   color: var(--muted);
 }
 
+.team-member-detail .team-member-reveal {
+  opacity: 0;
+  transform: translateY(1.1rem);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--team-reveal-delay, 0s);
+}
+
+.team-member-detail.team-member-detail--ready .team-member-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.team-member-detail-body li,
+.team-member-detail-body > p {
+  opacity: 0;
+  transform: translateY(0.65rem);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--team-item-delay, 0s);
+}
+
+.team-member-detail.team-member-detail--ready .team-member-detail-body li,
+.team-member-detail.team-member-detail--ready .team-member-detail-body > p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-member-detail .team-member-reveal,
+  .team-member-detail-body li,
+  .team-member-detail-body > p {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .team-member {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(190px, 24%);
@@ -1037,6 +1134,125 @@ h1 {
   transform-origin: center 62%;
 }
 
+/* نصار متولي — صورة طويلة (نصف جسم): إطار مثل باقي البطاقات + تركيز على الوجه */
+.team-photo-frame.team-photo-frame--nassar-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--nassar-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--nassar-face .team-photo.team-photo--nassar-metwaly {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 30%;
+  transform: scale(1.42);
+  transform-origin: center 30%;
+}
+
+/* محمد شاهين — صورة طويلة (نصف جسم): إطار مثل باقي البطاقات + تركيز على الوجه */
+.team-photo-frame.team-photo-frame--shahin-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--shahin-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--shahin-face .team-photo.team-photo--mohamed-shaheen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 30%;
+  transform: scale(1.42);
+  transform-origin: center 30%;
+}
+
+.team-photo-frame.team-photo-frame--mai-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--mai-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--mai-face .team-photo.team-photo--mai-hanafy {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 32%;
+  transform: scale(1.44);
+  transform-origin: center 32%;
+}
+
+/* حبيبه — صورة طويلة: إطار مثل باقي البطاقات + تركيز على الوجه */
+.team-photo-frame.team-photo-frame--habiba-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--habiba-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--habiba-face .team-photo.team-photo--habiba {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 28%;
+  transform: scale(1.48);
+  transform-origin: center 28%;
+}
+
 /* ——— مكتبة الصور ——— */
 .gallery-section .gallery-grid {
   display: grid;
@@ -1083,6 +1299,11 @@ h1 {
   object-fit: cover;
   display: block;
   transition: transform 0.38s ease;
+}
+
+/* 20.png — صورة طولية: إظهار الرؤوس داخل إطار ٤/٣ */
+.gallery-item-photo img.gallery-photo--library-20 {
+  object-position: center 12%;
 }
 
 .gallery-item-zoom {
@@ -1184,22 +1405,110 @@ h1 {
   position: relative;
   z-index: 1;
   direction: ltr;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(22rem, 34%);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  align-items: center;
   width: 100%;
   max-width: min(96vw, 1180px);
   min-height: min(82vh, 840px);
 }
 
 .gallery-lightbox-visual {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
+  min-width: 0;
   min-height: min(78vh, 800px);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.gallery-lightbox-zoom-hint {
+  position: absolute;
+  bottom: 1.1rem;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.52rem 0.95rem;
+  border-radius: 2rem;
+  background: rgba(14, 14, 14, 0.9);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  color: rgba(248, 246, 240, 0.94);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(0.35rem);
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s ease,
+    transform 0.4s ease;
+}
+
+.gallery-lightbox-zoom-hint-icon {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.45rem;
+  border: 2px solid rgba(200, 146, 46, 0.9);
+  border-radius: 0.42rem;
+  position: relative;
+}
+
+.gallery-lightbox-zoom-hint-icon::before {
+  content: "";
+  position: absolute;
+  top: 0.24rem;
+  left: 50%;
+  width: 3px;
+  height: 5px;
+  border-radius: 2px;
+  background: var(--gold-brand);
+  transform: translateX(-50%);
+  animation: gallery-zoom-wheel 1.35s ease-in-out infinite;
+}
+
+@keyframes gallery-zoom-wheel {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0.45;
+  }
+}
+
+.gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-zoom-hint {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.gallery-lightbox.gallery-lightbox--zoomed .gallery-lightbox-zoom-hint,
+.gallery-lightbox.gallery-lightbox--zoom-hint-dismissed .gallery-lightbox-zoom-hint {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(0.35rem);
+}
+
+.gallery-lightbox--zoomed .gallery-lightbox-visual {
+  cursor: zoom-out;
 }
 
 .gallery-lightbox-img {
   position: relative;
-  max-width: min(52vw, 640px);
+  max-width: 100%;
   max-height: min(80vh, 740px);
   width: auto;
   height: auto;
@@ -1215,18 +1524,25 @@ h1 {
 }
 
 .gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-img {
-  transform: translate3d(-10vw, 0, 0) scale(1);
+  transform: translate3d(var(--gallery-pan-x, 0px), var(--gallery-pan-y, 0px), 0) scale(var(--gallery-zoom, 1));
+}
+
+.gallery-lightbox.gallery-lightbox--revealed.gallery-lightbox--zoom-interactive .gallery-lightbox-img {
+  transition: transform 0.14s ease-out;
 }
 
 .gallery-lightbox-caption-wrap {
   box-sizing: border-box;
-  position: absolute;
-  top: 50%;
-  right: max(0.25rem, env(safe-area-inset-right));
-  width: min(38vw, 22rem);
-  max-height: min(72vh, 620px);
-  padding-inline-start: 0.35rem;
-  transform: translateY(-50%);
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: min(78vh, 800px);
+  max-height: min(78vh, 800px);
+  padding-inline-end: max(0.25rem, env(safe-area-inset-right));
   opacity: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -1244,11 +1560,19 @@ h1 {
 .gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-caption-wrap {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.gallery-lightbox.gallery-lightbox--revealed.gallery-lightbox--zoomed .gallery-lightbox-caption-wrap {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 .gallery-lightbox-caption {
   margin: 0;
-  padding: 0.35rem 0 0;
+  padding: 0;
   font-size: clamp(1rem, 1.35vw + 0.85rem, 1.28rem);
   font-weight: 600;
   line-height: 1.75;
@@ -1281,6 +1605,10 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .gallery-lightbox-zoom-hint-icon::before {
+    animation: none;
+  }
+
   .gallery-item-photo img,
   .gallery-item-zoom {
     transition: none;
@@ -1296,7 +1624,17 @@ h1 {
   }
 
   .gallery-lightbox.gallery-lightbox--revealed .gallery-lightbox-img {
-    transform: translate3d(-10vw, 0, 0) scale(1);
+    transform: translate3d(var(--gallery-pan-x, 0px), var(--gallery-pan-y, 0px), 0) scale(var(--gallery-zoom, 1));
+  }
+}
+
+@media (max-width: 760px) {
+  .gallery-lightbox-visual {
+    cursor: default;
+  }
+
+  .gallery-lightbox-zoom-hint {
+    display: none;
   }
 }
 
@@ -1309,6 +1647,14 @@ h1 {
   gap: 0.9rem;
   position: relative;
   margin-top: 1.2rem;
+}
+
+@media (min-width: 761px) {
+  .booking-form {
+    max-width: 32rem;
+    width: 100%;
+    margin-inline: auto;
+  }
 }
 
 /* Booking page — toast (top-right, slide + fade) */
@@ -2145,7 +2491,15 @@ textarea:focus {
   }
 
   .team-brief-card .team-photo-frame.team-photo-frame--magdy-face,
-  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face {
+  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--nassar-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--nassar-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--shahin-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--shahin-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--mai-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--mai-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--habiba-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face {
     border-radius: 0.48rem;
   }
 
@@ -2269,7 +2623,11 @@ textarea:focus {
   .team-brief-card .team-photo,
   .team-member-detail-head .team-photo,
   .team-photo-frame--zoom-face .team-photo.team-photo--abdulaziz-elgayar,
-  .team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy {
+  .team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy,
+  .team-photo-frame--nassar-face .team-photo.team-photo--nassar-metwaly,
+  .team-photo-frame--shahin-face .team-photo.team-photo--mohamed-shaheen,
+  .team-photo-frame--mai-face .team-photo.team-photo--mai-hanafy,
+  .team-photo-frame--habiba-face .team-photo.team-photo--habiba {
     min-height: 0;
   }
 
@@ -2553,7 +2911,15 @@ textarea:focus {
   }
 
   .team-brief-card .team-photo-frame.team-photo-frame--magdy-face,
-  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face {
+  .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--nassar-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--nassar-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--shahin-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--shahin-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--mai-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--mai-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--habiba-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face {
     border-radius: 0.42rem;
   }
 

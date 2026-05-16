@@ -5,16 +5,27 @@
 
   const imgEl = lightbox.querySelector(".gallery-lightbox-img");
   const captionEl = lightbox.querySelector(".gallery-lightbox-caption");
+  const captionWrap = lightbox.querySelector(".gallery-lightbox-caption-wrap");
   const closeBtn = lightbox.querySelector(".gallery-lightbox-close");
   const backdrop = lightbox.querySelector(".gallery-lightbox-backdrop");
+  const visualEl = lightbox.querySelector(".gallery-lightbox-visual");
+  const zoomHintEl = lightbox.querySelector(".gallery-lightbox-zoom-hint");
 
   const mqMobile = window.matchMedia("(max-width: 760px)");
   const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  const ZOOM_MIN = 1;
+  const ZOOM_MAX = 3.5;
+  const ZOOM_STEP = 0.1;
+
   let typingTimer = null;
   let revealTimer = null;
   let typeStartTimer = null;
+  let zoomHintTimer = null;
   let gpuTransitionHandler = null;
+  let userZoom = 1;
+  let panX = 0;
+  let panY = 0;
 
   function clearGpuTransition() {
     if (gpuTransitionHandler) {
@@ -37,6 +48,82 @@
       clearTimeout(typeStartTimer);
       typeStartTimer = null;
     }
+    if (zoomHintTimer !== null) {
+      clearTimeout(zoomHintTimer);
+      zoomHintTimer = null;
+    }
+  }
+
+  function dismissZoomHint() {
+    lightbox.classList.add("gallery-lightbox--zoom-hint-dismissed");
+    if (zoomHintEl) zoomHintEl.setAttribute("aria-hidden", "true");
+    if (zoomHintTimer !== null) {
+      clearTimeout(zoomHintTimer);
+      zoomHintTimer = null;
+    }
+  }
+
+  function resetZoomHint() {
+    lightbox.classList.remove("gallery-lightbox--zoom-hint-dismissed");
+    if (zoomHintEl) zoomHintEl.setAttribute("aria-hidden", "true");
+    if (zoomHintTimer !== null) {
+      clearTimeout(zoomHintTimer);
+      zoomHintTimer = null;
+    }
+  }
+
+  function scheduleZoomHint() {
+    if (mqMobile.matches || !zoomHintEl) return;
+    resetZoomHint();
+    zoomHintEl.setAttribute("aria-hidden", "false");
+    zoomHintTimer = window.setTimeout(dismissZoomHint, 5500);
+  }
+
+  function resetZoom() {
+    userZoom = 1;
+    panX = 0;
+    panY = 0;
+    lightbox.style.setProperty("--gallery-zoom", "1");
+    lightbox.style.setProperty("--gallery-pan-x", "0px");
+    lightbox.style.setProperty("--gallery-pan-y", "0px");
+    lightbox.classList.remove("gallery-lightbox--zoomed", "gallery-lightbox--zoom-interactive");
+    if (captionWrap) captionWrap.setAttribute("aria-hidden", "false");
+    resetZoomHint();
+  }
+
+  function applyZoomTransform() {
+    const isZoomed = userZoom > 1.02;
+    lightbox.style.setProperty("--gallery-zoom", String(userZoom));
+    lightbox.style.setProperty("--gallery-pan-x", `${panX}px`);
+    lightbox.style.setProperty("--gallery-pan-y", `${panY}px`);
+    lightbox.classList.toggle("gallery-lightbox--zoomed", isZoomed);
+    if (captionWrap) captionWrap.setAttribute("aria-hidden", isZoomed ? "true" : "false");
+  }
+
+  function onLightboxWheel(e) {
+    if (mqMobile.matches || lightbox.hidden || !lightbox.classList.contains("gallery-lightbox--revealed")) {
+      return;
+    }
+
+    e.preventDefault();
+    dismissZoomHint();
+    lightbox.classList.add("gallery-lightbox--zoom-interactive");
+
+    const direction = e.deltaY < 0 ? 1 : -1;
+    const step = mqReduce.matches ? 0.2 : ZOOM_STEP;
+    const nextZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, userZoom + direction * step));
+
+    if (nextZoom === userZoom) return;
+
+    const rect = imgEl.getBoundingClientRect();
+    const originX = e.clientX - rect.left - rect.width / 2;
+    const originY = e.clientY - rect.top - rect.height / 2;
+    const ratio = nextZoom / userZoom;
+
+    panX = originX - (originX - panX) * ratio;
+    panY = originY - (originY - panY) * ratio;
+    userZoom = nextZoom;
+    applyZoomTransform();
   }
 
   function syncAria() {
@@ -74,6 +161,7 @@
 
     clearTimers();
     clearGpuTransition();
+    resetZoom();
     lightbox.classList.remove("gallery-lightbox--revealed");
 
     imgEl.src = thumb.currentSrc || thumb.src;
@@ -96,6 +184,7 @@
       if (mqReduce.matches) {
         lightbox.classList.add("gallery-lightbox--revealed");
         if (captionEl) captionEl.textContent = captionText;
+        scheduleZoomHint();
         return;
       }
 
@@ -109,6 +198,7 @@
           };
           imgEl.addEventListener("transitionend", gpuTransitionHandler);
           lightbox.classList.add("gallery-lightbox--revealed");
+          scheduleZoomHint();
           revealTimer = null;
         }, 260);
       });
@@ -129,6 +219,7 @@
   function close() {
     clearTimers();
     clearGpuTransition();
+    resetZoom();
     lightbox.classList.remove("gallery-lightbox--revealed");
     lightbox.hidden = true;
     if (imgEl) {
@@ -157,5 +248,10 @@
     if (mqMobile.matches && !lightbox.hidden) close();
   });
 
+  if (visualEl) {
+    visualEl.addEventListener("wheel", onLightboxWheel, { passive: false });
+  }
+
+  resetZoom();
   syncAria();
 })();

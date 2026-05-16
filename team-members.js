@@ -32,7 +32,7 @@ const teamMembersData = {
     points: ["المحاميى بالنقض والاداريه العليا والدستوريه"],
   },
   "fahima-ahmed-alkomary": {
-    name: "د / فهيمة أحمد علي القماري",
+    name: "أ.د / فهيمة أحمد علي القماري",
     role: "أستاذ قانون المرافعات",
     image: "assets/team/fahima-ahmed-alkomary.jpg",
     points: [
@@ -61,7 +61,7 @@ const teamMembersData = {
   "nassar-metwaly-nassar": {
     name: "أ / نصار متولي نصار",
     role: "المدير التنفيذي لمكتب الاسكندرية",
-    image: "assets/team/nassar-metwaly-nassar.jpeg",
+    image: "assets/team/nassar-metwaly-nassar.png",
     points: ["المحامي بالنقض والادارية العليا والدستورية"],
   },
   "mohamed-ahmed-daghidy": {
@@ -79,7 +79,7 @@ const teamMembersData = {
   "mohamed-shaheen": {
     name: "أ / محمد شاهين",
     role: "المدير التنفيذي لمكتب الأسكندريه والعلمين",
-    image: "assets/team/mohamed-shaheen.jpg",
+    image: "assets/team/mohamed-shaheen.png",
     points: ["المحامي بالاستئناف العالي ومجلس الدوله"],
   },
   "abdulaziz-elgayar": {
@@ -103,8 +103,14 @@ const teamMembersData = {
   "mai-hanafy": {
     name: "أ / مى حنفى",
     role: "المدير الاداري",
-    image: "assets/team/mai-hanafy.jpg",
+    image: "assets/team/mai-hanafy.png",
     points: ["المحاميه"],
+  },
+  habiba: {
+    name: "أ / حبيبه",
+    role: "المحامية",
+    image: "assets/team/habiba.png",
+    points: [],
   },
   "aya-mostafa-zain": {
     name: "أ / اية مصطفى زين",
@@ -119,6 +125,32 @@ const teamMembersData = {
     points: ["ماجستير بالقانون الدولي", "دبلومة خبير قانونى معتمد من حكومة دبي"],
   },
 };
+
+function playTeamMemberDetailAnimation(container) {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) {
+    container.classList.add("team-member-detail--ready");
+    return;
+  }
+
+  container.classList.remove("team-member-detail--ready");
+  const items = container.querySelectorAll(".team-member-detail-body li, .team-member-detail-body > p");
+  const itemCount = Math.max(items.length, 1);
+  items.forEach((item, index) => {
+    item.style.setProperty("--team-item-delay", `${0.2 + Math.min(index, 9) * 0.07}s`);
+  });
+
+  const backBtn = container.querySelector(":scope > .btn.team-member-reveal");
+  if (backBtn) {
+    backBtn.style.setProperty("--team-reveal-delay", `${0.18 + itemCount * 0.07}s`);
+  }
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      container.classList.add("team-member-detail--ready");
+    });
+  });
+}
 
 const memberContainer = document.querySelector("#memberDetail");
 if (memberContainer) {
@@ -142,12 +174,20 @@ if (memberContainer) {
       photoMarkup = `<div class="team-photo-frame team-photo-frame--zoom-face"><img class="team-photo team-photo--abdulaziz-elgayar" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
     } else if (memberId === "mohamed-magdy") {
       photoMarkup = `<div class="team-photo-frame team-photo-frame--magdy-face"><img class="team-photo team-photo--mohamed-magdy" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else if (memberId === "nassar-metwaly-nassar") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--nassar-face"><img class="team-photo team-photo--nassar-metwaly" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else if (memberId === "mohamed-shaheen") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--shahin-face"><img class="team-photo team-photo--mohamed-shaheen" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else if (memberId === "mai-hanafy") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--mai-face"><img class="team-photo team-photo--mai-hanafy" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
+    } else if (memberId === "habiba") {
+      photoMarkup = `<div class="team-photo-frame team-photo-frame--habiba-face"><img class="team-photo team-photo--habiba" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
     } else {
       photoMarkup = `<img class="team-photo" src="${member.image}" alt="${member.name}" loading="lazy" />`;
     }
 
     memberContainer.innerHTML = `
-      <div class="team-member-detail-head">
+      <div class="team-member-detail-head team-member-reveal" style="--team-reveal-delay: 0.05s">
         ${photoMarkup}
         <div>
           <h2>${member.name}</h2>
@@ -157,7 +197,8 @@ if (memberContainer) {
       <div class="team-member-detail-body">
         ${pointsMarkup}
       </div>
-      <a class="btn" href="team.html">العودة إلى فريق العمل</a>
+      <a class="btn team-member-reveal" href="team.html">العودة إلى فريق العمل</a>
     `;
+    playTeamMemberDetailAnimation(memberContainer);
   }
 }
