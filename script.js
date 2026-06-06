@@ -82,38 +82,38 @@ const observer = new IntersectionObserver(
 
 revealItems.forEach((item) => observer.observe(item));
 
-const internalLinks = document.querySelectorAll("a[href]");
-internalLinks.forEach((link) => {
-  link.addEventListener("click", (event) => {
-    const href = link.getAttribute("href");
-    if (!href) return;
-    if (link.target === "_blank") return;
-    if (href.startsWith("#")) return;
-    if (href.startsWith("mailto:") || href.startsWith("tel:")) return;
-    if (href.startsWith("http://") || href.startsWith("https://")) return;
+document.addEventListener("click", (event) => {
+  const link = event.target.closest("a[href]");
+  if (!link) return;
 
-    let destination = href;
-    let memberId = null;
+  const href = link.getAttribute("href");
+  if (!href) return;
+  if (link.target === "_blank") return;
+  if (href.startsWith("#")) return;
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) return;
+  if (href.startsWith("http://") || href.startsWith("https://")) return;
+
+  let destination = href;
+  let memberId = null;
+  try {
+    const url = new URL(href, window.location.href);
+    destination = url.href;
+    memberId = url.searchParams.get("id");
+  } catch {
+    destination = href;
+  }
+
+  if (memberId) {
     try {
-      const url = new URL(href, window.location.href);
-      destination = url.href;
-      memberId = url.searchParams.get("id");
+      sessionStorage.setItem("gz-team-member-id", memberId);
     } catch {
-      destination = href;
+      /* ignore */
     }
+  }
 
-    if (memberId) {
-      try {
-        sessionStorage.setItem("gz-team-member-id", memberId);
-      } catch {
-        /* ignore */
-      }
-    }
-
-    event.preventDefault();
-    document.body.classList.add("page-exit");
-    setTimeout(() => {
-      window.location.assign(destination);
-    }, 220);
-  });
+  event.preventDefault();
+  document.body.classList.add("page-exit");
+  setTimeout(() => {
+    window.location.assign(destination);
+  }, 220);
 });
