@@ -283,7 +283,7 @@
       extra.push({ sel: ".update-card img", key: "updates.card1.alt", attr: "alt" });
       extra.push({ sel: ".update-date", key: "updates.card1.date" });
       extra.push({ sel: ".update-card-body h3", key: "updates.card1.title" });
-      extra.push({ sel: ".update-card-body p", key: "updates.card1.body" });
+      extra.push({ sel: ".update-card-body p:not(.update-date)", key: "updates.card1.body" });
     }
 
     if (page === "booking") {
