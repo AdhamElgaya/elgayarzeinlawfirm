@@ -110,11 +110,6 @@ internalLinks.forEach((link) => {
       }
     }
 
-    // Keep query strings intact — use normal navigation for member/profile links.
-    if (href.includes("?") || href.includes("team-member")) {
-      return;
-    }
-
     event.preventDefault();
     document.body.classList.add("page-exit");
     setTimeout(() => {
