@@ -75,12 +75,19 @@
     cfg.projectId &&
     !/^YOUR_/i.test(String(cfg.projectId).trim());
 
+  function msg(key, fallback) {
+    return window.GZ_I18N?.t(key) || fallback;
+  }
+
   if (!configured || typeof firebase === "undefined") {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       showToast(
         "error",
-        "لم يتم ضبط Firebase بعد. افتح ملف firebase-config.js وأدخل بيانات مشروعك من Firebase Console، ثم فعّل Firestore."
+        msg(
+          "booking.toast.firebase",
+          "لم يتم ضبط Firebase بعد. افتح ملف firebase-config.js وأدخل بيانات مشروعك من Firebase Console، ثم فعّل Firestore."
+        )
       );
     });
     return;
@@ -116,13 +123,19 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         source: "booking.html",
       });
-      showToast("success", "تم استلام طلبك بنجاح. سنقوم بالتواصل معك قريباً.");
+      showToast(
+        "success",
+        msg("booking.toast.success", "تم استلام طلبك بنجاح. سنقوم بالتواصل معك قريباً.")
+      );
       form.reset();
     } catch (err) {
       console.error(err);
       showToast(
         "error",
-        "تعذر إرسال الطلب. تحقق من اتصال الإنترنت، من إعداد firebase-config.js، ومن قواعد Firestore ثم أعد المحاولة."
+        msg(
+          "booking.toast.error",
+          "تعذر إرسال الطلب. تحقق من اتصال الإنترنت، من إعداد firebase-config.js، ومن قواعد Firestore ثم أعد المحاولة."
+        )
       );
     } finally {
       if (submitBtn) {

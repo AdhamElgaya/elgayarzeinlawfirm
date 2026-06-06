@@ -92,10 +92,33 @@ internalLinks.forEach((link) => {
     if (href.startsWith("mailto:") || href.startsWith("tel:")) return;
     if (href.startsWith("http://") || href.startsWith("https://")) return;
 
+    let destination = href;
+    let memberId = null;
+    try {
+      const url = new URL(href, window.location.href);
+      destination = url.href;
+      memberId = url.searchParams.get("id");
+    } catch {
+      destination = href;
+    }
+
+    if (memberId) {
+      try {
+        sessionStorage.setItem("gz-team-member-id", memberId);
+      } catch {
+        /* ignore */
+      }
+    }
+
+    // Keep query strings intact — use normal navigation for member/profile links.
+    if (href.includes("?") || href.includes("team-member")) {
+      return;
+    }
+
     event.preventDefault();
     document.body.classList.add("page-exit");
     setTimeout(() => {
-      window.location.href = href;
+      window.location.assign(destination);
     }, 220);
   });
 });

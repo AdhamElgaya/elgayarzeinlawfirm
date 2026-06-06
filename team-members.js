@@ -1,128 +1,300 @@
 const teamMembersData = {
   "mostafa-zain": {
-    name: "أ.د / مصطفى زين",
-    role: "شريك المؤسسه",
     image: "assets/team/mostafa-zain.jpg",
-    points: [
-      "المستشار القانوني للعقود والمعاملات الدوليه للمؤسسه",
-      "المحامي بالنقض والاداريه العليا والدستوريه",
-      "المستشار القانوني للعديد من الجهات الدولية والحكوميه",
-      "خبير الحكومة ومكافحة الفساد والعقود الدولية",
-      "المعاملات المصرفية الدولية",
-    ],
+    ar: {
+      name: "أ.د / مصطفى زين",
+      role: "شريك المؤسسه",
+      points: [
+        "المستشار القانوني للعقود والمعاملات الدوليه للمؤسسه",
+        "المحامي بالنقض والاداريه العليا والدستوريه",
+        "المستشار القانوني للعديد من الجهات الدولية والحكوميه",
+        "خبير الحكومة ومكافحة الفساد والعقود الدولية",
+        "المعاملات المصرفية الدولية",
+      ],
+    },
+    en: {
+      name: "Prof. Mostafa Zain",
+      role: "Founding Partner",
+      points: [
+        "Legal advisor to the firm on international contracts and cross-border transactions.",
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+        "Legal advisor to numerous international and governmental entities.",
+        "Government affairs, anti-corruption, and international contracts expert.",
+        "Specialist in international banking transactions.",
+      ],
+    },
   },
   "mahmoud-elgayar": {
-    name: "أ / محمود الجيار",
-    role: "المدير التنفيذى وشريك مؤسس",
     image: "assets/team/mahmoud-elgayar.jpg",
-    points: [
-      "المحامي بالنقض والاداريه العليا والدستوريه و عضو اتحاد المحامين العرب",
-      "ماجستير في الحقوق",
-      "دبلوما القانون الخاص",
-      "دبلوما العلوم الاداريه",
-      "باحث دكتوراه قسم القانون العام",
-      "المستشار القانوني لعدد من الشركات",
-      "درجة القيد : نقض",
-    ],
+    ar: {
+      name: "أ / محمود الجيار",
+      role: "المدير التنفيذى وشريك مؤسس",
+      points: [
+        "المحامي بالنقض والاداريه العليا والدستوريه و عضو اتحاد المحامين العرب",
+        "ماجستير في الحقوق",
+        "دبلوما القانون الخاص",
+        "دبلوما العلوم الاداريه",
+        "باحث دكتوراه قسم القانون العام",
+        "المستشار القانوني لعدد من الشركات",
+        "درجة القيد : نقض",
+      ],
+    },
+    en: {
+      name: "Mahmoud Elgayar",
+      role: "Chief Executive Officer & Founding Partner",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court, and member of the Arab Lawyers Union.",
+        "Master of Laws (LL.M.).",
+        "Diploma in Private Law.",
+        "Diploma in Administrative Sciences.",
+        "Doctoral researcher in Public Law.",
+        "Legal advisor to multiple companies.",
+        "Bar registration grade: Cassation.",
+      ],
+    },
   },
   "mahmoud-ahmed-emam": {
-    name: "أ / محمود احمد امام",
-    role: "المحامي بالنقض",
     image: "assets/team/mahmoud-ahmed-emam.jpg",
-    points: ["المحاميى بالنقض والاداريه العليا والدستوريه"],
+    ar: {
+      name: "أ / محمود احمد امام",
+      role: "المحامي بالنقض",
+      points: ["المحاميى بالنقض والاداريه العليا والدستوريه"],
+    },
+    en: {
+      name: "Mahmoud Ahmed Emam",
+      role: "Lawyer before the Court of Cassation",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+      ],
+    },
   },
   "fahima-ahmed-alkomary": {
-    name: "أ.د / فهيمة أحمد علي القماري",
-    role: "أستاذ قانون المرافعات",
     image: "assets/team/fahima-ahmed-alkomary.jpg",
-    points: [
-      "أستاذ قانون المرافعات - كلية الحقوق جامعة الإسكندرية",
-      "أستاذ القانون كلية النقل البحري - الأكاديمية العربية للنقل البحري",
-      "أستاذ القانون في المعهد العالي للعلوم الإدارية المتقدمة والحاسبات",
-      "مساعد عميد كلية الحقوق السابق",
-      "المستشار العلمي للدرسات العليا لنقابة المحامين سابقا",
-      "عضو الجمعية العربية للملاحة",
-      "عضو جمعية أصدقاء مكتبة الإسكندرية",
-      "المحامي بالنقض",
-    ],
+    ar: {
+      name: "أ.د / فهيمة أحمد علي القماري",
+      role: "أستاذ قانون المرافعات",
+      points: [
+        "أستاذ قانون المرافعات - كلية الحقوق جامعة الإسكندرية",
+        "أستاذ القانون كلية النقل البحري - الأكاديمية العربية للنقل البحري",
+        "أستاذ القانون في المعهد العالي للعلوم الإدارية المتقدمة والحاسبات",
+        "مساعد عميد كلية الحقوق السابق",
+        "المستشار العلمي للدرسات العليا لنقابة المحامين سابقا",
+        "عضو الجمعية العربية للملاحة",
+        "عضو جمعية أصدقاء مكتبة الإسكندرية",
+        "المحامي بالنقض",
+      ],
+    },
+    en: {
+      name: "Prof. Fahima Ahmed Ali Alkomary",
+      role: "Professor of Procedural Law",
+      points: [
+        "Professor of Procedural Law, Faculty of Law, Alexandria University.",
+        "Professor of Law, College of Maritime Transport, Arab Academy for Science, Technology and Maritime Transport.",
+        "Professor of Law at the Higher Institute for Advanced Administrative Sciences and Computers.",
+        "Former Vice Dean of the Faculty of Law.",
+        "Former academic advisor for postgraduate studies at the Bar Association.",
+        "Member of the Arab Navigation Association.",
+        "Member of the Friends of the Bibliotheca Alexandrina Association.",
+        "Lawyer before the Court of Cassation.",
+      ],
+    },
   },
   "ibrahim-ali-aref": {
-    name: "أ / ابراهيم علي عارف",
-    role: "المدير العام مكتب القاهرة",
     image: "assets/team/ibrahim-ali-aref.jpg",
-    points: ["المحامي بالنقض والادارية العليا والدستورية"],
+    ar: {
+      name: "أ / ابراهيم علي عارف",
+      role: "المدير العام مكتب القاهرة",
+      points: ["المحامي بالنقض والادارية العليا والدستورية"],
+    },
+    en: {
+      name: "Ibrahim Ali Aref",
+      role: "General Manager, Cairo Office",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+      ],
+    },
   },
   "noha-mohamed-elsayed": {
-    name: "أ / نهي محمد السيد",
-    role: "مستشار قضايا الاسرة",
     image: "assets/team/noha-mohamed-elsayed.jpg",
-    points: ["المحاميه بالنقض والاداريه العليا والدستوريه"],
+    ar: {
+      name: "أ / نهي محمد السيد",
+      role: "مستشار قضايا الاسرة",
+      points: ["المحاميه بالنقض والاداريه العليا والدستوريه"],
+    },
+    en: {
+      name: "Noha Mohamed El Sayed",
+      role: "Family Matters Counsel",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+      ],
+    },
   },
   "nassar-metwaly-nassar": {
-    name: "أ / نصار متولي نصار",
-    role: "المدير التنفيذي لمكتب الاسكندرية",
     image: "assets/team/nassar-metwaly-nassar.png",
-    points: ["المحامي بالنقض والادارية العليا والدستورية"],
+    ar: {
+      name: "أ / نصار متولي نصار",
+      role: "المدير التنفيذي لمكتب الاسكندرية",
+      points: ["المحامي بالنقض والادارية العليا والدستورية"],
+    },
+    en: {
+      name: "Nassar Metwaly Nassar",
+      role: "Executive Director, Alexandria Office",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+      ],
+    },
   },
   "mohamed-ahmed-daghidy": {
-    name: "أ / محمد احمد دغيدي",
-    role: "المحامي بالنقض",
     image: "assets/team/mohamed-ahmed-daghidy.jpg",
-    points: ["المحامي بالنقض والاداريه العليا والدستوريه"],
+    ar: {
+      name: "أ / محمد احمد دغيدي",
+      role: "المحامي بالنقض",
+      points: ["المحامي بالنقض والاداريه العليا والدستوريه"],
+    },
+    en: {
+      name: "Mohamed Ahmed Daghidy",
+      role: "Lawyer before the Court of Cassation",
+      points: [
+        "Lawyer before the Court of Cassation, the Supreme Administrative Court, and the Supreme Constitutional Court.",
+      ],
+    },
   },
   "mohamed-abdelhafiz": {
-    name: "أ / محمد عبدالحفيظ",
-    role: "المحامي بالاستئناف العالي ومجلس الدوله",
     image: "assets/team/mohamed-abdelhafiz.jpg",
-    points: ["حاصل علي ماجستير في الحقوق باحث دكتوراه في الاقتصاد"],
+    ar: {
+      name: "أ / محمد عبدالحفيظ",
+      role: "المحامي بالاستئناف العالي ومجلس الدوله",
+      points: ["حاصل علي ماجستير في الحقوق باحث دكتوراه في الاقتصاد"],
+    },
+    en: {
+      name: "Mohamed Abdelhafiz",
+      role: "Lawyer before the High Court of Appeal and the State Council",
+      points: ["Master of Laws holder and doctoral researcher in Economics."],
+    },
   },
   "mohamed-shaheen": {
-    name: "أ / محمد شاهين",
-    role: "المدير التنفيذي لمكتب الأسكندريه والعلمين",
     image: "assets/team/mohamed-shaheen.png",
-    points: ["المحامي بالاستئناف العالي ومجلس الدوله"],
+    ar: {
+      name: "أ / محمد شاهين",
+      role: "المدير التنفيذي لمكتب الأسكندريه والعلمين",
+      points: ["المحامي بالاستئناف العالي ومجلس الدوله"],
+    },
+    en: {
+      name: "Mohamed Shaheen",
+      role: "Executive Director, Alexandria & El Alamein Offices",
+      points: ["Lawyer before the High Court of Appeal and the State Council."],
+    },
   },
   "abdulaziz-elgayar": {
-    name: "أ / عبد العزيز الجيار",
-    role: "المحامى",
     image: "assets/team/abdulaziz-elgayar.jpg",
-    points: ["دبلوم القانون الخاص", "دبلوم القانون العام", "حاصل علي ماجستير في الحقوق"],
+    ar: {
+      name: "أ / عبد العزيز الجيار",
+      role: "المحامى",
+      points: ["دبلوم القانون الخاص", "دبلوم القانون العام", "حاصل علي ماجستير في الحقوق"],
+    },
+    en: {
+      name: "Abdulaziz Elgayar",
+      role: "Lawyer",
+      points: [
+        "Diploma in Private Law.",
+        "Diploma in Public Law.",
+        "Master of Laws (LL.M.) holder.",
+      ],
+    },
   },
   "ahmed-ibrahim-elkhediwy": {
-    name: "أ / احمد ابراهيم الخديوي",
-    role: "المحامى",
     image: "assets/team/ahmed-ibrahim-elkhediwy.jpg",
-    points: [],
+    ar: {
+      name: "أ / احمد ابراهيم الخديوي",
+      role: "المحامى",
+      points: [],
+    },
+    en: {
+      name: "Ahmed Ibrahim Elkhediwy",
+      role: "Lawyer",
+      points: [],
+    },
   },
   "mohamed-magdy": {
-    name: "أ / محمد مجدي",
-    role: "المحامى",
     image: "assets/team/mohamed-magdy.png",
-    points: [],
+    ar: {
+      name: "أ / محمد مجدي",
+      role: "المحامى",
+      points: [],
+    },
+    en: {
+      name: "Mohamed Magdy",
+      role: "Lawyer",
+      points: [],
+    },
   },
   "mai-hanafy": {
-    name: "أ / مى حنفى",
-    role: "المدير الاداري",
-    image: "assets/team/mai-hanafy.png",
-    points: ["المحاميه"],
+    image: "assets/team/mai-hanafy.webp",
+    ar: {
+      name: "أ / مى حنفى",
+      role: "المدير الاداري",
+      points: ["المحاميه"],
+    },
+    en: {
+      name: "Mai Hanafy",
+      role: "Administrative Manager",
+      points: ["Lawyer."],
+    },
   },
   habiba: {
-    name: "أ / حبيبه",
-    role: "المحامية",
     image: "assets/team/habiba.png",
-    points: [],
+    ar: {
+      name: "أ / حبيبه",
+      role: "المحامية",
+      points: [],
+    },
+    en: {
+      name: "Habiba",
+      role: "Lawyer",
+      points: [],
+    },
   },
   "aya-mostafa-zain": {
-    name: "أ / اية مصطفى زين",
-    role: "المحامية",
     image: "assets/team/aya-mostafa-zain.jpg",
-    points: [],
+    ar: {
+      name: "أ / اية مصطفى زين",
+      role: "المحامية",
+      points: [],
+    },
+    en: {
+      name: "Aya Mostafa Zain",
+      role: "Lawyer",
+      points: [],
+    },
   },
   "wesam-talal": {
-    name: "أ / وسام طلال",
-    role: "المحامي بالاستئناف العالي ومجلس الدوله",
     image: "assets/team/wesam-talal.jpg",
-    points: ["ماجستير بالقانون الدولي", "دبلومة خبير قانونى معتمد من حكومة دبي"],
+    ar: {
+      name: "أ / وسام طلال",
+      role: "المحامي بالاستئناف العالي ومجلس الدوله",
+      points: ["ماجستير بالقانون الدولي", "دبلومة خبير قانونى معتمد من حكومة دبي"],
+    },
+    en: {
+      name: "Wesam Talal",
+      role: "Lawyer before the High Court of Appeal and the State Council",
+      points: [
+        "Master's degree in International Law.",
+        "Certified Legal Expert Diploma accredited by the Government of Dubai.",
+      ],
+    },
+  },
+  "adham-elgayar": {
+    image: "assets/team/adham-elgayar.webp",
+    ar: {
+      name: "أ / ادهم الجيار",
+      role: "المدير التنفيذي للتكنولوجيا",
+      points: ["منشئ الموقع الالكتروني للمؤسسه", "مبرمج مواقع"],
+    },
+    en: {
+      name: "Adham Elgayar",
+      role: "Chief Technology Officer",
+      points: ["Creator of the firm's website.", "Web developer."],
+    },
   },
 };
 
@@ -152,53 +324,142 @@ function playTeamMemberDetailAnimation(container) {
   });
 }
 
-const memberContainer = document.querySelector("#memberDetail");
-if (memberContainer) {
-  const params = new URLSearchParams(window.location.search);
-  const memberId = params.get("id");
-  const member = memberId ? teamMembersData[memberId] : null;
+function getCurrentLanguage() {
+  const fromCookie = document.cookie.match(/(?:^|; )gz-lang=([^;]*)/);
+  if (fromCookie && decodeURIComponent(fromCookie[1]) === "en") {
+    return "en";
+  }
 
+  const lang = window.GZ_I18N?.getLanguage?.();
+  return lang === "en" ? "en" : "ar";
+}
+
+function tWithFallback(key, fallback) {
+  if (getCurrentLanguage() === "en") {
+    const text = window.GZ_I18N_EN?.[key];
+    if (typeof text === "string" && text.trim()) {
+      return text;
+    }
+  }
+  return fallback;
+}
+
+function getMemberIdFromUrl() {
+  const fromQuery = new URLSearchParams(window.location.search).get("id");
+  if (fromQuery && fromQuery.trim()) {
+    return fromQuery.trim();
+  }
+
+  try {
+    const stored = sessionStorage.getItem("gz-team-member-id");
+    if (stored && stored.trim()) {
+      return stored.trim();
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return null;
+}
+
+function getPhotoMarkup(memberId, image, name) {
+  if (memberId === "abdulaziz-elgayar") {
+    return `<div class="team-photo-frame team-photo-frame--zoom-face"><img class="team-photo team-photo--abdulaziz-elgayar" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "mohamed-magdy") {
+    return `<div class="team-photo-frame team-photo-frame--magdy-face"><img class="team-photo team-photo--mohamed-magdy" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "nassar-metwaly-nassar") {
+    return `<div class="team-photo-frame team-photo-frame--nassar-face"><img class="team-photo team-photo--nassar-metwaly" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "mohamed-shaheen") {
+    return `<div class="team-photo-frame team-photo-frame--shahin-face"><img class="team-photo team-photo--mohamed-shaheen" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "mai-hanafy") {
+    return `<div class="team-photo-frame team-photo-frame--mai-face"><img class="team-photo team-photo--mai-hanafy" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "habiba") {
+    return `<div class="team-photo-frame team-photo-frame--habiba-face"><img class="team-photo team-photo--habiba" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "adham-elgayar") {
+    return `<div class="team-photo-frame team-photo-frame--adham-face"><img class="team-photo team-photo--adham-elgayar" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  return `<img class="team-photo" src="${image}" alt="${name}" loading="lazy" />`;
+}
+
+function renderMemberDetail(memberId) {
+  const memberContainer = document.querySelector("#memberDetail");
+  if (!memberContainer) {
+    return;
+  }
+
+  const notFoundTitle = tWithFallback("team.member.notFound", "العضو غير موجود");
+  const notFoundBody = tWithFallback(
+    "team.member.notFoundBody",
+    "يرجى العودة إلى صفحة فريق العمل واختيار عضو صحيح."
+  );
+  const backLabel = tWithFallback("team.member.back", "العودة إلى فريق العمل");
+  const noDetailsLabel = tWithFallback("team.member.noDetails", "لا توجد تفاصيل إضافية حالياً.");
+
+  const member = memberId ? teamMembersData[memberId] : null;
   if (!member) {
     memberContainer.innerHTML = `
-      <h2>العضو غير موجود</h2>
-      <p>يرجى العودة إلى صفحة فريق العمل واختيار عضو صحيح.</p>
-      <a class="btn" href="team.html">العودة إلى فريق العمل</a>
+      <h2>${notFoundTitle}</h2>
+      <p>${notFoundBody}</p>
+      <a class="btn" href="team.html">${backLabel}</a>
     `;
-  } else {
-    const pointsMarkup = member.points.length
-      ? `<ul>${member.points.map((point) => `<li>${point}</li>`).join("")}</ul>`
-      : "<p>لا توجد تفاصيل إضافية حالياً.</p>";
-
-    let photoMarkup;
-    if (memberId === "abdulaziz-elgayar") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--zoom-face"><img class="team-photo team-photo--abdulaziz-elgayar" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else if (memberId === "mohamed-magdy") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--magdy-face"><img class="team-photo team-photo--mohamed-magdy" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else if (memberId === "nassar-metwaly-nassar") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--nassar-face"><img class="team-photo team-photo--nassar-metwaly" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else if (memberId === "mohamed-shaheen") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--shahin-face"><img class="team-photo team-photo--mohamed-shaheen" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else if (memberId === "mai-hanafy") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--mai-face"><img class="team-photo team-photo--mai-hanafy" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else if (memberId === "habiba") {
-      photoMarkup = `<div class="team-photo-frame team-photo-frame--habiba-face"><img class="team-photo team-photo--habiba" src="${member.image}" alt="${member.name}" loading="lazy" /></div>`;
-    } else {
-      photoMarkup = `<img class="team-photo" src="${member.image}" alt="${member.name}" loading="lazy" />`;
-    }
-
-    memberContainer.innerHTML = `
-      <div class="team-member-detail-head team-member-reveal" style="--team-reveal-delay: 0.05s">
-        ${photoMarkup}
-        <div>
-          <h2>${member.name}</h2>
-          <p>${member.role}</p>
-        </div>
-      </div>
-      <div class="team-member-detail-body">
-        ${pointsMarkup}
-      </div>
-      <a class="btn team-member-reveal" href="team.html">العودة إلى فريق العمل</a>
-    `;
-    playTeamMemberDetailAnimation(memberContainer);
+    return;
   }
+
+  const language = getCurrentLanguage();
+  const localized = member[language] || member.ar;
+  const pointsMarkup = localized.points.length
+    ? `<ul>${localized.points.map((point) => `<li>${point}</li>`).join("")}</ul>`
+    : `<p>${noDetailsLabel}</p>`;
+
+  const photoMarkup = getPhotoMarkup(memberId, member.image, localized.name);
+
+  memberContainer.innerHTML = `
+    <div class="team-member-detail-head team-member-reveal" style="--team-reveal-delay: 0.05s">
+      ${photoMarkup}
+      <div>
+        <h2>${localized.name}</h2>
+        <p>${localized.role}</p>
+      </div>
+    </div>
+    <div class="team-member-detail-body">
+      ${pointsMarkup}
+    </div>
+    <a class="btn team-member-reveal" href="team.html">${backLabel}</a>
+  `;
+
+  playTeamMemberDetailAnimation(memberContainer);
+}
+
+function bootMemberDetailPage() {
+  const memberContainer = document.querySelector("#memberDetail");
+  if (!memberContainer) return;
+
+  const refreshMemberDetail = () => {
+    const memberId = getMemberIdFromUrl();
+    if (memberId) {
+      try {
+        sessionStorage.setItem("gz-team-member-id", memberId);
+      } catch {
+        /* ignore */
+      }
+    }
+    renderMemberDetail(memberId);
+  };
+
+  window.addEventListener("gz:i18nready", refreshMemberDetail);
+  window.addEventListener("gz:languagechange", refreshMemberDetail);
+  window.addEventListener("pageshow", refreshMemberDetail);
+  refreshMemberDetail();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootMemberDetailPage);
+} else {
+  bootMemberDetailPage();
 }

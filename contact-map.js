@@ -1,38 +1,26 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════
- *  إحداثيات الفروع — ضع خط العرض والطول لكل فرع هنا
- *  MAP COORDINATES — put latitude & longitude for each branch below
- * ═══════════════════════════════════════════════════════════════════════════
- *
- *  خط العرض = latitude (الرقم الأول عادةً من الخرائط)
- *  خط الطول = longitude (الثاني)
- *
- *  من Google Maps: انقر يمين النقطة → نسخ الإحداثيات
- *  من OpenStreetMap: كليك يمين → Show address / الإحداثيات في الشريط
- *
- *  عدّل الأرقام فقط تحت كل فرع. نص النافذة المنبثقة عند الضغط على الدبوس:
- *  غيّر BRANCH_*_TITLE حسب الرغبة.
- * ═══════════════════════════════════════════════════════════════════════════
+ * Branch map coordinates — edit latitude & longitude for each office below.
  */
 
-/* فرع القاهرة — Cairo branch */
 const BRANCH_CAIRO_LAT = 30.03598711400953;
 const BRANCH_CAIRO_LNG = 31.33479067055226;
-const BRANCH_CAIRO_TITLE = "مكتب القاهرة";
-
-/* فرع الإسكندرية — Alexandria branch */
 const BRANCH_ALEX_LAT = 31.2541633103334;
 const BRANCH_ALEX_LNG = 29.9752725381945;
-const BRANCH_ALEX_TITLE = "مكتب الإسكندرية";
 
 (function initContactMap() {
   const el = document.getElementById("contact-map");
   if (!el || typeof L === "undefined") return;
 
+  const markers = [];
+
   const branches = [
-    { lat: BRANCH_CAIRO_LAT, lng: BRANCH_CAIRO_LNG, title: BRANCH_CAIRO_TITLE },
-    { lat: BRANCH_ALEX_LAT, lng: BRANCH_ALEX_LNG, title: BRANCH_ALEX_TITLE },
+    { lat: BRANCH_CAIRO_LAT, lng: BRANCH_CAIRO_LNG, titleKey: "contact.branch.cairo", titleAr: "مكتب القاهرة" },
+    { lat: BRANCH_ALEX_LAT, lng: BRANCH_ALEX_LNG, titleKey: "contact.branch.alex", titleAr: "مكتب الإسكندرية" },
   ];
+
+  function branchTitle(branch) {
+    return window.GZ_I18N?.t(branch.titleKey) || branch.titleAr;
+  }
 
   const map = L.map(el, {
     scrollWheelZoom: false,
@@ -46,7 +34,8 @@ const BRANCH_ALEX_TITLE = "مكتب الإسكندرية";
   const latLngs = [];
   branches.forEach((b) => {
     latLngs.push([b.lat, b.lng]);
-    L.marker([b.lat, b.lng]).addTo(map).bindPopup(b.title);
+    const marker = L.marker([b.lat, b.lng]).addTo(map).bindPopup(branchTitle(b));
+    markers.push({ marker, branch: b });
   });
 
   if (latLngs.length === 1) {
@@ -78,6 +67,12 @@ const BRANCH_ALEX_TITLE = "مكتب الإسكندرية";
     const mo = new MutationObserver(syncWhenVisible);
     mo.observe(reveal, { attributes: true, attributeFilter: ["class"] });
   }
+
+  window.addEventListener("gz:languagechange", () => {
+    markers.forEach(({ marker, branch }) => {
+      marker.setPopupContent(branchTitle(branch));
+    });
+  });
 
   setTimeout(fit, 450);
 })();

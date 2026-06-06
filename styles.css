@@ -1253,6 +1253,100 @@ h1 {
   transform-origin: center 28%;
 }
 
+/* ادهم الجيار — صورة نصف جسم: إطار مثل باقي البطاقات + تركيز على الوجه */
+.team-photo-frame.team-photo-frame--adham-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--adham-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--adham-face .team-photo.team-photo--adham-elgayar {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 8%;
+  transform: scale(1.68) translate3d(0, -14%, 0);
+  transform-origin: center 10%;
+}
+
+/* اماني فؤاد — تركيز على الوجه لمطابقة بطاقات مثل الخديوي */
+.team-photo-frame.team-photo-frame--amany-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--amany-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-brief-card .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad,
+.team-member-detail-head .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 15%;
+  transform: scale(1.75) translate3d(0, -8%, 0);
+  transform-origin: center 18%;
+}
+
+/* خميس جمعه — تركيز على الوجه لمطابقة بطاقات مثل الخديوي */
+.team-photo-frame.team-photo-frame--khamis-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--khamis-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--khamis-face .team-photo.team-photo--khamis-gomaa {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 16%;
+  transform: scale(1.8) translate3d(0, -10%, 0);
+  transform-origin: center 14%;
+}
+
 /* ——— مكتبة الصور ——— */
 .gallery-section .gallery-grid {
   display: grid;
@@ -1846,8 +1940,10 @@ textarea:focus {
 .footer-col-social {
   grid-column: 1 / -1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 1rem;
 }
 
 .footer-social {
@@ -2455,7 +2551,7 @@ textarea:focus {
     min-height: 0;
   }
 
-  .team-brief-card .team-photo {
+  .team-brief-card > .team-photo {
     width: 100%;
     aspect-ratio: 4 / 5;
     min-height: 0;
@@ -2490,6 +2586,52 @@ textarea:focus {
     transform-origin: center 11%;
   }
 
+  .team-photo-frame--adham-face .team-photo.team-photo--adham-elgayar {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: unset;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: cover;
+    object-position: center 8%;
+    transform: scale(1.68) translate3d(0, -14%, 0);
+    transform-origin: center 10%;
+  }
+
+  .team-brief-card .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad,
+  .team-member-detail-head .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: unset;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: cover;
+    object-position: center 15%;
+    transform: scale(1.75) translate3d(0, -8%, 0);
+    transform-origin: center 18%;
+  }
+
+  .team-photo-frame--khamis-face .team-photo.team-photo--khamis-gomaa {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: unset;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: cover;
+    object-position: center 16%;
+    transform: scale(1.8) translate3d(0, -10%, 0);
+    transform-origin: center 14%;
+  }
+
   .team-brief-card .team-photo-frame.team-photo-frame--magdy-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--magdy-face,
   .team-brief-card .team-photo-frame.team-photo-frame--nassar-face,
@@ -2499,7 +2641,13 @@ textarea:focus {
   .team-brief-card .team-photo-frame.team-photo-frame--mai-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--mai-face,
   .team-brief-card .team-photo-frame.team-photo-frame--habiba-face,
-  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face {
+  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--adham-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--adham-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--amany-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--amany-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--khamis-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--khamis-face {
     border-radius: 0.48rem;
   }
 
@@ -2627,7 +2775,10 @@ textarea:focus {
   .team-photo-frame--nassar-face .team-photo.team-photo--nassar-metwaly,
   .team-photo-frame--shahin-face .team-photo.team-photo--mohamed-shaheen,
   .team-photo-frame--mai-face .team-photo.team-photo--mai-hanafy,
-  .team-photo-frame--habiba-face .team-photo.team-photo--habiba {
+  .team-photo-frame--habiba-face .team-photo.team-photo--habiba,
+  .team-photo-frame--adham-face .team-photo.team-photo--adham-elgayar,
+  .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad,
+  .team-photo-frame--khamis-face .team-photo.team-photo--khamis-gomaa {
     min-height: 0;
   }
 
@@ -2919,7 +3070,13 @@ textarea:focus {
   .team-brief-card .team-photo-frame.team-photo-frame--mai-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--mai-face,
   .team-brief-card .team-photo-frame.team-photo-frame--habiba-face,
-  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face {
+  .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--adham-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--adham-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--amany-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--amany-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--khamis-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--khamis-face {
     border-radius: 0.42rem;
   }
 
@@ -2979,3 +3136,161 @@ textarea:focus {
     min-height: 0;
   }
 }
+
+.footer-lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 146, 46, 0.45);
+  background: rgba(200, 146, 46, 0.08);
+}
+
+.footer-lang-cookie-notice {
+  margin: 0;
+  max-width: 22rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.lang-switch-option {
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-switch-option:hover {
+  color: var(--text);
+}
+
+.lang-switch-option.is-active {
+  background: rgba(200, 146, 46, 0.22);
+  color: var(--gold-soft);
+}
+
+.lang-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.lang-picker[hidden] {
+  display: none;
+}
+
+.lang-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.lang-picker-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(24rem, 100%);
+  padding: 1.6rem 1.4rem 1.35rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(200, 146, 46, 0.45);
+  background: var(--surface-2);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.lang-picker-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.lang-picker-title--ar {
+  margin-top: 0.35rem;
+  color: var(--gold-soft);
+}
+
+.lang-picker-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.lang-picker-notice {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.lang-picker-notice--ar {
+  margin-top: 0.35rem;
+}
+
+.lang-picker-btn {
+  min-width: 7.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 146, 46, 0.55);
+  background: rgba(200, 146, 46, 0.1);
+  color: var(--gold-soft);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.lang-picker-btn:hover {
+  background: rgba(200, 146, 46, 0.2);
+  border-color: var(--gold);
+  color: var(--text);
+}
+
+body.lang-picker-open {
+  overflow: hidden;
+}
+
+html[dir="ltr"] .contact-detail-card ul {
+  padding-right: 0;
+  padding-left: 1.15rem;
+}
+
+html[dir="ltr"] .work-hours-slot,
+html[dir="ltr"] .work-hours-closed {
+  text-align: left;
+}
+
+html[dir="ltr"] .booking-toast {
+  right: auto;
+  left: max(0.85rem, env(safe-area-inset-left, 0px));
+  text-align: left;
+  direction: ltr;
+  transform: translate3d(calc(-100% - 1.5rem), 0, 0);
+}
+
+html[dir="ltr"] .booking-toast.booking-toast--visible {
+  transform: translate3d(0, 0, 0);
+}
+
+html[dir="ltr"] .gallery-lightbox-zoom-hint,
+html[dir="ltr"] .gallery-lightbox-caption {
+  direction: ltr;
+}
+
