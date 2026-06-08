@@ -1284,6 +1284,37 @@ h1 {
   transform-origin: center 10%;
 }
 
+/* احمد بدران سليم — صورة مع شخص ثانٍ: تركيز على الوجه (يسار الإطار) */
+.team-photo-frame.team-photo-frame--badran-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--badran-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--badran-face .team-photo.team-photo--ahmed-badran {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: 26% 20%;
+  transform: scale(1.22);
+  transform-origin: 26% 20%;
+}
+
 /* اماني فؤاد — تركيز على الوجه لمطابقة بطاقات مثل الخديوي */
 .team-photo-frame.team-photo-frame--amany-face {
   width: 100%;
@@ -2376,6 +2407,17 @@ textarea:focus {
     transition: none;
   }
 
+  .partners-grid .partner {
+    transition: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .partners-grid .partner:hover,
+  .partners-grid .partner:active {
+    transform: none;
+    border-color: #2a2a2a;
+  }
+
   /* Pen badge was absolute + large desktop padding-top; mobile padding is small → overlap first field */
   .booking-form .form-top-icon {
     position: static;
@@ -2529,15 +2571,22 @@ textarea:focus {
 
   /* فريق العمل — بطاقات أصغر على الجوال؛ صور بورتريه (aspect-ratio) */
   .team-cards-grid {
-    gap: 0.62rem;
-    max-width: min(100%, 17.25rem);
+    gap: 1.65rem;
+    max-width: min(100%, 20rem);
     margin-inline: auto;
   }
 
   .team-brief-card {
-    padding: 0.62rem 0.72rem;
+    padding: 0.95rem 1.1rem;
     border-radius: 0.72rem;
-    gap: 0.42rem;
+    gap: 0.55rem;
+  }
+
+  .team-brief-card > .team-photo,
+  .team-brief-card > .team-photo-frame {
+    width: 100%;
+    max-width: 15.85rem;
+    margin-inline: auto;
   }
 
   .team-brief-card h3 {
@@ -2601,6 +2650,21 @@ textarea:focus {
     transform-origin: center 10%;
   }
 
+  .team-photo-frame--badran-face .team-photo.team-photo--ahmed-badran {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: unset;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: cover;
+    object-position: 26% 20%;
+    transform: scale(1.18);
+    transform-origin: 26% 20%;
+  }
+
   .team-brief-card .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad,
   .team-member-detail-head .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad {
     width: 100%;
@@ -2644,6 +2708,8 @@ textarea:focus {
   .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face,
   .team-brief-card .team-photo-frame.team-photo-frame--adham-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--adham-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--badran-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--badran-face,
   .team-brief-card .team-photo-frame.team-photo-frame--amany-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--amany-face,
   .team-brief-card .team-photo-frame.team-photo-frame--khamis-face,
@@ -2777,6 +2843,7 @@ textarea:focus {
   .team-photo-frame--mai-face .team-photo.team-photo--mai-hanafy,
   .team-photo-frame--habiba-face .team-photo.team-photo--habiba,
   .team-photo-frame--adham-face .team-photo.team-photo--adham-elgayar,
+  .team-photo-frame--badran-face .team-photo.team-photo--ahmed-badran,
   .team-photo-frame--amany-face .team-photo.team-photo--amany-fouad,
   .team-photo-frame--khamis-face .team-photo.team-photo--khamis-gomaa {
     min-height: 0;
@@ -3030,14 +3097,19 @@ textarea:focus {
   }
 
   .team-cards-grid {
-    gap: 0.55rem;
-    max-width: min(100%, 15.75rem);
+    gap: 1.45rem;
+    max-width: min(100%, 18.25rem);
   }
 
   .team-brief-card {
-    padding: 0.55rem 0.62rem;
+    padding: 0.82rem 0.98rem;
     border-radius: 0.65rem;
-    gap: 0.36rem;
+    gap: 0.48rem;
+  }
+
+  .team-brief-card > .team-photo,
+  .team-brief-card > .team-photo-frame {
+    max-width: 14.5rem;
   }
 
   .team-brief-card h3 {
@@ -3073,6 +3145,8 @@ textarea:focus {
   .team-member-detail-head .team-photo-frame.team-photo-frame--habiba-face,
   .team-brief-card .team-photo-frame.team-photo-frame--adham-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--adham-face,
+  .team-brief-card .team-photo-frame.team-photo-frame--badran-face,
+  .team-member-detail-head .team-photo-frame.team-photo-frame--badran-face,
   .team-brief-card .team-photo-frame.team-photo-frame--amany-face,
   .team-member-detail-head .team-photo-frame.team-photo-frame--amany-face,
   .team-brief-card .team-photo-frame.team-photo-frame--khamis-face,

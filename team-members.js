@@ -296,6 +296,25 @@ const teamMembersData = {
       points: ["Creator of the firm's website.", "Web developer."],
     },
   },
+  "ahmed-badran": {
+    image: "assets/team/ahmed-badran.webp",
+    ar: {
+      name: "محاسب/ احمد بدران سليم",
+      role: "المستشار الإداري والمالي للمجموعه",
+      points: [
+        "المستشار الإداري والمالي للمجموعه وعضو غير متفرغ للمجموعه",
+        "مدير إدارة بشئون العاملين للإداره العامه للموارد البشريه والشؤون الإداريه بشركة إسكندرية للصيانه البتروليه.<br>(بترومنت) احدي شركات الهيئه المصريه العامه للبترول ووزارة البترول المصريه.",
+      ],
+    },
+    en: {
+      name: "Acct./ Ahmed Badran Selim",
+      role: "Administrative and Financial Advisor to the Group",
+      points: [
+        "Administrative and Financial Advisor to the Group and non-executive member of the Group.",
+        "Director of Employee Affairs at the General Directorate of Human Resources and Administrative Affairs, Alexandria Petroleum Maintenance Company (Petromaint), one of the companies of the Egyptian General Petroleum Corporation and the Egyptian Petroleum Administration.",
+      ],
+    },
+  },
 };
 
 function playTeamMemberDetailAnimation(container) {
@@ -383,6 +402,9 @@ function getPhotoMarkup(memberId, image, name) {
   }
   if (memberId === "adham-elgayar") {
     return `<div class="team-photo-frame team-photo-frame--adham-face"><img class="team-photo team-photo--adham-elgayar" src="${image}" alt="${name}" loading="lazy" /></div>`;
+  }
+  if (memberId === "ahmed-badran") {
+    return `<div class="team-photo-frame team-photo-frame--badran-face"><img class="team-photo team-photo--ahmed-badran" src="${image}" alt="${name}" loading="lazy" /></div>`;
   }
   return `<img class="team-photo" src="${image}" alt="${name}" loading="lazy" />`;
 }

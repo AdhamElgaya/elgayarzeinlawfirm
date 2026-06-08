@@ -262,6 +262,8 @@ window.GZ_I18N_EN = {
   "team.aya-mostafa-zain.roleCard": "Lawyer",
   "team.adham-elgayar.name": "Mr. Adham Elgayar",
   "team.adham-elgayar.roleCard": "Chief Technology Officer",
+  "team.ahmed-badran.name": "Acct./ Ahmed Badran Selim",
+  "team.ahmed-badran.roleCard": "Administrative and Financial Advisor to the Group",
 
   "team.member.notFound": "Member Not Found",
   "team.member.notFoundBody": "Please return to the team page and select a valid team member.",
