@@ -1,11 +1,13 @@
 {
   "name": "elgayarzeinlawfirm",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "npm --prefix portal-server start",
     "portal": "npm --prefix portal-server start",
     "portal:dev": "npm --prefix portal-server run dev",
-    "site": "npx --yes serve -l 3001"
+    "site": "npx --yes serve -l 3001",
+    "postinstall": "npm install --prefix portal-server"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
