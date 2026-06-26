@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | المهام</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css" />
+  </head>
+  <body class="portal-page" data-page="portal-tasks" data-portal-page="tasks">
+    <header class="portal-header">
+      <div class="container portal-header__bar">
+        <a class="portal-brand" href="../index.html">
+          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
+          <span class="portal-brand-tag" data-i18n="portal.brand.portal">بوابة المحامين</span>
+        </a>
+        <div class="portal-header__end">
+          <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
+            <svg class="portal-nav-toggle__open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+            <svg class="portal-nav-toggle__close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+          <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
+            <div class="portal-header-nav__links" id="adminNavLinks">
+              <a class="portal-nav-link" href="home.html" data-nav="home">المنزل</a>
+              <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
+              <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
+              <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
+              <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
+            </div>
+          </nav>
+          <button id="logoutBtn" class="portal-btn-sm portal-header-cta" type="button" data-i18n="portal.logout">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="portal-nav-backdrop" id="portalNavBackdrop" hidden></div>
+    </header>
+    <main class="portal-main">
+      <div class="container portal-dashboard">
+        <section class="portal-panel">
+          <div class="portal-panel-head">
+            <h2 id="tasksPanelTitle" data-i18n="portal.dashboard.tasks">مهامي</h2>
+            <button type="button" class="portal-icon-btn" id="addTaskBtn" hidden aria-label="إضافة مهمة">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+          </div>
+          <div class="portal-search-bar portal-search-bar--tasks">
+            <div class="portal-task-toolbar">
+              <div class="portal-date-group">
+                <span class="portal-filter-label">التاريخ</span>
+                <div class="portal-date-nav">
+                  <button type="button" class="portal-date-nav-btn" id="taskDatePrev" aria-label="اليوم السابق">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+                  </button>
+                  <div class="portal-date-input-wrap">
+                    <input type="date" id="taskDateInput" aria-label="تاريخ المهام" />
+                  </div>
+                  <button type="button" class="portal-date-nav-btn" id="taskDateNext" aria-label="اليوم التالي">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="portal-mode-group" id="taskScopeGroup" data-admin-only hidden>
+                <span class="portal-filter-label">المهام</span>
+                <div class="portal-mode-toggle" role="group" aria-label="نطاق المهام">
+                  <button type="button" class="portal-mode-toggle-btn is-active" id="taskScopeMineBtn">مهامي</button>
+                  <button type="button" class="portal-mode-toggle-btn" id="taskScopeAllBtn">كل المهام</button>
+                </div>
+              </div>
+              <div class="portal-mode-group">
+                <span class="portal-filter-label">العرض</span>
+                <div class="portal-mode-toggle" role="group" aria-label="عرض المهام">
+                  <button type="button" class="portal-mode-toggle-btn" id="taskDateToday">مهام اليوم</button>
+                  <button type="button" class="portal-mode-toggle-btn" id="taskShowAllBtn">كل المهام</button>
+                </div>
+              </div>
+            </div>
+            <div class="portal-search-filters">
+              <div class="portal-filter-field portal-filter-field--search">
+                <label class="portal-filter-label" for="tasksSearch">بحث</label>
+                <input type="search" id="tasksSearch" placeholder="بحث بالعنوان أو القضية..." autocomplete="off" />
+              </div>
+              <div class="portal-filter-field">
+                <label class="portal-filter-label" for="taskStatusFilter">الحالة</label>
+                <div class="portal-select-wrap">
+                  <select id="taskStatusFilter">
+                    <option value="">كل الحالات</option>
+                    <option value="open">غير مكتملة</option>
+                    <option value="done">مكتملة</option>
+                  </select>
+                </div>
+              </div>
+              <div class="portal-filter-field" id="taskAssigneeFilterWrap" data-admin-only hidden>
+                <label class="portal-filter-label" for="taskAssigneeFilter">المعيّن</label>
+                <div class="portal-select-wrap">
+                  <select id="taskAssigneeFilter">
+                    <option value="">كل المعيّنين</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="portal-list" id="tasksList"></ul>
+        </section>
+      </div>
+    </main>
+
+    <script src="../i18n-en.js"></script>
+    <script src="../i18n.js"></script>
+    <script src="portal.js"></script>
+    <script src="portal-nav.js"></script>
+    <script src="portal-shared.js"></script>
+    <script>PortalDash.boot("tasks");</script>
+  </body>
+</html>

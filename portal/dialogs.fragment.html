@@ -1,0 +1,162 @@
+<dialog id="addCaseDialog" class="portal-dialog">
+  <form id="addCaseForm" class="portal-dialog-form portal-form" method="dialog">
+    <h2>إضافة قضية</h2>
+    <div id="addCaseAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>عنوان القضية</span>
+      <input type="text" name="title" required />
+    </label>
+    <label>
+      <span>اسم الموكل</span>
+      <select name="client_id" id="caseClientSelect" required></select>
+    </label>
+    <label>
+      <span>تعيين إلى</span>
+      <select name="assigned_to" id="caseAssigneeSelect" required></select>
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelCaseBtn">إلغاء</button>
+      <button class="btn" type="submit">إنشاء القضية</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="editCaseDialog" class="portal-dialog">
+  <form id="editCaseForm" class="portal-dialog-form portal-form">
+    <h2>تعديل القضية</h2>
+    <input type="hidden" name="case_id" id="editCaseId" />
+    <div id="editCaseAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>عنوان القضية</span>
+      <input type="text" name="title" id="editCaseTitle" required />
+    </label>
+    <label>
+      <span>اسم الموكل</span>
+      <select name="client_id" id="editCaseClientSelect" required></select>
+    </label>
+    <label>
+      <span>تعيين إلى</span>
+      <select name="assigned_to" id="editCaseAssigneeSelect" required></select>
+    </label>
+    <label>
+      <span>الحالة</span>
+      <select name="status" id="editCaseStatus">
+        <option value="active">نشطة</option>
+        <option value="finished">منتهية</option>
+      </select>
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelEditCaseBtn">إلغاء</button>
+      <button class="btn" type="submit">حفظ التعديلات</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="addTaskDialog" class="portal-dialog">
+  <form id="addTaskForm" class="portal-dialog-form portal-form" method="dialog">
+    <h2>إضافة مهمة</h2>
+    <div id="addTaskAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>القضية</span>
+      <select name="case_id" id="taskCaseSelect" required></select>
+    </label>
+    <div class="portal-task-case-attachments" id="taskCaseAttachmentsWrap" hidden>
+      <span class="portal-filter-label">مرفقات من القضية</span>
+      <p class="portal-task-case-attachments__hint">اختر مستندات القضية ليصلها المحامي مع المهمة.</p>
+      <div id="taskCaseAttachmentsList" class="portal-task-attachment-picks"></div>
+    </div>
+    <label>
+      <span>عنوان المهمة</span>
+      <input type="text" name="title" required />
+    </label>
+    <label id="taskAssigneeField">
+      <span>تعيين إلى</span>
+      <select name="assigned_to" id="taskAssigneeSelect" required></select>
+    </label>
+    <label>
+      <span>تاريخ الاستحقاق (اختياري)</span>
+      <input type="date" name="due_at" />
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelTaskBtn">إلغاء</button>
+      <button class="btn" type="submit">إنشاء المهمة</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="editTaskDialog" class="portal-dialog">
+  <form id="editTaskForm" class="portal-dialog-form portal-form">
+    <h2>تعديل المهمة</h2>
+    <input type="hidden" name="task_id" id="editTaskId" />
+    <div id="editTaskAlert" class="portal-alert portal-alert--error" hidden></div>
+    <div class="portal-detail-row">
+      <span>القضية</span>
+      <strong id="editTaskCaseTitle">—</strong>
+    </div>
+    <div class="portal-task-case-attachments" id="editTaskCaseAttachmentsWrap" hidden>
+      <span class="portal-filter-label">مرفقات من القضية</span>
+      <p class="portal-task-case-attachments__hint">اختر مستندات القضية ليصلها المحامي مع المهمة.</p>
+      <div id="editTaskCaseAttachmentsList" class="portal-task-attachment-picks"></div>
+    </div>
+    <label>
+      <span>عنوان المهمة</span>
+      <input type="text" name="title" id="editTaskTitle" required />
+    </label>
+    <label>
+      <span>تعيين إلى</span>
+      <select name="assigned_to" id="editTaskAssigneeSelect" required></select>
+    </label>
+    <label>
+      <span>تاريخ الاستحقاق (اختياري)</span>
+      <input type="date" name="due_at" id="editTaskDueAt" />
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelEditTaskBtn">إلغاء</button>
+      <button class="btn" type="submit">حفظ التعديلات</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="addClientDialog" class="portal-dialog">
+  <form id="addClientForm" class="portal-dialog-form portal-form" method="dialog">
+    <h2>إضافة موكل</h2>
+    <div id="addClientAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>اسم الموكل</span>
+      <input type="text" name="name" required />
+    </label>
+    <label>
+      <span>رقم الهاتف (اختياري)</span>
+      <input type="tel" name="phone" dir="ltr" />
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelClientBtn">إلغاء</button>
+      <button class="btn" type="submit">إضافة الموكل</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="detailDialog" class="portal-dialog portal-dialog--wide">
+  <div id="detailDialogBody" class="portal-dialog-form portal-detail-wrap"></div>
+</dialog>
+
+<dialog id="confirmDeleteDialog" class="portal-dialog">
+  <div class="portal-dialog-form">
+    <h2>تأكيد الحذف</h2>
+    <p id="confirmDeleteMessage" class="portal-confirm-text"></p>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="confirmDeleteCancel">إلغاء</button>
+      <button type="button" class="portal-btn-danger" id="confirmDeleteOk">حذف</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="attachmentPreviewDialog" class="portal-dialog portal-dialog--preview">
+  <div class="portal-preview-dialog">
+    <div class="portal-preview-head">
+      <h2 id="attachmentPreviewTitle">معاينة المرفق</h2>
+      <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeAttachmentPreviewBtn">إغلاق</button>
+    </div>
+    <div id="attachmentPreviewBody" class="portal-preview-body"></div>
+  </div>
+</dialog>

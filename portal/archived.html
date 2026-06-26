@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | المؤرشفه</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css" />
+  </head>
+  <body class="portal-page" data-page="portal-archived" data-portal-page="archived">
+    <header class="portal-header">
+      <div class="container portal-header__bar">
+        <a class="portal-brand" href="../index.html">
+          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
+          <span class="portal-brand-tag" data-i18n="portal.brand.portal">بوابة المحامين</span>
+        </a>
+        <div class="portal-header__end">
+          <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
+            <svg class="portal-nav-toggle__open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+            <svg class="portal-nav-toggle__close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+          <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
+            <div class="portal-header-nav__links" id="adminNavLinks">
+              <a class="portal-nav-link" href="home.html" data-nav="home">المنزل</a>
+              <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
+              <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
+              <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
+              <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
+            </div>
+          </nav>
+          <button id="logoutBtn" class="portal-btn-sm portal-header-cta" type="button" data-i18n="portal.logout">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="portal-nav-backdrop" id="portalNavBackdrop" hidden></div>
+    </header>
+    <main class="portal-main">
+      <div class="container portal-dashboard">
+        <section class="portal-panel" id="casesPanel">
+          <div class="portal-panel-head">
+            <h2 id="casesPanelTitle">المؤرشفه</h2>
+          </div>
+          <div class="portal-search-bar">
+            <input type="search" id="casesSearch" placeholder="بحث بالعنوان، الموكل، أو المحامي..." autocomplete="off" />
+          </div>
+          <ul class="portal-list" id="casesList"></ul>
+        </section>
+      </div>
+    </main>
+
+    <script src="../i18n-en.js"></script>
+    <script src="../i18n.js"></script>
+    <script src="portal.js"></script>
+    <script src="portal-nav.js"></script>
+    <script src="portal-shared.js"></script>
+    <script>PortalDash.boot("archived");</script>
+  </body>
+</html>

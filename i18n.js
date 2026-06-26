@@ -50,6 +50,7 @@
     { sel: '.footer-site-nav a[href="booking.html"]', key: "nav.bookingFooter" },
     { sel: '.footer-site-nav a[href="contact.html"]', key: "nav.contact" },
     { sel: ".footer-lang-cookie-notice", key: "footer.langCookie" },
+    { sel: '.footer-portal-nav a[href="/portal/login.html"]', key: "footer.portal.login" },
     { sel: ".footer-bottom p", key: "footer.copyright" },
     { sel: '.footer-social a[href*="facebook"]', key: "social.facebook", attr: "aria-label" },
     { sel: '.footer-social a[href*="instagram"]', key: "social.instagram", attr: "aria-label" },
@@ -130,6 +131,30 @@
     ],
     "team-member": [
       { sel: "title", key: "page.teamMember.title" },
+    ],
+    "portal-login": [
+      { sel: "title", key: "page.portal.login.title" },
+      { sel: "h1", key: "portal.login.title" },
+      { sel: ".portal-lead", key: "portal.login.lead" },
+      { sel: 'label span[data-i18n="portal.field.username"]', key: "portal.field.username" },
+      { sel: 'label span[data-i18n="portal.field.password"]', key: "portal.field.password" },
+      { sel: 'button[type="submit"]', key: "portal.login.submit" },
+      { sel: '.portal-brand [data-i18n="portal.brand.title"]', key: "portal.brand.title" },
+      { sel: '.portal-brand [data-i18n="portal.brand.portal"]', key: "portal.brand.portal" },
+    ],
+    "portal-dashboard": [
+      { sel: "title", key: "page.portal.dashboard.title" },
+      { sel: "h1", key: "portal.dashboard.title" },
+      { sel: ".portal-panel:nth-of-type(2) h2", key: "portal.dashboard.tasks" },
+      { sel: '.portal-brand [data-i18n="portal.brand.title"]', key: "portal.brand.title" },
+      { sel: '.portal-brand [data-i18n="portal.brand.portal"]', key: "portal.brand.portal" },
+      { sel: "#logoutBtn", key: "portal.logout" },
+      { sel: "#adminLink", key: "portal.admin.link" },
+    ],
+    "portal-admin": [
+      { sel: '.portal-brand [data-i18n="portal.brand.title"]', key: "portal.brand.title" },
+      { sel: '.portal-brand [data-i18n="portal.brand.admin"]', key: "portal.brand.admin" },
+      { sel: '.portal-back-link [data-i18n="portal.back"]', key: "portal.back" },
     ],
   };
 
@@ -467,6 +492,29 @@
     });
   }
 
+  function injectFooterPortalLinks() {
+    const socialCol = document.querySelector(".footer-col-social");
+    if (!socialCol || socialCol.querySelector(".footer-portal-nav")) return;
+
+    const nav = document.createElement("nav");
+    nav.className = "footer-portal-nav";
+    nav.setAttribute("aria-label", "Lawyer portal");
+
+    const loginLink = document.createElement("a");
+    loginLink.href = "/portal/login.html";
+    loginLink.setAttribute("data-i18n", "footer.portal.login");
+    loginLink.textContent = "تسجيل الدخول";
+
+    nav.append(loginLink);
+
+    const social = socialCol.querySelector(".footer-social");
+    if (social) {
+      socialCol.insertBefore(nav, social);
+    } else {
+      socialCol.appendChild(nav);
+    }
+  }
+
   function injectLanguagePicker() {
     if (document.getElementById("lang-picker")) return;
 
@@ -542,6 +590,7 @@
   function init() {
     injectLanguagePicker();
     injectFooterSwitcher();
+    injectFooterPortalLinks();
 
     const chosen = hasChosenLanguage();
     currentLang = chosen ? getStoredLang() : "ar";

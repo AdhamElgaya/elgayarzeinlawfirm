@@ -1,5 +1,15 @@
 {
+  "name": "elgayarzeinlawfirm",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix portal-server start",
+    "portal": "npm --prefix portal-server start",
+    "portal:dev": "npm --prefix portal-server run dev",
+    "site": "npx --yes serve -l 3001"
+  },
   "dependencies": {
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.2",
     "firebase": "^12.13.0"
   }
 }

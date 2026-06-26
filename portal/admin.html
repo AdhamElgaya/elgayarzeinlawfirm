@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | إدارة البوابة</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css" />
+  </head>
+  <body class="portal-page" data-page="portal-admin">
+    <header class="portal-header">
+      <div class="container">
+        <a class="portal-brand" href="home.html">
+          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
+          <span class="portal-brand-tag" data-i18n="portal.brand.admin">الحسابات</span>
+        </a>
+      </div>
+    </header>
+    <main class="portal-main">
+      <div class="container portal-dashboard">
+        <div class="portal-dashboard-head">
+          <div>
+            <a class="portal-back-link" href="home.html">
+              <svg class="portal-back-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span data-i18n="portal.back">الرجوع</span>
+            </a>
+            <h1>إدارة المستخدمين</h1>
+            <p>أنشئ حساباً للمحامي أو المساعد بكلمة مرور. اسم المستخدم للدخول: الاسم الأول والأخير بالعربية بمسافة واحدة (مثل: أحمد محمد).</p>
+          </div>
+        </div>
+
+        <div class="portal-card portal-card--wide">
+          <h2 class="portal-section-title">إنشاء حساب جديد</h2>
+          <div id="adminAlert" class="portal-alert portal-alert--error" hidden></div>
+          <div id="adminSuccess" class="portal-alert portal-alert--success" hidden></div>
+          <form id="createUserForm" class="portal-form">
+            <label>
+              <span>الاسم</span>
+              <input type="text" name="name" required />
+            </label>
+            <label>
+              <span>اسم المستخدم</span>
+              <input
+                type="text"
+                name="username"
+                placeholder="أحمد محمد"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+              />
+              <span class="portal-field-hint">الاسم الأول والأخير بالعربية، بمسافة واحدة فقط.</span>
+            </label>
+            <label>
+              <span>الدور</span>
+              <select name="role">
+                <option value="lawyer">محامي</option>
+                <option value="assistant">مساعد</option>
+                <option value="admin">مدير</option>
+              </select>
+            </label>
+            <label>
+              <span>كلمة المرور</span>
+              <input type="password" name="password" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label>
+              <span>تأكيد كلمة المرور</span>
+              <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+            </label>
+            <div class="portal-actions">
+              <button class="btn" type="submit">إنشاء الحساب</button>
+            </div>
+          </form>
+        </div>
+
+        <section class="portal-panel portal-panel--users">
+          <h2 class="portal-section-title">المستخدمون</h2>
+          <ul class="portal-list" id="usersList"></ul>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="confirmDeleteUserDialog" class="portal-dialog">
+      <div class="portal-dialog-form">
+        <h2>تأكيد الحذف</h2>
+        <p id="confirmDeleteUserMessage" class="portal-confirm-text"></p>
+        <div class="portal-dialog-actions">
+          <button type="button" class="portal-btn-ghost" id="confirmDeleteUserCancel">إلغاء</button>
+          <button type="button" class="portal-btn-danger" id="confirmDeleteUserOk">حذف</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="../i18n-en.js"></script>
+    <script src="../i18n.js"></script>
+    <script src="portal.js"></script>
+    <script>
+      const createUserForm = document.getElementById("createUserForm");
+      const adminAlert = document.getElementById("adminAlert");
+      const adminSuccess = document.getElementById("adminSuccess");
+      const usersList = document.getElementById("usersList");
+      const confirmDeleteUserDialog = document.getElementById("confirmDeleteUserDialog");
+      const confirmDeleteUserMessage = document.getElementById("confirmDeleteUserMessage");
+      const confirmDeleteUserCancel = document.getElementById("confirmDeleteUserCancel");
+      const confirmDeleteUserOk = document.getElementById("confirmDeleteUserOk");
+      let currentAdminId = null;
+
+      function askDeleteUserConfirm(name) {
+        confirmDeleteUserMessage.textContent = `سيتم حذف حساب «${name}» نهائياً وإنهاء جميع جلساته. هل تريد المتابعة؟`;
+        return new Promise((resolve) => {
+          const onCancel = () => {
+            cleanup();
+            resolve(false);
+          };
+          const onOk = () => {
+            cleanup();
+            resolve(true);
+          };
+          const cleanup = () => {
+            confirmDeleteUserCancel.removeEventListener("click", onCancel);
+            confirmDeleteUserOk.removeEventListener("click", onOk);
+            confirmDeleteUserDialog.close();
+          };
+          confirmDeleteUserCancel.addEventListener("click", onCancel);
+          confirmDeleteUserOk.addEventListener("click", onOk);
+          confirmDeleteUserDialog.showModal();
+        });
+      }
+
+      async function deleteUserAccount(userId, name) {
+        const confirmed = await askDeleteUserConfirm(name);
+        if (!confirmed) return;
+
+        Portal.hideAlert(adminAlert);
+        adminSuccess.hidden = true;
+        try {
+          const data = await Portal.request(`/admin/users/${userId}`, { method: "DELETE" });
+          Portal.showToast(data.message || "تم حذف الحساب.", "success");
+          await loadUsers();
+        } catch (error) {
+          Portal.showAlert(adminAlert, error.message);
+        }
+      }
+
+      async function loadUsers() {
+        const data = await Portal.request("/admin/users");
+        if (!data.users.length) {
+          usersList.innerHTML =
+            '<li class="portal-list-empty"><div class="portal-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" stroke-linecap="round" stroke-linejoin="round"/></svg><p>لا يوجد مستخدمون بعد.</p></div></li>';
+          return;
+        }
+        usersList.innerHTML = data.users
+          .map(
+            (u) => `<li class="portal-user-item">
+              <div class="portal-user-item__body">
+                <div class="portal-user-item__top">
+                  <strong>${Portal.escapeHtml(u.name)}</strong>
+                  <span class="portal-role-chip">${Portal.roleLabel(u.role)}</span>
+                </div>
+                <span class="portal-user-item__meta">${Portal.escapeHtml(u.username)} · ${Portal.accountStatusLabel(u.status)}</span>
+              </div>
+              ${
+                u.id !== currentAdminId
+                  ? `<div class="portal-user-item__actions">
+                      <button type="button" class="portal-btn-danger portal-btn-danger--sm" data-delete-user="${u.id}" data-user-name="${Portal.escapeHtml(u.name)}">حذف</button>
+                    </div>`
+                  : ""
+              }
+            </li>`
+          )
+          .join("");
+      }
+
+      async function boot() {
+        const user = await Portal.requireAuth();
+        if (!user) return;
+        if (user.role !== "admin") {
+          window.location.href = "home.html";
+          return;
+        }
+        currentAdminId = user.id;
+        Portal.initPasswordToggles(createUserForm);
+        usersList.addEventListener("click", async (event) => {
+          const btn = event.target.closest("[data-delete-user]");
+          if (!btn) return;
+          await deleteUserAccount(btn.dataset.deleteUser, btn.dataset.userName);
+        });
+        await loadUsers();
+      }
+
+      createUserForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        Portal.hideAlert(adminAlert);
+        adminSuccess.hidden = true;
+        const fd = new FormData(createUserForm);
+        try {
+          const data = await Portal.request("/admin/users", {
+            method: "POST",
+            body: JSON.stringify({
+              name: fd.get("name"),
+              username: fd.get("username"),
+              role: fd.get("role"),
+              password: fd.get("password"),
+              confirmPassword: fd.get("confirmPassword"),
+            }),
+          });
+          adminSuccess.hidden = false;
+          adminSuccess.textContent = data.message;
+          createUserForm.reset();
+          await loadUsers();
+        } catch (error) {
+          Portal.showAlert(adminAlert, error.message);
+        }
+      });
+
+      boot();
+    </script>
+  </body>
+</html>

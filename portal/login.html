@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | تسجيل الدخول</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css" />
+  </head>
+  <body class="portal-page" data-page="portal-login">
+    <header class="portal-header">
+      <div class="container">
+        <a class="portal-brand" href="../index.html">
+          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
+          <span class="portal-brand-tag" data-i18n="portal.brand.portal">بوابة المحامين</span>
+        </a>
+        <a class="portal-muted-link" href="../index.html">العودة للموقع</a>
+      </div>
+    </header>
+    <main class="portal-main">
+      <div class="container">
+        <div class="portal-card">
+          <h1 data-i18n="portal.login.title">تسجيل الدخول</h1>
+          <p class="portal-lead" data-i18n="portal.login.lead">للمحامين والموظفين المعتمدين في المكتب. استخدم اسم المستخدم (الاسم الأول والأخير بمسافة واحدة) وكلمة المرور التي يوفرها المدير.</p>
+          <div id="loginAlert" class="portal-alert portal-alert--error" hidden></div>
+          <form id="loginForm" class="portal-form">
+            <label>
+              <span data-i18n="portal.field.username">اسم المستخدم</span>
+              <input
+                type="text"
+                name="username"
+                placeholder="أحمد محمد"
+                autocomplete="username"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+              />
+            </label>
+            <label>
+              <span data-i18n="portal.field.password">كلمة المرور</span>
+              <input type="password" name="password" autocomplete="current-password" required />
+            </label>
+            <div class="portal-actions">
+              <button class="btn" type="submit" data-i18n="portal.login.submit">دخول</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <script src="../i18n-en.js"></script>
+    <script src="../i18n.js"></script>
+    <script src="portal.js"></script>
+    <script>
+      const form = document.getElementById("loginForm");
+      const alertEl = document.getElementById("loginAlert");
+
+      Portal.redirectIfAuthed();
+      Portal.initPasswordToggles(form);
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        Portal.hideAlert(alertEl);
+        const fd = new FormData(form);
+        try {
+          await Portal.request("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({
+              username: fd.get("username"),
+              password: fd.get("password"),
+            }),
+          });
+          window.location.href = "home.html";
+        } catch (error) {
+          Portal.showAlert(alertEl, error.message);
+        }
+      });
+    </script>
+  </body>
+</html>

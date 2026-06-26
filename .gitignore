@@ -1,0 +1,5 @@
+node_modules/
+portal-server/node_modules/
+portal-server/data/
+portal-server/uploads/
+.env
