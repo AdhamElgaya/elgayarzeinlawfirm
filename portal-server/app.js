@@ -20,6 +20,7 @@ export async function createApp() {
     .map((value) => value.trim())
     .filter(Boolean);
   const crossOriginApi = allowedOrigins.length > 0;
+  const apiOnly = process.env.API_ONLY === "true" || crossOriginApi;
 
   app.set("trust proxy", 1);
 
@@ -60,13 +61,15 @@ export async function createApp() {
   });
 
   const portalPages = ["login", "home", "clients", "cases", "archived", "tasks", "dashboard", "admin"];
-  for (const page of portalPages) {
-    app.get(`/portal/${page}`, (_req, res, next) => {
-      res.sendFile(path.join(rootDir, "portal", `${page}.html`), (err) => (err ? next() : undefined));
-    });
-  }
+  if (!apiOnly) {
+    for (const page of portalPages) {
+      app.get(`/portal/${page}`, (_req, res, next) => {
+        res.sendFile(path.join(rootDir, "portal", `${page}.html`), (err) => (err ? next() : undefined));
+      });
+    }
 
-  app.use(express.static(rootDir));
+    app.use(express.static(rootDir));
+  }
 
   app.use((error, _req, res, _next) => {
     console.error("[portal] unhandled error:", error);

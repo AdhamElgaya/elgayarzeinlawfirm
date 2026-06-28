@@ -633,7 +633,8 @@ const PortalDash = (() => {
   }
 
   function attachmentHref(item) {
-    if (item?.filename && item?.id) return `/api/dashboard/attachments/${item.id}`;
+    const api = typeof Portal.apiRoot === "function" ? Portal.apiRoot() : "/api";
+    if (item?.filename && item?.id) return `${api}/dashboard/attachments/${item.id}`;
     return item?.url || "";
   }
 

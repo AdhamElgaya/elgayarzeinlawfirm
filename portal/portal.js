@@ -4,6 +4,10 @@ const Portal = (() => {
     return base.replace(/\/$/, "");
   }
 
+  function apiCredentials() {
+    return apiRoot().startsWith("http") ? "include" : "same-origin";
+  }
+
   async function request(path, options = {}) {
     const headers = { ...(options.headers || {}) };
     const hasBody = options.body !== undefined && options.body !== null;
@@ -12,7 +16,7 @@ const Portal = (() => {
     }
 
     const res = await fetch(`${apiRoot()}${path}`, {
-      credentials: "same-origin",
+      credentials: apiCredentials(),
       headers,
       ...options,
     });
@@ -124,7 +128,7 @@ const Portal = (() => {
 
   async function upload(path, formData) {
     const res = await fetch(`${apiRoot()}${path}`, {
-      credentials: "same-origin",
+      credentials: apiCredentials(),
       method: "POST",
       body: formData,
     });
@@ -275,6 +279,7 @@ const Portal = (() => {
   return {
     request,
     upload,
+    apiRoot,
     showAlert,
     hideAlert,
     showToast,

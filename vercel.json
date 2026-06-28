@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install && npm install --prefix portal-server",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/portal/(login|home|clients|cases|archived|tasks|dashboard|admin)", "destination": "/api" }
-  ]
+  "buildCommand": "node scripts/write-portal-api-config.js",
+  "installCommand": "npm install"
 }
