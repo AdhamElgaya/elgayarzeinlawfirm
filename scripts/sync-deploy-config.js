@@ -39,8 +39,7 @@ window.PORTAL_API_BASE = "";
 
 const vercelConfig = {
   $schema: "https://openapi.vercel.sh/vercel.json",
-  installCommand: "npm install",
-  buildCommand: "node scripts/sync-deploy-config.js",
+  installCommand: "npm install && node scripts/sync-deploy-config.js",
 };
 
 if (railwayOrigin) {
