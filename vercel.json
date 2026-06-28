@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install",
-  "buildCommand": "node scripts/sync-deploy-config.js"
+  "buildCommand": "node scripts/sync-deploy-config.js",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://elgayarzeinlawfirm-production-f6ce.up.railway.app/api/$1"
+    }
+  ]
 }
