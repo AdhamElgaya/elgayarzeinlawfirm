@@ -9,6 +9,9 @@
     "site": "npx --yes serve -l 3001",
     "postinstall": "npm install --prefix portal-server"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
