@@ -4,6 +4,10 @@ const Portal = (() => {
     return base.replace(/\/$/, "");
   }
 
+  function usingExternalApi() {
+    return apiRoot().startsWith("http");
+  }
+
   function apiCredentials() {
     return apiRoot().startsWith("http") ? "include" : "same-origin";
   }
@@ -36,7 +40,14 @@ const Portal = (() => {
       if (res.status === 404) {
         throw new Error(
           data?.error ||
-            "Portal API not available. Stop npx serve and run npm start from the project folder instead."
+            (usingExternalApi()
+              ? "Portal API not available on the backend server."
+              : "Portal API not available. Set PORTAL_API_BASE on Vercel to your Railway URL.")
+        );
+      }
+      if (res.status === 500 && !usingExternalApi()) {
+        throw new Error(
+          "الخادم يحاول الاتصال بـ /api على Vercel. أضف PORTAL_API_BASE في إعدادات Vercel (رابط Railway + /api) ثم أعد النشر."
         );
       }
       const message = data?.error || `Request failed (${res.status}).`;
