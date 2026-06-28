@@ -295,6 +295,90 @@ function runQuery(dbRef, sql, params, mutate) {
     return [row];
   }
 
+  if (lower.startsWith("delete from tasks where case_id = ?")) {
+    if (mutate) {
+      dbRef.data.tasks = dbRef.data.tasks.filter((t) => t.case_id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from tasks where assigned_to = ? or created_by = ?")) {
+    if (mutate) {
+      dbRef.data.tasks = dbRef.data.tasks.filter(
+        (t) => t.assigned_to !== params[0] && t.created_by !== params[1]
+      );
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from tasks") {
+    if (mutate) {
+      dbRef.data.tasks = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from cases where id = ?")) {
+    if (mutate) {
+      dbRef.data.cases = dbRef.data.cases.filter((c) => c.id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from cases where assigned_to = ? or created_by = ?")) {
+    if (mutate) {
+      dbRef.data.cases = dbRef.data.cases.filter(
+        (c) => c.assigned_to !== params[0] && c.created_by !== params[1]
+      );
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from cases") {
+    if (mutate) {
+      dbRef.data.cases = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from clients where created_by = ?")) {
+    if (mutate) {
+      dbRef.data.clients = dbRef.data.clients.filter((c) => c.created_by !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from clients") {
+    if (mutate) {
+      dbRef.data.clients = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from audit_logs where user_id = ?")) {
+    if (mutate) {
+      dbRef.data.audit_logs = dbRef.data.audit_logs.filter((log) => log.user_id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from audit_logs") {
+    if (mutate) {
+      dbRef.data.audit_logs = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
   if (lower.startsWith("delete from sessions where id = ?")) {
     if (mutate) {
       dbRef.data.sessions = dbRef.data.sessions.filter((s) => s.id !== params[0]);
@@ -319,6 +403,30 @@ function runQuery(dbRef, sql, params, mutate) {
     return [];
   }
 
+  if (lower === "delete from invitations") {
+    if (mutate) {
+      dbRef.data.invitations = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from sessions") {
+    if (mutate) {
+      dbRef.data.sessions = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from users where id != ?")) {
+    if (mutate) {
+      dbRef.data.users = dbRef.data.users.filter((u) => u.id === params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
   if (lower.startsWith("delete from users where id = ?")) {
     if (mutate) {
       const before = dbRef.data.users.length;
@@ -328,8 +436,18 @@ function runQuery(dbRef, sql, params, mutate) {
     return [];
   }
 
+  if (lower.includes("select count(*) as count from users") && lower.includes("role = 'admin'")) {
+    const count = dbRef.data.users.filter((u) => u.role === "admin" && u.status === "active").length;
+    return [{ count }];
+  }
+
   if (lower.includes("select count(*) as count from users")) {
     return [{ count: dbRef.data.users.length }];
+  }
+
+  if (lower.includes("from users where role = 'admin'") && lower.includes("status = 'active'")) {
+    const user = dbRef.data.users.find((u) => u.role === "admin" && u.status === "active");
+    return user ? [user] : [];
   }
 
   if (lower.includes("from users where username = ?")) {
@@ -534,6 +652,12 @@ function runQuery(dbRef, sql, params, mutate) {
     return dbRef.data.cases
       .filter((c) => c.client_id === params[0] && !c.deleted_at)
       .sort((a, b) => b.opened_at.localeCompare(a.opened_at));
+  }
+
+  if (lower.includes("select id from cases where assigned_to = ? or created_by = ?")) {
+    return dbRef.data.cases
+      .filter((c) => c.assigned_to === params[0] || c.created_by === params[1])
+      .map((c) => ({ id: c.id }));
   }
 
   if (lower.includes("from cases where id = ?")) {
