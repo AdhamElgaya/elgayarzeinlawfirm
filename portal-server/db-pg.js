@@ -35,7 +35,7 @@ function normalizeRow(row) {
   if (!row) return row;
   const out = { ...row };
   if (out.count !== undefined) out.count = Number(out.count);
-  for (const key of ["attachments", "metadata"]) {
+  for (const key of ["attachments", "metadata", "subscription"]) {
     out[key] = normalizeValue(out[key]);
   }
   if (out.attachments === null) out.attachments = [];

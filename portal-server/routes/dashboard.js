@@ -34,6 +34,12 @@ import {
   softDeleteTask,
 } from "../lib/entities.js";
 import { requireAuth } from "../middleware/auth.js";
+import {
+  getVapidPublicKey,
+  isPushConfigured,
+  removePushSubscription,
+  savePushSubscription,
+} from "../lib/push.js";
 
 const router = Router();
 
@@ -507,7 +513,9 @@ router.patch("/tasks/:id", async (req, res) => {
     }
 
     await db
-      .prepare(`UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ? WHERE id = ?`)
+      .prepare(
+        `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL WHERE id = ?`
+      )
       .run(title, assignedTo, dueAt, attachments, row.id);
 
     await writeAudit({
@@ -639,6 +647,34 @@ router.get("/assignees", async (req, res) => {
       .all()
   ).filter((u) => u.status === "active" && ["lawyer", "assistant"].includes(u.role));
   res.json({ users });
+});
+
+router.get("/push/vapid-key", requireAuth, (req, res) => {
+  if (!isPushConfigured()) {
+    return res.json({ enabled: false });
+  }
+  res.json({ enabled: true, publicKey: getVapidPublicKey() });
+});
+
+router.post("/push/subscribe", requireAuth, async (req, res) => {
+  if (!isPushConfigured()) {
+    return res.status(503).json({ error: "الإشعارات غير مفعّلة على الخادم." });
+  }
+
+  try {
+    await savePushSubscription(req.user.id, req.body?.subscription);
+    res.json({ message: "تم تفعيل الإشعارات." });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "تعذر حفظ الاشتراك." });
+  }
+});
+
+router.delete("/push/subscribe", requireAuth, async (req, res) => {
+  const endpoint = String(req.body?.endpoint || "");
+  if (endpoint) {
+    await removePushSubscription(req.user.id, endpoint);
+  }
+  res.json({ ok: true });
 });
 
 export default router;

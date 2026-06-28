@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "data");
 const storePath = process.env.DATABASE_PATH || path.join(dataDir, "portal.json");
 
-const tables = ["users", "sessions", "invitations", "clients", "cases", "tasks", "audit_logs"];
+const tables = ["users", "sessions", "invitations", "clients", "cases", "tasks", "audit_logs", "push_subscriptions"];
 
 function emptyDb() {
   return Object.fromEntries(tables.map((t) => [t, []]));
@@ -28,6 +28,10 @@ function load() {
   migrateCases(data);
   migrateCaseFields(data);
   migrateTasks(data);
+  if (!data.push_subscriptions) {
+    data.push_subscriptions = [];
+    save(data);
+  }
   return data;
 }
 
@@ -36,6 +40,10 @@ function migrateTasks(data) {
   for (const row of data.tasks || []) {
     if (!Array.isArray(row.attachments)) {
       row.attachments = [];
+      changed = true;
+    }
+    if (row.reminder_sent_at === undefined) {
+      row.reminder_sent_at = null;
       changed = true;
     }
   }
@@ -283,6 +291,7 @@ function runQuery(dbRef, sql, params, mutate) {
       assigned_to: params[3],
       status: "open",
       due_at: params[4] || null,
+      reminder_sent_at: null,
       created_by: params[5],
       attachments: hasAttachments ? params[6] ?? [] : [],
       deleted_at: null,
@@ -374,6 +383,85 @@ function runQuery(dbRef, sql, params, mutate) {
   if (lower === "delete from audit_logs") {
     if (mutate) {
       dbRef.data.audit_logs = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("insert into push_subscriptions")) {
+    const row = {
+      id: params[0],
+      user_id: params[1],
+      endpoint: params[2],
+      subscription: params[3],
+      created_at: new Date().toISOString(),
+    };
+    if (mutate) {
+      if (!dbRef.data.push_subscriptions) dbRef.data.push_subscriptions = [];
+      dbRef.data.push_subscriptions.push(row);
+      save(dbRef.data);
+    }
+    return [row];
+  }
+
+  if (lower.startsWith("update push_subscriptions set user_id")) {
+    const row = (dbRef.data.push_subscriptions || []).find((s) => s.endpoint === params[2]);
+    if (row && mutate) {
+      row.user_id = params[0];
+      row.subscription = params[1];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from push_subscriptions where user_id = ? and endpoint = ?")) {
+    if (mutate) {
+      dbRef.data.push_subscriptions = (dbRef.data.push_subscriptions || []).filter(
+        (s) => !(s.user_id === params[0] && s.endpoint === params[1])
+      );
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from push_subscriptions where id = ?")) {
+    if (mutate) {
+      dbRef.data.push_subscriptions = (dbRef.data.push_subscriptions || []).filter((s) => s.id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("delete from push_subscriptions where user_id = ?")) {
+    if (mutate) {
+      dbRef.data.push_subscriptions = (dbRef.data.push_subscriptions || []).filter((s) => s.user_id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower === "delete from push_subscriptions") {
+    if (mutate) {
+      dbRef.data.push_subscriptions = [];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("select id from push_subscriptions where endpoint = ?")) {
+    return (dbRef.data.push_subscriptions || [])
+      .filter((s) => s.endpoint === params[0])
+      .map((s) => ({ id: s.id }));
+  }
+
+  if (lower.startsWith("select id, endpoint, subscription from push_subscriptions where user_id = ?")) {
+    return (dbRef.data.push_subscriptions || []).filter((s) => s.user_id === params[0]);
+  }
+
+  if (lower.startsWith("update sessions set expires_at")) {
+    const row = dbRef.data.sessions.find((s) => s.id === params[1]);
+    if (row && mutate) {
+      row.expires_at = params[0];
       save(dbRef.data);
     }
     return [];
@@ -579,12 +667,22 @@ function runQuery(dbRef, sql, params, mutate) {
   }
 
   if (lower.startsWith("update tasks set title")) {
-    const row = dbRef.data.tasks.find((t) => t.id === params[4] && !t.deleted_at);
+    const row = dbRef.data.tasks.find((t) => t.id === params[5] && !t.deleted_at);
     if (row && mutate) {
       row.title = params[0];
       row.assigned_to = params[1];
       row.due_at = params[2];
       row.attachments = params[3] ?? [];
+      row.reminder_sent_at = null;
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("update tasks set reminder_sent_at")) {
+    const row = dbRef.data.tasks.find((t) => t.id === params[1]);
+    if (row && mutate) {
+      row.reminder_sent_at = params[0];
       save(dbRef.data);
     }
     return [];
@@ -741,6 +839,23 @@ function runQuery(dbRef, sql, params, mutate) {
         };
       })
       .sort((a, b) => b.opened_at.localeCompare(a.opened_at));
+  }
+
+  if (lower.includes("reminder_sent_at is null") && lower.includes("from tasks t")) {
+    return dbRef.data.tasks
+      .filter((t) => {
+        if (t.deleted_at || t.status !== "open") return false;
+        if (!t.due_at || t.reminder_sent_at || !t.assigned_to) return false;
+        const caseRow = dbRef.data.cases.find((c) => c.id === t.case_id);
+        return caseRow && !caseRow.deleted_at;
+      })
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        due_at: t.due_at,
+        assigned_to: t.assigned_to,
+        case_title: dbRef.data.cases.find((c) => c.id === t.case_id)?.title || "",
+      }));
   }
 
   if (lower.includes("from tasks t")) {

@@ -226,6 +226,44 @@ const Portal = (() => {
     });
   }
 
+  function hasDueTime(iso) {
+    return Boolean(iso && String(iso).includes("T"));
+  }
+
+  function buildDueAt(dateValue, timeValue) {
+    const date = String(dateValue || "").trim();
+    if (!date) return null;
+    const time = String(timeValue || "").trim();
+    if (!time) return date;
+    const parsed = new Date(`${date}T${time}:00`);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toISOString();
+  }
+
+  function formatTimeInput(iso) {
+    if (!hasDueTime(iso)) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return "";
+    return new Date(iso).toLocaleString(locale(), {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
+  function formatTaskDue(iso) {
+    if (!iso) return "";
+    return hasDueTime(iso) ? formatDateTime(iso) : formatDate(iso);
+  }
+
   function roleLabel(role) {
     const labels = {
       admin: "مدير",
@@ -301,6 +339,11 @@ const Portal = (() => {
     t,
     formatNumber,
     formatDate,
+    formatDateTime,
+    formatTaskDue,
+    formatTimeInput,
+    buildDueAt,
+    hasDueTime,
     roleLabel,
     statusLabel,
     accountStatusLabel,

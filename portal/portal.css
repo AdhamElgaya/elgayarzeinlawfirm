@@ -281,6 +281,30 @@
   font-weight: 600;
 }
 
+.portal-form label.portal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.portal-form label.portal-checkbox input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--gold);
+}
+
+.portal-lead--compact {
+  margin-bottom: 0.75rem;
+  font-size: 0.88rem;
+}
+
+.portal-actions--wrap {
+  flex-wrap: wrap;
+}
+
 .portal-form input,
 .portal-form select {
   width: 100%;

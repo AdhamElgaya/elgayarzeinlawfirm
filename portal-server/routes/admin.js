@@ -385,7 +385,9 @@ router.patch("/tasks/:id", async (req, res) => {
 
   const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
   await db
-    .prepare(`UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ? WHERE id = ?`)
+    .prepare(
+      `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL WHERE id = ?`
+    )
     .run(title, assignedTo, dueAt, attachments, taskRow.id);
 
   await writeAudit({

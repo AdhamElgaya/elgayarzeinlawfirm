@@ -299,7 +299,7 @@ const PortalDash = (() => {
                 ${badge(t.status)}
               </div>
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
-              <span class="portal-list-item__meta">${Portal.escapeHtml(t.case_title)}${t.due_at ? ` — ${due} ${Portal.formatDate(t.due_at)}` : ""}</span>
+              <span class="portal-list-item__meta">${Portal.escapeHtml(t.case_title)}${t.due_at ? ` — ${due} ${Portal.formatTaskDue(t.due_at)}` : ""}</span>
             </div>
             ${showMoreBtn("show-task", t.id)}
           </div>
@@ -799,7 +799,7 @@ const PortalDash = (() => {
         ? `<div class="portal-detail-situation portal-detail-situation--${latest.status === "done" ? "done" : "open"}">
             <strong>الوضع الحالي (آخر مهمة)</strong>
             <p>${Portal.escapeHtml(latest.title)} — ${Portal.statusLabel(latest.status)}</p>
-            ${latest.due_at ? `<span class="portal-list-item__meta">مستحق: ${Portal.formatDate(latest.due_at)}</span>` : ""}
+            ${latest.due_at ? `<span class="portal-list-item__meta">مستحق: ${Portal.formatTaskDue(latest.due_at)}</span>` : ""}
           </div>`
         : `<p class="portal-detail-empty">لا توجد مهام بعد لهذه القضية.</p>`;
       const attachments = c.attachments || [];
@@ -900,6 +900,7 @@ const PortalDash = (() => {
       document.getElementById("editTaskTitle").value = t.title;
       fillTaskAssigneeSelect(document.getElementById("editTaskAssigneeSelect"), t.assigned_to);
       document.getElementById("editTaskDueAt").value = t.due_at ? Portal.formatDateInput(t.due_at) : "";
+      document.getElementById("editTaskDueTime").value = Portal.formatTimeInput(t.due_at);
       const selectedIds = (t.attachments || []).filter(isSavedAttachment).map((item) => item.id);
       await renderTaskCaseAttachmentPicks(t.case_id, {
         wrapId: "editTaskCaseAttachmentsWrap",
@@ -937,7 +938,7 @@ const PortalDash = (() => {
           ${detailRow("القضية", Portal.escapeHtml(t.case_title || "—"))}
           ${detailRow("معيّنة إلى", t.assignee_name ? Portal.escapeHtml(t.assignee_name) : "—")}
           ${detailRow("الحالة", Portal.statusLabel(t.status))}
-          ${detailRow("تاريخ الاستحقاق", t.due_at ? Portal.formatDate(t.due_at) : "—")}
+          ${detailRow("موعد المهمة", t.due_at ? Portal.formatTaskDue(t.due_at) : "—")}
           <h3 class="portal-detail-subtitle">مرفقات المهمة</h3>
           ${attachmentsHtml}
           <div class="portal-detail-actions portal-detail-actions--status">
@@ -974,8 +975,8 @@ const PortalDash = (() => {
     }
   }
 
-  async function collectCaseAttachments(caseId) {
-    const rows = [...detailDialogBody.querySelectorAll(".portal-attachment-row")];
+  async function collectCaseAttachments(caseId, root = detailDialogBody) {
+    const rows = [...(root || document).querySelectorAll(".portal-attachment-row")];
     const attachments = [];
 
     for (const row of rows) {
@@ -1097,6 +1098,8 @@ const PortalDash = (() => {
     addCaseBtn?.addEventListener("click", () => {
       Portal.hideAlert(addCaseAlert);
       addCaseForm.reset();
+      const attachmentsList = document.getElementById("addCaseAttachmentsList");
+      if (attachmentsList) attachmentsList.innerHTML = "";
       clients = dashboardData?.clients || [];
       fillAssigneeSelect(caseAssigneeSelect);
       fillClientSelect();
@@ -1104,6 +1107,13 @@ const PortalDash = (() => {
     });
 
     document.getElementById("cancelCaseBtn")?.addEventListener("click", () => addCaseDialog.close());
+
+    document.getElementById("addCaseAttachmentBtn")?.addEventListener("click", () => {
+      const list = document.getElementById("addCaseAttachmentsList");
+      if (!list) return;
+      const index = list.querySelectorAll(".portal-attachment-row").length;
+      list.insertAdjacentHTML("beforeend", draftAttachmentRow({}, index));
+    });
 
     addCaseForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1113,8 +1123,18 @@ const PortalDash = (() => {
         Portal.showAlert(addCaseAlert, "أضف موكلاً أولاً.");
         return;
       }
+
+      const submitBtn = document.getElementById("saveAddCaseBtn");
+      const attachmentsRoot = document.getElementById("addCaseAttachmentsList");
+      const notes = document.getElementById("addCaseNotesInput")?.value?.trim() || "";
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "جاري الإنشاء...";
+      }
+
       try {
-        await Portal.request("/admin/cases", {
+        const data = await Portal.request("/admin/cases", {
           method: "POST",
           body: JSON.stringify({
             title: fd.get("title"),
@@ -1122,10 +1142,24 @@ const PortalDash = (() => {
             assigned_to: fd.get("assigned_to"),
           }),
         });
+        const caseId = data.case?.id;
+        if (caseId && (notes || attachmentsRoot?.querySelector(".portal-attachment-row"))) {
+          const attachments = await collectCaseAttachments(caseId, attachmentsRoot);
+          await Portal.request(`/dashboard/cases/${caseId}`, {
+            method: "PATCH",
+            body: JSON.stringify({ notes, attachments }),
+          });
+        }
         addCaseDialog.close();
+        Portal.showToast("تم إنشاء القضية.", "success");
         await refresh();
       } catch (error) {
         Portal.showAlert(addCaseAlert, error.message);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "إنشاء القضية";
+        }
       }
     });
   }
@@ -1191,7 +1225,7 @@ const PortalDash = (() => {
       const body = {
         case_id: fd.get("case_id"),
         title: fd.get("title"),
-        due_at: fd.get("due_at") || null,
+        due_at: Portal.buildDueAt(fd.get("due_at"), fd.get("due_time")),
         attachments: [...addTaskForm.querySelectorAll('input[name="task_attachment_ids"]:checked')].map(
           (el) => el.value
         ),
@@ -1297,7 +1331,7 @@ const PortalDash = (() => {
     const body = {
       title,
       assigned_to: assignedTo,
-      due_at: fd.get("due_at") || null,
+      due_at: Portal.buildDueAt(fd.get("due_at"), fd.get("due_time")),
       attachments: [...form.querySelectorAll('input[name="edit_task_attachment_ids"]:checked')].map((el) => el.value),
     };
 
@@ -1638,6 +1672,38 @@ const PortalDash = (() => {
     }
   }
 
+  async function ensurePortalPush() {
+    if (window.PortalPush) return;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "portal-push.js";
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("Failed to load push module"));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function openPendingTaskFromUrl() {
+    const taskId = new URLSearchParams(window.location.search).get("task");
+    if (!taskId) return;
+    await openTaskDetail(taskId);
+    history.replaceState({}, "", window.location.pathname);
+  }
+
+  function setupPushNavigation() {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data?.type !== "portal-open-url") return;
+      const url = new URL(event.data.url, window.location.origin);
+      const taskId = url.searchParams.get("task");
+      if (taskId) {
+        openTaskDetail(taskId);
+        return;
+      }
+      window.location.href = url.pathname + url.search;
+    });
+  }
+
   async function boot(page = "home") {
     pageType = page;
     await ensureDialogs();
@@ -1682,8 +1748,21 @@ const PortalDash = (() => {
 
     setupListActions();
     setupAttachmentPreview();
+    setupPushNavigation();
 
     await refresh();
+    await openPendingTaskFromUrl();
+
+    try {
+      await ensurePortalPush();
+      PortalPush.ensureManifest();
+      PortalPush.registerServiceWorker();
+      if (pageType === "home") {
+        await PortalPush.initUi("pushNotifyPanel");
+      }
+    } catch {
+      /* push optional */
+    }
   }
 
   window.addEventListener("gz:languagechange", renderPage);

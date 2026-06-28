@@ -1,0 +1,26 @@
+{
+  "name": "بوابة الجيار و زين",
+  "short_name": "الجيار و زين",
+  "description": "بوابة المحامين — مكتب الجيار و زين",
+  "start_url": "/portal/home.html",
+  "scope": "/portal/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

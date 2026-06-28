@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   assigned_to TEXT REFERENCES users(id),
   status TEXT NOT NULL CHECK (status IN ('open', 'done')),
   due_at TIMESTAMPTZ,
+  reminder_sent_at TIMESTAMPTZ,
   attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_by TEXT REFERENCES users(id),
   deleted_at TIMESTAMPTZ,
@@ -86,3 +87,13 @@ CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_clients_deleted ON clients(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_cases_deleted ON cases(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_deleted ON tasks(deleted_at);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL UNIQUE,
+  subscription JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id);

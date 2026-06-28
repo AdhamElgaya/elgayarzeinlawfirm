@@ -171,6 +171,7 @@ export async function deleteUser(userId) {
   await db.prepare(`DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?`).run(userId, userId);
   await db.prepare(`DELETE FROM clients WHERE created_by = ?`).run(userId);
   await db.prepare(`DELETE FROM audit_logs WHERE user_id = ?`).run(userId);
+  await db.prepare(`DELETE FROM push_subscriptions WHERE user_id = ?`).run(userId);
   await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
   await db.prepare(`DELETE FROM invitations WHERE user_id = ?`).run(userId);
   await db.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
@@ -181,6 +182,7 @@ export async function resetPortalData(adminUserId) {
   await db.prepare(`DELETE FROM cases`).run();
   await db.prepare(`DELETE FROM clients`).run();
   await db.prepare(`DELETE FROM audit_logs`).run();
+  await db.prepare(`DELETE FROM push_subscriptions`).run();
   await db.prepare(`DELETE FROM sessions`).run();
   await db.prepare(`DELETE FROM invitations`).run();
   await db.prepare(`DELETE FROM users WHERE id != ?`).run(adminUserId);

@@ -8,35 +8,20 @@ import { normalizeUsername } from "../lib/username.js";
 import {
   SESSION_COOKIE,
   SESSION_DAYS,
+  SESSION_REMEMBER_DAYS,
   getUserFromSession,
   publicUser,
   requireAuth,
+  setSessionCookie,
+  clearSessionCookie,
 } from "../middleware/auth.js";
 
 const router = Router();
 
-function sessionCookieOptions() {
-  const crossOrigin = Boolean(process.env.ALLOWED_ORIGINS?.trim());
-  return {
-    httpOnly: true,
-    sameSite: crossOrigin ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000,
-    path: "/",
-  };
-}
-
-function setSessionCookie(res, sessionId) {
-  res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions());
-}
-
-function clearSessionCookie(res) {
-  res.clearCookie(SESSION_COOKIE, { ...sessionCookieOptions(), maxAge: 0 });
-}
-
 router.get("/me", async (req, res) => {
   try {
-    const user = await getUserFromSession(req.cookies[SESSION_COOKIE]);
+    const sessionId = req.cookies[SESSION_COOKIE];
+    const user = await getUserFromSession(sessionId, { refresh: true, res });
     if (!user) {
       return res.status(401).json({ authenticated: false });
     }
@@ -51,6 +36,7 @@ router.post("/login", async (req, res) => {
   try {
     const username = normalizeUsername(req.body?.username);
     const password = String(req.body?.password || "");
+    const rememberMe = Boolean(req.body?.remember_me);
 
     if (!username || !password) {
       return res.status(400).json({ error: "Username and password are required." });
@@ -71,16 +57,22 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
+    const sessionDays = rememberMe ? SESSION_REMEMBER_DAYS : SESSION_DAYS;
     const sessionId = uuid();
-    const expiresAt = sessionExpiry(SESSION_DAYS);
+    const expiresAt = sessionExpiry(sessionDays);
     await db.prepare(`INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`).run(
       sessionId,
       user.id,
       expiresAt
     );
 
-    setSessionCookie(res, sessionId);
-    await writeAudit({ userId: user.id, action: "login_success", ip: req.ip });
+    setSessionCookie(res, sessionId, sessionDays);
+    await writeAudit({
+      userId: user.id,
+      action: "login_success",
+      metadata: { remember_me: rememberMe },
+      ip: req.ip,
+    });
 
     res.json({
       user: publicUser(user),

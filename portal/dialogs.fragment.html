@@ -1,5 +1,5 @@
-<dialog id="addCaseDialog" class="portal-dialog">
-  <form id="addCaseForm" class="portal-dialog-form portal-form" method="dialog">
+<dialog id="addCaseDialog" class="portal-dialog portal-dialog--wide">
+  <form id="addCaseForm" class="portal-dialog-form portal-form">
     <h2>إضافة قضية</h2>
     <div id="addCaseAlert" class="portal-alert portal-alert--error" hidden></div>
     <label>
@@ -14,9 +14,18 @@
       <span>تعيين إلى</span>
       <select name="assigned_to" id="caseAssigneeSelect" required></select>
     </label>
+    <h3 class="portal-detail-subtitle">ملاحظات القضية</h3>
+    <textarea id="addCaseNotesInput" name="notes" class="portal-detail-notes" rows="4" placeholder="أضف ملاحظات عن القضية..."></textarea>
+    <h3 class="portal-detail-subtitle">مرفقات القضية</h3>
+    <div id="addCaseAttachmentsList" class="portal-attachments"></div>
+    <div class="portal-detail-actions portal-detail-actions--case">
+      <div class="portal-detail-actions__end">
+        <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="addCaseAttachmentBtn">إضافة مرفق</button>
+      </div>
+    </div>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelCaseBtn">إلغاء</button>
-      <button class="btn" type="submit">إنشاء القضية</button>
+      <button class="btn" type="submit" id="saveAddCaseBtn">إنشاء القضية</button>
     </div>
   </form>
 </dialog>
@@ -77,6 +86,10 @@
       <span>تاريخ الاستحقاق (اختياري)</span>
       <input type="date" name="due_at" />
     </label>
+    <label>
+      <span>وقت المهمة (اختياري — بدونه يُذكَّر الساعة 6:00 ص)</span>
+      <input type="time" name="due_time" />
+    </label>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelTaskBtn">إلغاء</button>
       <button class="btn" type="submit">إنشاء المهمة</button>
@@ -109,6 +122,10 @@
     <label>
       <span>تاريخ الاستحقاق (اختياري)</span>
       <input type="date" name="due_at" id="editTaskDueAt" />
+    </label>
+    <label>
+      <span>وقت المهمة (اختياري — بدونه يُذكَّر الساعة 6:00 ص)</span>
+      <input type="time" name="due_time" id="editTaskDueTime" />
     </label>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelEditTaskBtn">إلغاء</button>
