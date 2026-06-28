@@ -5,9 +5,11 @@ if (!connectionString) {
   throw new Error("DATABASE_URL or SUPABASE_DB_URL is required for PostgreSQL mode.");
 }
 
+const isLocalDb = /localhost|127\.0\.0\.1/.test(connectionString);
+
 const pool = new pg.Pool({
   connectionString,
-  ssl: connectionString.includes("supabase") ? { rejectUnauthorized: false } : undefined,
+  ssl: isLocalDb ? undefined : { rejectUnauthorized: false },
 });
 
 function toPgSql(sql) {
@@ -43,7 +45,7 @@ function normalizeRow(row) {
 function prepareParams(params) {
   return params.map((value) => {
     if (value !== null && typeof value === "object" && !(value instanceof Date)) {
-      return JSON.stringify(value);
+      return value;
     }
     return value;
   });
@@ -73,6 +75,9 @@ class Statement {
 const db = {
   prepare(sql) {
     return new Statement(sql);
+  },
+  async ping() {
+    await pool.query("SELECT 1");
   },
   async transaction(fn) {
     const client = await pool.connect();

@@ -7,7 +7,7 @@ import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import { seedAdmin } from "./seed.js";
-import { dbMode } from "./db.js";
+import db, { dbMode } from "./db.js";
 import { storageMode } from "./lib/storage.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,8 +24,19 @@ export async function createApp() {
   app.use("/api/admin", adminRoutes);
   app.use("/api/dashboard", dashboardRoutes);
 
-  app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, database: dbMode, storage: storageMode });
+  app.get("/api/health", async (_req, res) => {
+    const payload = { ok: true, database: dbMode, storage: storageMode };
+    if (typeof db.ping === "function") {
+      try {
+        await db.ping();
+        payload.database_ok = true;
+      } catch (error) {
+        payload.ok = false;
+        payload.database_ok = false;
+        payload.database_error = error.message;
+      }
+    }
+    res.status(payload.ok ? 200 : 503).json(payload);
   });
 
   const portalPages = ["login", "home", "clients", "cases", "archived", "tasks", "dashboard", "admin"];
@@ -37,7 +48,17 @@ export async function createApp() {
 
   app.use(express.static(rootDir));
 
-  await seedAdmin();
+  app.use((error, _req, res, _next) => {
+    console.error("[portal] unhandled error:", error);
+    res.status(500).json({ error: "حدث خطأ في الخادم." });
+  });
+
+  try {
+    await seedAdmin();
+  } catch (error) {
+    console.error("[portal] seed admin failed:", error);
+    throw error;
+  }
 
   return app;
 }

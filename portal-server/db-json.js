@@ -138,6 +138,7 @@ const db = {
   exec() {
     save(this.data);
   },
+  async ping() {},
 };
 
 function runQuery(dbRef, sql, params, mutate) {
