@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/write-portal-api-config.js",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "buildCommand": "node scripts/sync-deploy-config.js"
 }

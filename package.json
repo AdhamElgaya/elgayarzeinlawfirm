@@ -7,7 +7,8 @@
     "portal": "npm --prefix portal-server start",
     "portal:dev": "npm --prefix portal-server run dev",
     "site": "npx --yes serve -l 3001",
-    "postinstall": "npm install --prefix portal-server"
+    "postinstall": "npm install --prefix portal-server",
+    "vercel:config": "node scripts/sync-deploy-config.js"
   },
   "engines": {
     "node": ">=20"
