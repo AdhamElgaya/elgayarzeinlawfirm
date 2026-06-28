@@ -15,26 +15,36 @@ import {
 
 const router = Router();
 
-function setSessionCookie(res, sessionId) {
-  res.cookie(SESSION_COOKIE, sessionId, {
+function sessionCookieOptions() {
+  const crossOrigin = Boolean(process.env.ALLOWED_ORIGINS?.trim());
+  return {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: crossOrigin ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000,
     path: "/",
-  });
+  };
+}
+
+function setSessionCookie(res, sessionId) {
+  res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions());
 }
 
 function clearSessionCookie(res) {
-  res.clearCookie(SESSION_COOKIE, { path: "/" });
+  res.clearCookie(SESSION_COOKIE, { ...sessionCookieOptions(), maxAge: 0 });
 }
 
 router.get("/me", async (req, res) => {
-  const user = await getUserFromSession(req.cookies[SESSION_COOKIE]);
-  if (!user) {
-    return res.status(401).json({ authenticated: false });
+  try {
+    const user = await getUserFromSession(req.cookies[SESSION_COOKIE]);
+    if (!user) {
+      return res.status(401).json({ authenticated: false });
+    }
+    res.json({ authenticated: true, user: publicUser(user) });
+  } catch (error) {
+    console.error("[portal] auth/me error:", error);
+    res.status(500).json({ error: "تعذر التحقق من الجلسة." });
   }
-  res.json({ authenticated: true, user: publicUser(user) });
 });
 
 router.post("/login", async (req, res) => {

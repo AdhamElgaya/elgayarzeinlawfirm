@@ -1,5 +1,8 @@
 const Portal = (() => {
-  const API = "/api";
+  function apiRoot() {
+    const base = window.PORTAL_API_BASE || "/api";
+    return base.replace(/\/$/, "");
+  }
 
   async function request(path, options = {}) {
     const headers = { ...(options.headers || {}) };
@@ -8,7 +11,7 @@ const Portal = (() => {
       headers["Content-Type"] = "application/json";
     }
 
-    const res = await fetch(`${API}${path}`, {
+    const res = await fetch(`${apiRoot()}${path}`, {
       credentials: "same-origin",
       headers,
       ...options,
@@ -120,7 +123,7 @@ const Portal = (() => {
   }
 
   async function upload(path, formData) {
-    const res = await fetch(`${API}${path}`, {
+    const res = await fetch(`${apiRoot()}${path}`, {
       credentials: "same-origin",
       method: "POST",
       body: formData,
