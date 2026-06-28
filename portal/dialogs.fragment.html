@@ -85,7 +85,7 @@
 </dialog>
 
 <dialog id="editTaskDialog" class="portal-dialog">
-  <form id="editTaskForm" class="portal-dialog-form portal-form">
+  <form id="editTaskForm" class="portal-dialog-form portal-form" novalidate>
     <h2>تعديل المهمة</h2>
     <input type="hidden" name="task_id" id="editTaskId" />
     <div id="editTaskAlert" class="portal-alert portal-alert--error" hidden></div>
@@ -112,7 +112,7 @@
     </label>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelEditTaskBtn">إلغاء</button>
-      <button class="btn" type="submit">حفظ التعديلات</button>
+      <button class="btn" type="submit" id="saveEditTaskBtn">حفظ التعديلات</button>
     </div>
   </form>
 </dialog>

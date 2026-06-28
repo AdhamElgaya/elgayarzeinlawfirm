@@ -460,6 +460,71 @@ router.patch("/tasks/:id", async (req, res) => {
     return res.status(404).json({ error: "المهمة غير موجودة أو غير متاحة." });
   }
 
+  const isAdmin = req.user.role === "admin";
+  const hasMetaUpdate =
+    req.body?.title !== undefined ||
+    req.body?.assigned_to !== undefined ||
+    req.body?.due_at !== undefined ||
+    req.body?.attachments !== undefined;
+
+  if (hasMetaUpdate) {
+    if (!isAdmin) {
+      return res.status(403).json({ error: "غير مصرح بتعديل المهمة." });
+    }
+
+    const caseRow = await db
+      .prepare(`SELECT id, title, status, attachments FROM cases WHERE id = ? AND deleted_at IS NULL`)
+      .get(row.case_id);
+    if (!caseRow || caseRow.status === "archived") {
+      return res.status(400).json({ error: "القضية المرتبطة بالمهمة غير موجودة أو مؤرشفة." });
+    }
+
+    let title = row.title;
+    let assignedTo = row.assigned_to;
+    let dueAt = row.due_at ?? null;
+    let attachments = Array.isArray(row.attachments) ? row.attachments : [];
+
+    if (req.body?.title !== undefined) {
+      title = String(req.body.title || "").trim();
+      if (!title) {
+        return res.status(400).json({ error: "عنوان المهمة مطلوب." });
+      }
+    }
+
+    if (req.body?.assigned_to !== undefined) {
+      assignedTo = String(req.body.assigned_to || "");
+      if (!(await getTaskAssignee(assignedTo, req.user))) {
+        return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+      }
+    }
+
+    if (req.body?.due_at !== undefined) {
+      dueAt = req.body.due_at ? String(req.body.due_at) : null;
+    }
+
+    if (req.body?.attachments !== undefined) {
+      attachments = pickCaseAttachments(caseRow, req.body.attachments);
+    }
+
+    await db
+      .prepare(`UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ? WHERE id = ?`)
+      .run(title, assignedTo, dueAt, attachments, row.id);
+
+    await writeAudit({
+      userId: req.user.id,
+      action: "task_updated",
+      entityType: "task",
+      entityId: row.id,
+      metadata: { title, assigned_to: assignedTo, attachments_count: attachments.length },
+      ip: req.ip,
+    });
+
+    return res.json({
+      task: await enrichTask({ ...row, title, assigned_to: assignedTo, due_at: dueAt, attachments }),
+      message: "تم تحديث المهمة.",
+    });
+  }
+
   const status = String(req.body?.status || "");
   if (!["open", "done"].includes(status)) {
     return res.status(400).json({ error: "حالة المهمة غير صالحة." });

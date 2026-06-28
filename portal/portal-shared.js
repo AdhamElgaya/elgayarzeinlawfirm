@@ -1271,6 +1271,51 @@ const PortalDash = (() => {
 
   let editTaskControlsBound = false;
 
+  async function saveEditTaskForm(form) {
+    const alertEl = document.getElementById("editTaskAlert");
+    const dialog = document.getElementById("editTaskDialog");
+    const submitBtn = form.querySelector("#saveEditTaskBtn");
+    Portal.hideAlert(alertEl);
+
+    const fd = new FormData(form);
+    const taskId = fd.get("task_id");
+    const title = String(fd.get("title") || "").trim();
+    const assignedTo = String(fd.get("assigned_to") || "");
+    if (!taskId) {
+      Portal.showAlert(alertEl, "تعذر تحديد المهمة.");
+      return;
+    }
+    if (!title) {
+      Portal.showAlert(alertEl, "عنوان المهمة مطلوب.");
+      return;
+    }
+    if (!assignedTo) {
+      Portal.showAlert(alertEl, "يجب اختيار محامٍ أو مساعد.");
+      return;
+    }
+
+    const body = {
+      title,
+      assigned_to: assignedTo,
+      due_at: fd.get("due_at") || null,
+      attachments: [...form.querySelectorAll('input[name="edit_task_attachment_ids"]:checked')].map((el) => el.value),
+    };
+
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      await Portal.request(`/dashboard/tasks/${taskId}`, { method: "PATCH", body: JSON.stringify(body) });
+      dialog?.close();
+      Portal.showToast("تم الحفظ");
+      await refresh();
+      await openTaskDetail(taskId);
+    } catch (error) {
+      Portal.showAlert(alertEl, error.message);
+      Portal.showToast(error.message, "error");
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
   function setupEditTaskControls() {
     if (!isAdminUser || editTaskControlsBound) return;
     editTaskControlsBound = true;
@@ -1285,45 +1330,7 @@ const PortalDash = (() => {
       const form = event.target;
       if (form?.id !== "editTaskForm") return;
       event.preventDefault();
-
-      const alertEl = document.getElementById("editTaskAlert");
-      const dialog = document.getElementById("editTaskDialog");
-      const submitBtn = form.querySelector('button[type="submit"]');
-      Portal.hideAlert(alertEl);
-
-      const fd = new FormData(form);
-      const taskId = fd.get("task_id");
-      const title = String(fd.get("title") || "").trim();
-      const assignedTo = String(fd.get("assigned_to") || "");
-      if (!taskId) return;
-      if (!title) {
-        Portal.showAlert(alertEl, "عنوان المهمة مطلوب.");
-        return;
-      }
-      if (!assignedTo) {
-        Portal.showAlert(alertEl, "يجب اختيار محامٍ أو مساعد.");
-        return;
-      }
-
-      const body = {
-        title,
-        assigned_to: assignedTo,
-        due_at: fd.get("due_at") || null,
-        attachments: [...form.querySelectorAll('input[name="edit_task_attachment_ids"]:checked')].map((el) => el.value),
-      };
-
-      if (submitBtn) submitBtn.disabled = true;
-      try {
-        await Portal.request(`/admin/tasks/${taskId}`, { method: "PATCH", body: JSON.stringify(body) });
-        dialog?.close();
-        Portal.showToast("تم الحفظ");
-        await refresh();
-        await openTaskDetail(taskId);
-      } catch (error) {
-        Portal.showAlert(alertEl, error.message);
-      } finally {
-        if (submitBtn) submitBtn.disabled = false;
-      }
+      await saveEditTaskForm(form);
     });
   }
 

@@ -45,7 +45,7 @@ function normalizeRow(row) {
 function prepareParams(params) {
   return params.map((value) => {
     if (value !== null && typeof value === "object" && !(value instanceof Date)) {
-      return value;
+      return JSON.stringify(value);
     }
     return value;
   });

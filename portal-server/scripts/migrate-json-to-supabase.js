@@ -1,18 +1,17 @@
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
-dotenv.config({ path: path.join(__dirname, ".env") });
-
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import db, { dbMode } from "../db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
+dotenv.config({ path: path.join(__dirname, ".env") });
+
 const jsonPath = process.env.DATABASE_PATH || path.join(__dirname, "..", "data", "portal.json");
+
+const USER_ID_FIELDS = ["user_id", "assigned_to", "created_by"];
+const JSONB_FIELDS = new Set(["attachments", "metadata"]);
 
 if (dbMode !== "supabase") {
   console.error("Set DATABASE_URL (Supabase connection string) before running migration.");
@@ -27,12 +26,59 @@ if (!fs.existsSync(jsonPath)) {
 const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 const tables = ["users", "sessions", "invitations", "clients", "cases", "tasks", "audit_logs"];
 
-async function insertRows(table, rows, sql) {
-  for (const row of rows) {
-    const values = sql.columns.map((col) => row[col] ?? null);
-    await db.prepare(sql.text).run(...values);
+function remapUserIds(row, idMap) {
+  const out = { ...row };
+  for (const field of USER_ID_FIELDS) {
+    if (out[field] && idMap[out[field]]) {
+      out[field] = idMap[out[field]];
+    }
   }
-  console.log(`  ${table}: ${rows.length} rows`);
+  return out;
+}
+
+async function buildUserIdMap(jsonUsers = []) {
+  const existing = await db.prepare(`SELECT id, username FROM users`).all();
+  const byUsername = new Map(existing.map((user) => [user.username, user.id]));
+  const idMap = {};
+
+  for (const user of jsonUsers) {
+    const existingId = byUsername.get(user.username);
+    if (existingId && existingId !== user.id) {
+      idMap[user.id] = existingId;
+      console.log(`  users: map ${user.username} ${user.id} → ${existingId}`);
+    }
+  }
+
+  return idMap;
+}
+
+async function insertRows(table, rows, sql, idMap = {}) {
+  let inserted = 0;
+  let skipped = 0;
+
+  for (const row of rows) {
+    const mapped = table === "users" ? row : remapUserIds(row, idMap);
+    const values = sql.columns.map((col) => {
+      const value = mapped[col] ?? null;
+      if (JSONB_FIELDS.has(col) && value !== null && typeof value === "object") {
+        return JSON.stringify(value);
+      }
+      return value;
+    });
+
+    try {
+      await db.prepare(sql.text).run(...values);
+      inserted += 1;
+    } catch (error) {
+      if (error.code === "23505") {
+        skipped += 1;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  console.log(`  ${table}: ${inserted} inserted${skipped ? `, ${skipped} skipped (already exist)` : ""}`);
 }
 
 const inserts = {
@@ -108,15 +154,22 @@ const inserts = {
 
 console.log(`Migrating ${jsonPath} → Supabase...`);
 
+const userIdMap = await buildUserIdMap(data.users || []);
+
 for (const table of tables) {
   const rows = data[table] || [];
   if (!rows.length) continue;
   const normalized = rows.map((row) => ({
     ...row,
     attachments: row.attachments ?? [],
-    metadata: typeof row.metadata === "string" ? JSON.parse(row.metadata) : row.metadata,
+    metadata:
+      row.metadata === undefined || row.metadata === null
+        ? null
+        : typeof row.metadata === "string"
+          ? JSON.parse(row.metadata)
+          : row.metadata,
   }));
-  await insertRows(table, normalized, inserts[table]);
+  await insertRows(table, normalized, inserts[table], userIdMap);
 }
 
 console.log("Migration complete.");
