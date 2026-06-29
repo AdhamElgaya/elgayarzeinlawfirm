@@ -95,7 +95,36 @@ const PortalPush = (() => {
     ensureManifest();
 
     if (!isSupported()) {
-      container.hidden = true;
+      container.hidden = false;
+      container.innerHTML = `
+        <div class="portal-panel-head">
+          <h2>الإشعارات</h2>
+        </div>
+        <p class="portal-lead portal-lead--compact">
+          هذا المتصفح لا يدعم إشعارات المهام. استخدم Chrome أو Edge على الكمبيوتر، أو على iPhone أضف الموقع إلى الشاشة الرئيسية ثم افتحه من هناك (iOS 16.4+).
+        </p>
+      `;
+      return;
+    }
+
+    let serverEnabled = true;
+    try {
+      const keyData = await Portal.request("/dashboard/push/vapid-key");
+      serverEnabled = Boolean(keyData.enabled && keyData.publicKey);
+    } catch {
+      serverEnabled = false;
+    }
+
+    if (!serverEnabled) {
+      container.hidden = false;
+      container.innerHTML = `
+        <div class="portal-panel-head">
+          <h2>الإشعارات</h2>
+        </div>
+        <p class="portal-lead portal-lead--compact">
+          الإشعارات غير مفعّلة على الخادم حالياً. اطلب من المدير ضبط مفاتيح VAPID على Railway.
+        </p>
+      `;
       return;
     }
 

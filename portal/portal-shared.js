@@ -1829,7 +1829,7 @@ const PortalDash = (() => {
       await ensurePortalPush();
       PortalPush.ensureManifest();
       PortalPush.registerServiceWorker();
-      if (pageType === "home" || pageType === "tasks") {
+      if (document.getElementById("pushNotifyPanel")) {
         await PortalPush.initUi("pushNotifyPanel");
       }
     } catch {

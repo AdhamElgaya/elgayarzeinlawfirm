@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="portal.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
   </head>
   <body class="portal-page" data-page="portal-cases" data-portal-page="cases">
     <header class="portal-header">
@@ -41,6 +43,7 @@
     </header>
     <main class="portal-main">
       <div class="container portal-dashboard">
+        <section class="portal-panel" id="pushNotifyPanel" hidden></section>
         <section class="portal-panel" id="casesPanel">
           <div class="portal-panel-head">
             <h2 id="casesPanelTitle">قضاياي</h2>
