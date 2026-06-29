@@ -283,7 +283,7 @@ function runQuery(dbRef, sql, params, mutate) {
 
   if (lower.startsWith("insert into tasks")) {
     const now = new Date().toISOString();
-    const hasAttachments = lower.includes("attachments");
+    const hasAssignedAt = lower.includes("assigned_at");
     const row = {
       id: params[0],
       case_id: params[1],
@@ -293,7 +293,8 @@ function runQuery(dbRef, sql, params, mutate) {
       due_at: params[4] || null,
       reminder_sent_at: null,
       created_by: params[5],
-      attachments: hasAttachments ? params[6] ?? [] : [],
+      attachments: hasAssignedAt ? params[6] ?? [] : params[6] ?? [],
+      assigned_at: hasAssignedAt ? params[7] || now : now,
       deleted_at: null,
       created_at: now,
     };
@@ -591,6 +592,27 @@ function runQuery(dbRef, sql, params, mutate) {
     ];
   }
 
+  if (lower.startsWith("update users set name = ?, username = ?, password_hash = ?")) {
+    const user = dbRef.data.users.find((u) => u.id === params[3]);
+    if (user && mutate) {
+      user.name = params[0];
+      user.username = params[1];
+      user.password_hash = params[2];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
+  if (lower.startsWith("update users set name = ?, username = ?")) {
+    const user = dbRef.data.users.find((u) => u.id === params[2]);
+    if (user && mutate) {
+      user.name = params[0];
+      user.username = params[1];
+      save(dbRef.data);
+    }
+    return [];
+  }
+
   if (lower.startsWith("update users set password_hash")) {
     const user = dbRef.data.users.find((u) => u.id === params[2]);
     if (user && mutate) {
@@ -674,6 +696,7 @@ function runQuery(dbRef, sql, params, mutate) {
       row.due_at = params[2];
       row.attachments = params[3] ?? [];
       row.reminder_sent_at = null;
+      row.assigned_at = params[4] || row.assigned_at || row.created_at;
       save(dbRef.data);
     }
     return [];

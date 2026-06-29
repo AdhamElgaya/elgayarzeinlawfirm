@@ -21,7 +21,8 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { openFile, putFile } from "../lib/storage.js";
+import { openFile, putFile, signedGetUrl, signedPutUrl, fileExists } from "../lib/storage.js";
+import { assertAllowedUpload } from "../lib/upload-policy.js";
 import {
   archiveCase,
   displayId,
@@ -61,6 +62,14 @@ const upload = multer({
           },
         }),
   limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    try {
+      assertAllowedUpload(file.originalname, file.mimetype);
+      cb(null, true);
+    } catch (error) {
+      cb(error);
+    }
+  },
 });
 
 router.use(requireAuth);
@@ -99,7 +108,7 @@ router.get("/summary", async (req, res) => {
 
   const taskRows = await db
     .prepare(
-      `SELECT t.id, t.title, t.status, t.due_at, t.case_id, t.assigned_to, t.created_at, c.title AS case_title
+      `SELECT t.id, t.title, t.status, t.due_at, t.case_id, t.assigned_to, t.assigned_at, t.created_at, c.title AS case_title
        FROM tasks t
        JOIN cases c ON c.id = t.case_id
        WHERE t.deleted_at IS NULL
@@ -279,7 +288,7 @@ router.patch("/cases/:id", async (req, res) => {
   const notes = String(req.body?.notes ?? row.notes ?? "").trim();
   const previousAttachments = Array.isArray(row.attachments) ? row.attachments : [];
   const previousById = new Map(previousAttachments.map((item) => [item.id, item]));
-  const attachments = Array.isArray(req.body?.attachments)
+  let attachments = Array.isArray(req.body?.attachments)
     ? req.body.attachments
         .map((item) => {
           const normalized = normalizeAttachment(item);
@@ -288,6 +297,15 @@ router.patch("/cases/:id", async (req, res) => {
         })
         .filter(isValidAttachment)
     : previousAttachments;
+
+  if (!isAdmin && Array.isArray(req.body?.attachments)) {
+    const preserved = previousAttachments
+      .map((item) => normalizeAttachment(item))
+      .filter(isValidAttachment);
+    const preservedIds = new Set(preserved.map((item) => item.id));
+    const additions = attachments.filter((item) => item.id && !preservedIds.has(item.id));
+    attachments = [...preserved, ...additions];
+  }
 
   await deleteOrphanedFiles(previousAttachments, attachments);
 
@@ -358,12 +376,122 @@ router.post("/cases/:id/archive", async (req, res) => {
 });
 
 router.post(
+  "/cases/:caseId/attachments/presign",
+  async (req, res) => {
+    const row = await getCaseIfAccessible(req.user, req.params.caseId);
+    if (!row) {
+      return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
+    }
+
+    if (!canEditCase(req.user, row)) {
+      return res.status(403).json({ error: "غير مصرح برفع مرفقات لهذه القضية." });
+    }
+
+    if (storageMode !== "r2") {
+      return res.status(400).json({ error: "الرفع المباشر متاح فقط مع R2." });
+    }
+
+    const originalName = String(req.body?.originalName || "").trim();
+    const mimeType = String(req.body?.mimeType || "application/octet-stream").trim();
+    const size = Number(req.body?.size || 0);
+    const label = String(req.body?.label || originalName || "").trim();
+    if (!originalName || !label) {
+      return res.status(400).json({ error: "بيانات المرفق غير مكتملة." });
+    }
+    if (!Number.isFinite(size) || size <= 0 || size > 15 * 1024 * 1024) {
+      return res.status(400).json({ error: "حجم الملف غير صالح (الحد الأقصى 15MB)." });
+    }
+
+    try {
+      assertAllowedUpload(originalName, mimeType);
+    } catch (error) {
+      return res.status(error.statusCode || 400).json({ error: error.message });
+    }
+
+    const attachmentId = uuid();
+    const key = storedFilename(attachmentId, originalName);
+    try {
+      const uploadUrl = await signedPutUrl(key, mimeType, 300);
+      res.json({
+        attachmentId,
+        key,
+        uploadUrl,
+        expiresIn: 300,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "تعذر إنشاء رابط الرفع." });
+    }
+  }
+);
+
+router.post("/cases/:caseId/attachments/finalize", async (req, res) => {
+  const row = await getCaseIfAccessible(req.user, req.params.caseId);
+  if (!row) {
+    return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
+  }
+
+  if (!canEditCase(req.user, row)) {
+    return res.status(403).json({ error: "غير مصرح برفع مرفقات لهذه القضية." });
+  }
+
+  const attachmentId = String(req.body?.attachmentId || "").trim();
+  const key = String(req.body?.key || "").trim();
+  const label = String(req.body?.label || "").trim();
+  const originalName = String(req.body?.originalName || "").trim();
+  const mimeType = String(req.body?.mimeType || "").trim();
+  const size = Number(req.body?.size || 0);
+
+  if (!attachmentId || !key || !label || !originalName) {
+    return res.status(400).json({ error: "بيانات المرفق غير مكتملة." });
+  }
+
+  const expectedKey = storedFilename(attachmentId, originalName);
+  if (key !== expectedKey) {
+    return res.status(400).json({ error: "مفتاح الملف غير صالح." });
+  }
+
+  try {
+    assertAllowedUpload(originalName, mimeType);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
+  }
+
+  if (!(await fileExists(key))) {
+    return res.status(400).json({ error: "لم يتم العثور على الملف المرفوع. أعد الرفع وحاول مرة أخرى." });
+  }
+
+  const attachment = normalizeAttachment({
+    id: attachmentId,
+    label,
+    filename: key,
+    originalName,
+    mimeType: mimeType || "application/octet-stream",
+    size: Number.isFinite(size) ? size : undefined,
+  });
+  if (!isValidAttachment(attachment)) {
+    return res.status(400).json({ error: "المرفق غير صالح." });
+  }
+
+  res.status(201).json({
+    attachment,
+    message: "تم رفع الملف.",
+  });
+});
+
+router.post(
   "/cases/:caseId/attachments",
   (req, res, next) => {
     req.attachmentId = uuid();
     next();
   },
-  upload.single("file"),
+  (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        return res.status(err.statusCode || 400).json({ error: err.message || "تعذر رفع الملف." });
+      }
+      next();
+    });
+  },
   async (req, res) => {
     let storedKey = null;
 
@@ -391,6 +519,13 @@ router.post(
     if (!label) {
       await cleanup();
       return res.status(400).json({ error: "اسم المرفق مطلوب." });
+    }
+
+    try {
+      assertAllowedUpload(req.file.originalname, req.file.mimetype);
+    } catch (error) {
+      await cleanup();
+      return res.status(error.statusCode || 400).json({ error: error.message });
     }
 
     try {
@@ -428,18 +563,34 @@ router.get("/attachments/:attachmentId", async (req, res) => {
   }
 
   const { attachment } = access;
+  const downloadName = attachmentDownloadName(attachment);
+  const inline = req.query.view === "1" || req.query.inline === "1";
+  const disposition = inline
+    ? attachmentInlineContentDisposition(downloadName)
+    : attachmentContentDisposition(downloadName);
+  const mimeType = attachmentMimeType(attachment);
+
+  if (storageMode === "r2") {
+    try {
+      const url = await signedGetUrl(attachment.filename, {
+        contentType: mimeType,
+        contentDisposition: disposition,
+        expiresInSeconds: 120,
+      });
+      if (!url) {
+        return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
+      }
+      return res.redirect(302, url);
+    } catch {
+      return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
+    }
+  }
+
   const opened = await openFile(attachment.filename);
   if (!opened?.body) {
     return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
   }
-
-  const downloadName = attachmentDownloadName(attachment);
-  const mimeType = attachmentMimeType(attachment, opened.filePath || "");
-  const inline = req.query.view === "1" || req.query.inline === "1";
-  res.setHeader(
-    "Content-Disposition",
-    inline ? attachmentInlineContentDisposition(downloadName) : attachmentContentDisposition(downloadName)
-  );
+  res.setHeader("Content-Disposition", disposition);
   res.type(mimeType);
   if (opened.contentLength != null) {
     res.setHeader("Content-Length", String(opened.contentLength));
@@ -504,6 +655,11 @@ router.patch("/tasks/:id", async (req, res) => {
       }
     }
 
+    let assignedAt = row.assigned_at || row.created_at;
+    if (req.body?.assigned_to !== undefined && assignedTo !== row.assigned_to) {
+      assignedAt = new Date().toISOString();
+    }
+
     if (req.body?.due_at !== undefined) {
       dueAt = req.body.due_at ? String(req.body.due_at) : null;
     }
@@ -514,9 +670,9 @@ router.patch("/tasks/:id", async (req, res) => {
 
     await db
       .prepare(
-        `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL WHERE id = ?`
+        `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL, assigned_at = ? WHERE id = ?`
       )
-      .run(title, assignedTo, dueAt, attachments, row.id);
+      .run(title, assignedTo, dueAt, attachments, assignedAt, row.id);
 
     await writeAudit({
       userId: req.user.id,
@@ -528,7 +684,7 @@ router.patch("/tasks/:id", async (req, res) => {
     });
 
     return res.json({
-      task: await enrichTask({ ...row, title, assigned_to: assignedTo, due_at: dueAt, attachments }),
+      task: await enrichTask({ ...row, title, assigned_to: assignedTo, due_at: dueAt, attachments, assigned_at: assignedAt }),
       message: "تم تحديث المهمة.",
     });
   }
@@ -602,12 +758,13 @@ router.post("/tasks", async (req, res) => {
 
   const taskId = uuid();
   const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
+  const assignedAt = new Date().toISOString();
   await db
     .prepare(
-      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments);
+    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
   await writeAudit({
     userId: req.user.id,
@@ -627,7 +784,8 @@ router.post("/tasks", async (req, res) => {
       status: "open",
       due_at: dueAt,
       attachments,
-      created_at: new Date().toISOString(),
+      assigned_at: assignedAt,
+      created_at: assignedAt,
     }),
     message: "تم إنشاء المهمة.",
   });

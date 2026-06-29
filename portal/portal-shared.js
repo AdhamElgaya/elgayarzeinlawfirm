@@ -87,7 +87,7 @@ const PortalDash = (() => {
 
   function renderWelcome(user) {
     if (!welcomeText) return;
-    welcomeText.textContent = `${Portal.t("portal.dashboard.welcome", "مرحباً،")} ${user.name} (${Portal.roleLabel(user.role)})`;
+    welcomeText.textContent = `${Portal.t("portal.dashboard.welcome", "مرحباً،")} ${user.name}`;
   }
 
   function renderStats(stats) {
@@ -181,6 +181,7 @@ const PortalDash = (() => {
           t.title,
           t.case_title || "",
           assigneeName,
+          Portal.formatAssignmentStamp(t.assigned_at || t.created_at),
           Portal.statusLabel(t.status),
           t.due_at ? Portal.formatDateInput(t.due_at) : "",
         ]
@@ -285,11 +286,8 @@ const PortalDash = (() => {
     const assigned = Portal.t("portal.dashboard.assignedTo", "معيّنة إلى:");
     listEl.innerHTML = rows
       .map((t) => {
-        const assigneeName =
-          (isAdminUser && t.assigned_to && assigneeNames[t.assigned_to]) ||
-          t.assignee_name ||
-          "";
-        const assigneeLine = assigneeName ? `${assigned} ${Portal.escapeHtml(assigneeName)}` : "";
+        const assignmentLine = taskAssignmentHtml(t);
+        const assigneeLine = assignmentLine ? `${assigned} ${assignmentLine}` : "";
         const statusClass = t.status === "done" ? "portal-list-item--done" : "portal-list-item--open";
         return `<li class="portal-list-item ${statusClass}">
           <div class="portal-list-item__row">
@@ -478,6 +476,16 @@ const PortalDash = (() => {
     return `<div class="portal-detail-row"><span>${label}</span><strong>${value}</strong></div>`;
   }
 
+  function taskAssignmentHtml(task) {
+    const name =
+      (isAdminUser && task.assigned_to && assigneeNames[task.assigned_to]) ||
+      task.assignee_name ||
+      "";
+    if (!name) return "";
+    const when = Portal.formatAssignmentStamp(task.assigned_at || task.created_at);
+    return when ? `${Portal.escapeHtml(name)} @ ${when}` : Portal.escapeHtml(name);
+  }
+
   function deleteBtn(action, id, label = "حذف") {
     return `<button type="button" class="portal-btn-danger" data-action="${action}" data-id="${id}">${label}</button>`;
   }
@@ -608,7 +616,7 @@ const PortalDash = (() => {
         : `<p class="portal-detail-empty">لا توجد قضايا مرتبطة بهذا الموكل.</p>`;
       detailDialogBody.innerHTML = `
         <div class="portal-detail" data-client-id="${client.id}">
-          <div class="portal-detail-head">
+          <div class="portal-detail-head portal-detail-head--client">
             <div class="portal-detail-title-block">
               <span class="portal-detail-label">اسم الموكل</span>
               <p class="portal-detail-name">${Portal.escapeHtml(client.name)}</p>
@@ -739,9 +747,14 @@ const PortalDash = (() => {
     });
   }
 
-  function savedAttachmentRow(item) {
+  function savedAttachmentRow(item, canDelete = true) {
     const href = attachmentHref(item);
+    const viewHref = attachmentViewHref(item);
     const label = item.label || item.originalName || item.filename || "مرفق";
+    const mimeType = item.mimeType || "";
+    const originalName = item.originalName || "";
+    const filename = item.filename || "";
+    const canView = Boolean(viewHref && item.filename);
 
     return `<div class="portal-attachment-row portal-attachment-row--saved"
       data-attachment-id="${Portal.escapeHtml(item.id)}"
@@ -758,7 +771,27 @@ const PortalDash = (() => {
             : `<span class="portal-attachment-saved-label">${Portal.escapeHtml(label)}</span>`
         }
       </div>
-      <button type="button" class="portal-btn-danger portal-attachment-remove" data-saved="1">حذف</button>
+      <div class="portal-attachment-saved-actions">
+        ${
+          canView
+            ? `<button type="button" class="portal-attachment-view-btn" data-action="view-attachment" data-view-url="${Portal.escapeHtml(viewHref)}" data-mime-type="${Portal.escapeHtml(mimeType)}" data-original-name="${Portal.escapeHtml(originalName)}" data-filename="${Portal.escapeHtml(filename)}" data-label="${Portal.escapeHtml(label)}" aria-label="عرض ${Portal.escapeHtml(label)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>`
+            : ""
+        }
+        ${
+          href
+            ? `<a class="portal-attachment-download-link" href="${Portal.escapeHtml(href)}" title="تنزيل" aria-label="تنزيل ${Portal.escapeHtml(label)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>`
+            : ""
+        }
+        ${
+          canDelete
+            ? `<button type="button" class="portal-btn-danger portal-attachment-remove" data-saved="1">حذف</button>`
+            : ""
+        }
+      </div>
     </div>`;
   }
 
@@ -779,10 +812,10 @@ const PortalDash = (() => {
     </div>`;
   }
 
-  function renderCaseAttachments(attachments = []) {
+  function renderCaseAttachments(attachments = [], canDelete = isAdminUser) {
     const list = document.getElementById("caseAttachmentsList");
     if (!list) return;
-    list.innerHTML = attachments.map((item) => savedAttachmentRow(item)).join("");
+    list.innerHTML = attachments.map((item) => savedAttachmentRow(item, canDelete)).join("");
   }
 
   async function openCaseDetail(caseId) {
@@ -792,6 +825,7 @@ const PortalDash = (() => {
       const data = await Portal.request(`/dashboard/cases/${caseId}`);
       const c = data.case;
       const canEdit = isAdminUser || c.assigned_to === dashboardUser?.id;
+      const canDeleteAttachments = isAdminUser;
       const canEditCaseInfo = isAdminUser && c.status !== "archived";
       const canArchiveCase = isAdminUser && c.status !== "archived";
       const latest = c.latest_task;
@@ -809,7 +843,8 @@ const PortalDash = (() => {
             <h2>${Portal.escapeHtml(c.title)}</h2>
             <div class="portal-detail-head-actions">
               ${canEditCaseInfo ? editBtn("edit-case", c.id) : ""}
-              <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
+              ${canArchiveCase ? archiveBtn("archive-case", c.id) : ""}
+              ${!canEdit ? `<button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>` : ""}
             </div>
           </div>
           ${detailRow("الموكل", c.client?.name ? Portal.escapeHtml(c.client.name) : "—")}
@@ -825,14 +860,17 @@ const PortalDash = (() => {
           }
           <h3 class="portal-detail-subtitle">مرفقات القضية</h3>
           <div id="caseAttachmentsList" class="portal-attachments">
-            ${attachments.filter(isSavedAttachment).map((item) => savedAttachmentRow(item)).join("")}
+            ${attachments
+              .filter(isSavedAttachment)
+              .map((item) => savedAttachmentRow(item, canDeleteAttachments))
+              .join("")}
           </div>
           ${
             canEdit
               ? `<div class="portal-detail-actions portal-detail-actions--case">
-                  ${canArchiveCase ? archiveBtn("archive-case", c.id) : ""}
                   <div class="portal-detail-actions__end">
                     <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="addAttachmentBtn">إضافة مرفق</button>
+                    <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
                     <button type="button" class="btn" id="saveCaseBtn">حفظ</button>
                   </div>
                 </div>`
@@ -936,7 +974,7 @@ const PortalDash = (() => {
             </div>
           </div>
           ${detailRow("القضية", Portal.escapeHtml(t.case_title || "—"))}
-          ${detailRow("معيّنة إلى", t.assignee_name ? Portal.escapeHtml(t.assignee_name) : "—")}
+          ${detailRow("معيّنة إلى", taskAssignmentHtml(t) || "—")}
           ${detailRow("الحالة", Portal.statusLabel(t.status))}
           ${detailRow("موعد المهمة", t.due_at ? Portal.formatTaskDue(t.due_at) : "—")}
           <h3 class="portal-detail-subtitle">مرفقات المهمة</h3>
@@ -1014,10 +1052,38 @@ const PortalDash = (() => {
       }
 
       if (pendingFile) {
-        const formData = new FormData();
-        formData.append("file", pendingFile);
-        formData.append("label", label);
-        const data = await Portal.upload(`/dashboard/cases/${caseId}/attachments`, formData);
+        const presign = await Portal.request(`/dashboard/cases/${caseId}/attachments/presign`, {
+          method: "POST",
+          body: JSON.stringify({
+            originalName: pendingFile.name,
+            mimeType: pendingFile.type || "application/octet-stream",
+            size: pendingFile.size,
+            label,
+          }),
+        });
+
+        const uploadRes = await fetch(presign.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": pendingFile.type || "application/octet-stream",
+          },
+          body: pendingFile,
+        });
+        if (!uploadRes.ok) {
+          throw new Error("تعذر رفع الملف مباشرة إلى التخزين.");
+        }
+
+        const data = await Portal.request(`/dashboard/cases/${caseId}/attachments/finalize`, {
+          method: "POST",
+          body: JSON.stringify({
+            attachmentId: presign.attachmentId,
+            key: presign.key,
+            label,
+            originalName: pendingFile.name,
+            mimeType: pendingFile.type || "application/octet-stream",
+            size: pendingFile.size,
+          }),
+        });
         attachments.push(data.attachment);
       }
     }
@@ -1043,7 +1109,7 @@ const PortalDash = (() => {
         method: "PATCH",
         body: JSON.stringify({ notes, attachments }),
       });
-      renderCaseAttachments(result.case?.attachments || []);
+      renderCaseAttachments(result.case?.attachments || [], isAdminUser);
       dashboardData = await Portal.request("/dashboard/summary");
       if (pageType === "archived") {
         const archivedData = await Portal.request("/dashboard/archived");
@@ -1093,6 +1159,7 @@ const PortalDash = (() => {
   }
 
   function setupCaseControls() {
+    if (!isAdminUser) return;
     if (addCaseBtn) addCaseBtn.hidden = false;
 
     addCaseBtn?.addEventListener("click", () => {
@@ -1191,7 +1258,7 @@ const PortalDash = (() => {
   }
 
   function setupTaskControls() {
-    if (addTaskBtn) addTaskBtn.hidden = false;
+    if (addTaskBtn) addTaskBtn.hidden = !isAdminUser;
     if (taskAssigneeField) {
       taskAssigneeField.hidden = !isAdminUser;
     }
@@ -1200,6 +1267,7 @@ const PortalDash = (() => {
     }
 
     addTaskBtn?.addEventListener("click", async () => {
+      if (!isAdminUser) return;
       Portal.hideAlert(addTaskAlert);
       addTaskForm.reset();
       if (isAdminUser) fillTaskAssigneeSelect(taskAssigneeSelect);

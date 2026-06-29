@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   status TEXT NOT NULL CHECK (status IN ('open', 'done')),
   due_at TIMESTAMPTZ,
   reminder_sent_at TIMESTAMPTZ,
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_by TEXT REFERENCES users(id),
   deleted_at TIMESTAMPTZ,

@@ -1,5 +1,6 @@
 import "./load-env.js";
 import express from "express";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,6 +10,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import { seedAdmin } from "./seed.js";
 import db, { dbMode } from "./db.js";
 import { storageMode } from "./lib/storage.js";
+import { isProductionEnv } from "./lib/env.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -23,6 +25,13 @@ export async function createApp() {
   const apiOnly = process.env.API_ONLY === "true" || crossOriginApi;
 
   app.set("trust proxy", 1);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   if (crossOriginApi) {
     app.use((req, res, next) => {
@@ -52,9 +61,12 @@ export async function createApp() {
         await db.ping();
         payload.database_ok = true;
       } catch (error) {
+        console.error("[portal] health db ping failed:", error);
         payload.ok = false;
         payload.database_ok = false;
-        payload.database_error = error.message;
+        if (!isProductionEnv()) {
+          payload.database_error = error.message;
+        }
       }
     }
     res.status(payload.ok ? 200 : 503).json(payload);

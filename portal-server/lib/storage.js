@@ -1,7 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { r2Configured, r2PutObject, r2GetObject, r2DeleteObject } from "./r2.js";
+import {
+  r2Configured,
+  r2PutObject,
+  r2GetObject,
+  r2DeleteObject,
+  r2SignedGetUrl,
+  r2SignedPutUrl,
+  r2ObjectExists,
+} from "./r2.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCAL_UPLOAD_DIR = path.join(__dirname, "..", "uploads", "case-attachments");
@@ -78,4 +86,27 @@ export async function openFile(key) {
     contentType: null,
     filePath,
   };
+}
+
+export async function signedPutUrl(key, contentType, expiresInSeconds = 300) {
+  if (storageMode !== "r2") {
+    throw new Error("Signed upload URLs are only available with R2 storage.");
+  }
+  return r2SignedPutUrl(key, contentType, expiresInSeconds);
+}
+
+export async function signedGetUrl(key, options = {}) {
+  if (storageMode !== "r2") {
+    return null;
+  }
+  return r2SignedGetUrl(key, options);
+}
+
+export async function fileExists(key) {
+  if (!key) return false;
+  if (storageMode === "r2") {
+    return r2ObjectExists(key);
+  }
+  const filePath = getLocalFilePath(path.basename(key));
+  return Boolean(filePath && fs.existsSync(filePath));
 }

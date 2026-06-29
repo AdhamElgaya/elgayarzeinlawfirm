@@ -128,8 +128,8 @@ const inserts = {
     ],
   },
   tasks: {
-    text: `INSERT INTO tasks (id, case_id, title, assigned_to, status, due_at, attachments, created_by, deleted_at, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    text: `INSERT INTO tasks (id, case_id, title, assigned_to, status, due_at, attachments, created_by, deleted_at, created_at, assigned_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT (id) DO NOTHING`,
     columns: [
       "id",
@@ -142,6 +142,7 @@ const inserts = {
       "created_by",
       "deleted_at",
       "created_at",
+      "assigned_at",
     ],
   },
   audit_logs: {
@@ -162,6 +163,7 @@ for (const table of tables) {
   const normalized = rows.map((row) => ({
     ...row,
     attachments: row.attachments ?? [],
+    assigned_at: table === "tasks" ? row.assigned_at || row.created_at : row.assigned_at,
     metadata:
       row.metadata === undefined || row.metadata === null
         ? null

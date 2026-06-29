@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   status TEXT NOT NULL CHECK (status IN ('open', 'done')),
   due_at TEXT,
   reminder_sent_at TEXT,
+  assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
   attachments TEXT,
   created_by TEXT REFERENCES users(id),
   deleted_at TEXT,

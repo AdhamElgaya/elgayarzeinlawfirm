@@ -32,7 +32,7 @@
               <span data-i18n="portal.back">الرجوع</span>
             </a>
             <h1>إدارة المستخدمين</h1>
-            <p>أنشئ حساباً للمحامي أو المساعد بكلمة مرور. اسم المستخدم للدخول: الاسم الأول والأخير بالعربية بمسافة واحدة (مثل: أحمد محمد).</p>
+            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب (بما في ذلك حسابك) من زر «تعديل» لتغيير الاسم أو كلمة المرور.</p>
           </div>
         </div>
 
@@ -98,6 +98,47 @@
       </div>
     </dialog>
 
+    <dialog id="editUserDialog" class="portal-dialog">
+      <form id="editUserForm" class="portal-dialog-form portal-form" novalidate>
+        <h2>تعديل الحساب</h2>
+        <input type="hidden" name="user_id" id="editUserId" />
+        <div id="editUserAlert" class="portal-alert portal-alert--error" hidden></div>
+        <div class="portal-detail-row">
+          <span>الدور</span>
+          <strong id="editUserRole">—</strong>
+        </div>
+        <label>
+          <span>الاسم</span>
+          <input type="text" name="name" id="editUserName" required />
+        </label>
+        <label>
+          <span>اسم المستخدم</span>
+          <input
+            type="text"
+            name="username"
+            id="editUserUsername"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          />
+          <span class="portal-field-hint">الاسم الأول والأخير بالعربية، بمسافة واحدة فقط.</span>
+        </label>
+        <label>
+          <span>كلمة مرور جديدة (اختياري)</span>
+          <input type="password" name="password" id="editUserPassword" autocomplete="new-password" minlength="8" />
+        </label>
+        <label>
+          <span>تأكيد كلمة المرور</span>
+          <input type="password" name="confirmPassword" id="editUserConfirmPassword" autocomplete="new-password" minlength="8" />
+        </label>
+        <div class="portal-dialog-actions">
+          <button type="button" class="portal-btn-ghost" id="cancelEditUserBtn">إلغاء</button>
+          <button class="btn" type="submit" id="saveEditUserBtn">حفظ التعديلات</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="../i18n-en.js"></script>
     <script src="../i18n.js"></script>
     <script src="api-config.js"></script>
@@ -111,7 +152,11 @@
       const confirmDeleteUserMessage = document.getElementById("confirmDeleteUserMessage");
       const confirmDeleteUserCancel = document.getElementById("confirmDeleteUserCancel");
       const confirmDeleteUserOk = document.getElementById("confirmDeleteUserOk");
+      const editUserDialog = document.getElementById("editUserDialog");
+      const editUserForm = document.getElementById("editUserForm");
+      const editUserAlert = document.getElementById("editUserAlert");
       let currentAdminId = null;
+      let usersCache = [];
 
       function askDeleteUserConfirm(name) {
         confirmDeleteUserMessage.textContent = `سيتم حذف حساب «${name}» نهائياً وإنهاء جميع جلساته. هل تريد المتابعة؟`;
@@ -152,31 +197,111 @@
 
       async function loadUsers() {
         const data = await Portal.request("/admin/users");
-        if (!data.users.length) {
+        usersCache = data.users || [];
+        if (!usersCache.length) {
           usersList.innerHTML =
             '<li class="portal-list-empty"><div class="portal-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" stroke-linecap="round" stroke-linejoin="round"/></svg><p>لا يوجد مستخدمون بعد.</p></div></li>';
           return;
         }
-        usersList.innerHTML = data.users
+        usersList.innerHTML = usersCache
           .map(
             (u) => `<li class="portal-user-item">
               <div class="portal-user-item__body">
                 <div class="portal-user-item__top">
                   <strong>${Portal.escapeHtml(u.name)}</strong>
                   <span class="portal-role-chip">${Portal.roleLabel(u.role)}</span>
+                  ${u.id === currentAdminId ? '<span class="portal-role-chip portal-role-chip--self">حسابك</span>' : ""}
                 </div>
                 <span class="portal-user-item__meta">${Portal.escapeHtml(u.username)} · ${Portal.accountStatusLabel(u.status)}</span>
               </div>
-              ${
-                u.id !== currentAdminId
-                  ? `<div class="portal-user-item__actions">
-                      <button type="button" class="portal-btn-danger portal-btn-danger--sm" data-delete-user="${u.id}" data-user-name="${Portal.escapeHtml(u.name)}">حذف</button>
-                    </div>`
-                  : ""
-              }
+              <div class="portal-user-item__actions">
+                <button type="button" class="portal-btn-sm" data-edit-user="${u.id}">تعديل</button>
+                ${
+                  u.id !== currentAdminId
+                    ? `<button type="button" class="portal-btn-danger portal-btn-danger--sm" data-delete-user="${u.id}" data-user-name="${Portal.escapeHtml(u.name)}">حذف</button>`
+                    : ""
+                }
+              </div>
             </li>`
           )
           .join("");
+      }
+
+      function openEditUserDialog(userId) {
+        const user = usersCache.find((u) => u.id === userId);
+        if (!user) return;
+
+        Portal.hideAlert(editUserAlert);
+        document.getElementById("editUserId").value = user.id;
+        document.getElementById("editUserName").value = user.name;
+        document.getElementById("editUserUsername").value = user.username;
+        document.getElementById("editUserRole").textContent = Portal.roleLabel(user.role);
+        document.getElementById("editUserPassword").value = "";
+        document.getElementById("editUserConfirmPassword").value = "";
+        const isSelf = user.id === currentAdminId;
+        document.querySelector("#editUserDialog h2").textContent = isSelf
+          ? "تعديل حسابك"
+          : "تعديل الحساب";
+        editUserDialog.showModal();
+      }
+
+      async function saveEditUserForm(event) {
+        event.preventDefault();
+        Portal.hideAlert(editUserAlert);
+        adminSuccess.hidden = true;
+
+        const fd = new FormData(editUserForm);
+        const userId = fd.get("user_id");
+        const password = String(fd.get("password") || "");
+        const confirmPassword = String(fd.get("confirmPassword") || "");
+
+        if (password && password.length < 8) {
+          Portal.showAlert(editUserAlert, "كلمة المرور يجب أن تكون 8 أحرف على الأقل.");
+          return;
+        }
+        if (password && password !== confirmPassword) {
+          Portal.showAlert(editUserAlert, "كلمتا المرور غير متطابقتين.");
+          return;
+        }
+        if ((password && !confirmPassword) || (!password && confirmPassword)) {
+          Portal.showAlert(editUserAlert, "أدخل كلمة المرور وتأكيدها معاً.");
+          return;
+        }
+
+        const editingSelf = userId === currentAdminId;
+        const submitBtn = document.getElementById("saveEditUserBtn");
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+          const body = {
+            name: fd.get("name"),
+            username: fd.get("username"),
+          };
+          if (password) {
+            body.password = password;
+            body.confirmPassword = confirmPassword;
+          }
+
+          const data = await Portal.request(`/admin/users/${userId}`, {
+            method: "PATCH",
+            body: JSON.stringify(body),
+          });
+
+          editUserDialog.close();
+          if (editingSelf && password) {
+            Portal.showToast("تم تغيير كلمة المرور. سجّل الدخول مرة أخرى.", "success", 4000);
+            window.setTimeout(() => {
+              window.location.href = "login.html";
+            }, 1500);
+            return;
+          }
+          Portal.showToast(data.message || "تم تحديث الحساب.", "success");
+          await loadUsers();
+        } catch (error) {
+          Portal.showAlert(editUserAlert, error.message);
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
       }
 
       async function boot() {
@@ -188,7 +313,15 @@
         }
         currentAdminId = user.id;
         Portal.initPasswordToggles(createUserForm);
+        Portal.initPasswordToggles(editUserForm);
+        document.getElementById("cancelEditUserBtn")?.addEventListener("click", () => editUserDialog.close());
+        editUserForm?.addEventListener("submit", saveEditUserForm);
         usersList.addEventListener("click", async (event) => {
+          const editBtn = event.target.closest("[data-edit-user]");
+          if (editBtn) {
+            openEditUserDialog(editBtn.dataset.editUser);
+            return;
+          }
           const btn = event.target.closest("[data-delete-user]");
           if (!btn) return;
           await deleteUserAccount(btn.dataset.deleteUser, btn.dataset.userName);

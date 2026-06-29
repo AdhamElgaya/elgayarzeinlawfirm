@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
 import { verifyPassword } from "../lib/password.js";
@@ -18,6 +19,16 @@ import {
 
 const router = Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(429).json({ error: "محاولات كثيرة. حاول مرة أخرى لاحقاً." });
+  },
+});
+
 router.get("/me", async (req, res) => {
   try {
     const sessionId = req.cookies[SESSION_COOKIE];
@@ -32,14 +43,14 @@ router.get("/me", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const username = normalizeUsername(req.body?.username);
     const password = String(req.body?.password || "");
     const rememberMe = Boolean(req.body?.remember_me);
 
     if (!username || !password) {
-      return res.status(400).json({ error: "Username and password are required." });
+      return res.status(400).json({ error: "اسم المستخدم وكلمة المرور مطلوبان." });
     }
 
     const user = await db
@@ -48,13 +59,13 @@ router.post("/login", async (req, res) => {
 
     if (!user || user.status !== "active") {
       await writeAudit({ action: "login_failed", metadata: { username }, ip: req.ip });
-      return res.status(401).json({ error: "Invalid username or password." });
+      return res.status(401).json({ error: "اسم المستخدم أو كلمة المرور غير صحيحة." });
     }
 
     const valid = await verifyPassword(password, user.password_hash);
     if (!valid) {
       await writeAudit({ action: "login_failed", metadata: { username }, ip: req.ip });
-      return res.status(401).json({ error: "Invalid username or password." });
+      return res.status(401).json({ error: "اسم المستخدم أو كلمة المرور غير صحيحة." });
     }
 
     const sessionDays = rememberMe ? SESSION_REMEMBER_DAYS : SESSION_DAYS;

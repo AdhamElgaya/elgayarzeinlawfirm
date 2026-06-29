@@ -1,5 +1,6 @@
 import db from "../db.js";
 import { isExpired, sessionExpiry } from "../lib/crypto-utils.js";
+import { isProductionEnv } from "../lib/env.js";
 
 const SESSION_COOKIE = "gz_portal_session";
 const SESSION_DAYS = Number(process.env.SESSION_DAYS || 30);
@@ -12,7 +13,7 @@ export function sessionCookieOptions(maxAgeDays = SESSION_DAYS) {
   return {
     httpOnly: true,
     sameSite: crossOrigin ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isProductionEnv() || process.env.FORCE_SECURE_COOKIES === "true",
     maxAge: maxAgeDays * 24 * 60 * 60 * 1000,
     path: "/",
   };

@@ -20,7 +20,6 @@ const MIME_TO_EXT = {
   "application/vnd.ms-excel": ".xls",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
   "text/plain": ".txt",
-  "application/zip": ".zip",
 };
 
 export function extensionFromAttachment(attachment) {

@@ -39,11 +39,11 @@ router.post("/users", async (req, res) => {
   }
 
   if (password.length < 8) {
-    return res.status(400).json({ error: "Password must be at least 8 characters." });
+    return res.status(400).json({ error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل." });
   }
 
   if (password !== confirmPassword) {
-    return res.status(400).json({ error: "Passwords do not match." });
+    return res.status(400).json({ error: "كلمتا المرور غير متطابقتين." });
   }
 
   if (!["lawyer", "assistant", "admin"].includes(role)) {
@@ -78,6 +78,76 @@ router.post("/users", async (req, res) => {
   res.status(201).json({
     user: { id: userId, username, name, role, status: "active" },
     message: "Account created. Share the username and password with the lawyer securely.",
+  });
+});
+
+router.patch("/users/:id", async (req, res) => {
+  const userId = String(req.params.id || "");
+  const name = String(req.body?.name || "").trim();
+  const username = normalizeUsername(req.body?.username);
+  const password = String(req.body?.password || "");
+  const confirmPassword = String(req.body?.confirmPassword || "");
+
+  if (!userId || !name || !username) {
+    return res.status(400).json({ error: "Name and username are required." });
+  }
+
+  if (!isValidNewUsername(username)) {
+    return res.status(400).json({ error: USERNAME_RULES_MESSAGE });
+  }
+
+  const user = await db
+    .prepare(`SELECT id, username, name, role, status FROM users WHERE id = ?`)
+    .get(userId);
+  if (!user) {
+    return res.status(404).json({ error: "المستخدم غير موجود." });
+  }
+
+  const existing = await db.prepare(`SELECT id FROM users WHERE username = ?`).get(username);
+  if (existing && existing.id !== userId) {
+    return res.status(409).json({ error: "اسم المستخدم مستخدم بالفعل." });
+  }
+
+  const changingPassword = password.length > 0;
+  if (changingPassword) {
+    if (password.length < 8) {
+      return res.status(400).json({ error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل." });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "كلمتا المرور غير متطابقتين." });
+    }
+  }
+
+  if (changingPassword) {
+    const passwordHash = await hashPassword(password);
+    await db
+      .prepare(`UPDATE users SET name = ?, username = ?, password_hash = ? WHERE id = ?`)
+      .run(name, username, passwordHash, userId);
+    await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
+  } else {
+    await db.prepare(`UPDATE users SET name = ?, username = ? WHERE id = ?`).run(name, username, userId);
+    if (user.username !== username) {
+      await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
+    }
+  }
+
+  await writeAudit({
+    userId: req.user.id,
+    action: "user_updated",
+    entityType: "user",
+    entityId: userId,
+    metadata: {
+      username,
+      name,
+      password_changed: changingPassword,
+      username_changed: user.username !== username,
+    },
+    ip: req.ip,
+  });
+
+  res.json({
+    user: { id: userId, username, name, role: user.role, status: user.status },
+    message: changingPassword ? "تم تحديث الحساب وكلمة المرور." : "تم تحديث الحساب.",
   });
 });
 
@@ -323,12 +393,13 @@ router.post("/tasks", async (req, res) => {
 
   const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
   const taskId = uuid();
+  const assignedAt = new Date().toISOString();
   await db
     .prepare(
-      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments);
+    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
   await writeAudit({
     userId: req.user.id,
@@ -356,7 +427,7 @@ router.post("/tasks", async (req, res) => {
 router.patch("/tasks/:id", async (req, res) => {
   const taskRow = await db
     .prepare(
-      `SELECT id, case_id, title, assigned_to, status, due_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
+      `SELECT id, case_id, title, assigned_to, status, due_at, assigned_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
     )
     .get(req.params.id);
   if (!taskRow) {
@@ -384,11 +455,13 @@ router.patch("/tasks/:id", async (req, res) => {
   }
 
   const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
+  const assignedAt =
+    assignedTo !== taskRow.assigned_to ? new Date().toISOString() : taskRow.assigned_at || taskRow.created_at;
   await db
     .prepare(
-      `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL WHERE id = ?`
+      `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL, assigned_at = ? WHERE id = ?`
     )
-    .run(title, assignedTo, dueAt, attachments, taskRow.id);
+    .run(title, assignedTo, dueAt, attachments, assignedAt, taskRow.id);
 
   await writeAudit({
     userId: req.user.id,
@@ -400,7 +473,14 @@ router.patch("/tasks/:id", async (req, res) => {
   });
 
   res.json({
-    task: await enrichTask({ ...taskRow, title, assigned_to: assignedTo, due_at: dueAt, attachments }),
+    task: await enrichTask({
+      ...taskRow,
+      title,
+      assigned_to: assignedTo,
+      due_at: dueAt,
+      attachments,
+      assigned_at: assignedAt,
+    }),
     message: "تم تحديث المهمة.",
   });
 });

@@ -71,7 +71,7 @@ export async function getCaseIfAccessible(user, caseId) {
 export async function getTaskIfAccessible(user, taskId) {
   const row = await db
     .prepare(
-      `SELECT id, case_id, title, assigned_to, status, due_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
+      `SELECT id, case_id, title, assigned_to, status, due_at, assigned_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
     )
     .get(taskId);
   if (!row) return null;

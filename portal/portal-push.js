@@ -99,9 +99,15 @@ const PortalPush = (() => {
       return;
     }
 
-    container.hidden = false;
     const permission = Notification.permission;
     const granted = permission === "granted";
+    if (granted) {
+      container.hidden = true;
+      container.innerHTML = "";
+      return;
+    }
+
+    container.hidden = false;
 
     container.innerHTML = `
       <div class="portal-panel-head">
@@ -112,8 +118,8 @@ const PortalPush = (() => {
         على iPhone: أضف الموقع إلى الشاشة الرئيسية ثم فعّل الإشعارات (iOS 16.4+).
       </p>
       <div class="portal-actions portal-actions--wrap">
-        <button type="button" class="portal-btn-sm" id="pushEnableBtn" ${granted ? "hidden" : ""}>تفعيل الإشعارات</button>
-        <button type="button" class="portal-btn-sm portal-btn-sm--muted" id="pushDisableBtn" ${granted ? "" : "hidden"}>إيقاف الإشعارات</button>
+        <button type="button" class="portal-btn-sm" id="pushEnableBtn">تفعيل الإشعارات</button>
+        <button type="button" class="portal-btn-sm portal-btn-sm--muted" id="pushDisableBtn" hidden>إيقاف الإشعارات</button>
       </div>
     `;
 

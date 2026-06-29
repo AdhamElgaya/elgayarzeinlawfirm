@@ -3,7 +3,9 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export function r2Configured() {
   return Boolean(
@@ -64,4 +66,39 @@ export async function r2DeleteObject(key) {
       Key: key,
     })
   );
+}
+
+export async function r2ObjectExists(key) {
+  try {
+    await getClient().send(
+      new HeadObjectCommand({
+        Bucket: bucket(),
+        Key: key,
+      })
+    );
+    return true;
+  } catch (error) {
+    const status = error?.$metadata?.httpStatusCode;
+    if (status === 404 || error?.name === "NotFound") return false;
+    throw error;
+  }
+}
+
+export async function r2SignedPutUrl(key, contentType, expiresInSeconds = 300) {
+  const command = new PutObjectCommand({
+    Bucket: bucket(),
+    Key: key,
+    ContentType: contentType || "application/octet-stream",
+  });
+  return getSignedUrl(getClient(), command, { expiresIn: expiresInSeconds });
+}
+
+export async function r2SignedGetUrl(key, options = {}) {
+  const command = new GetObjectCommand({
+    Bucket: bucket(),
+    Key: key,
+    ResponseContentType: options.contentType,
+    ResponseContentDisposition: options.contentDisposition,
+  });
+  return getSignedUrl(getClient(), command, { expiresIn: options.expiresInSeconds || 120 });
 }
