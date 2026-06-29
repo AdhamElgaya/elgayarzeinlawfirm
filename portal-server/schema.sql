@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   assigned_to TEXT REFERENCES users(id),
-  status TEXT NOT NULL CHECK (status IN ('open', 'done')),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'done')),
   due_at TEXT,
   reminder_sent_at TEXT,
   assigned_at TEXT NOT NULL DEFAULT (datetime('now')),

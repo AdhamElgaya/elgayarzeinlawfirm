@@ -12,6 +12,10 @@ export async function applySchemaPatches() {
       name: "tasks.assigned_at_backfill",
       sql: `UPDATE tasks SET assigned_at = created_at WHERE assigned_at IS NULL`,
     },
+    {
+      name: "tasks.status_default",
+      sql: `ALTER TABLE tasks ALTER COLUMN status SET DEFAULT 'open'`,
+    },
   ];
 
   for (const patch of patches) {

@@ -398,8 +398,8 @@ router.post("/tasks", async (req, res) => {
     const assignedAt = new Date().toISOString();
     await db
       .prepare(
-        `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO tasks (id, case_id, title, assigned_to, status, due_at, created_by, attachments, assigned_at)
+     VALUES (?, ?, ?, ?, 'open', ?, ?, ?, ?)`
       )
       .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
