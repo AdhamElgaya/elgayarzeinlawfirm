@@ -206,13 +206,13 @@ const teamMembersData = {
     image: "assets/team/ahmed-ibrahim-elkhediwy.jpg",
     ar: {
       name: "أ / احمد ابراهيم الخديوي",
-      role: "المحامى",
-      points: [],
+      role: "المحامي لدي محاكم الجنايات",
+      points: ["المحامي لدي محاكم الجنايات"],
     },
     en: {
       name: "Ahmed Ibrahim Elkhediwy",
-      role: "Lawyer",
-      points: [],
+      role: "Lawyer at Felony Courts",
+      points: ["Lawyer at Felony Courts"],
     },
   },
   "mohamed-magdy": {
