@@ -13,6 +13,7 @@ const PortalNav = (() => {
     if (isAdmin) {
       document.body.classList.add("portal-admin-nav");
     }
+    document.body.classList.add("portal-drawer-nav");
 
     document.querySelectorAll(".portal-nav-link[data-nav]").forEach((link) => {
       link.classList.toggle("is-active", link.dataset.nav === page);
@@ -22,7 +23,7 @@ const PortalNav = (() => {
     const backdrop = document.getElementById("portalNavBackdrop");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    if (isAdmin && toggle) toggle.hidden = false;
+    if (toggle) toggle.hidden = false;
 
     function setOpen(open) {
       document.body.classList.toggle("portal-nav-open", open);

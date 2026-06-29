@@ -100,28 +100,52 @@ const PortalPush = (() => {
     }
 
     const permission = Notification.permission;
-    const granted = permission === "granted";
-    if (granted) {
-      container.hidden = true;
-      container.innerHTML = "";
-      return;
+    const registration = await getRegistration();
+    let subscribed = false;
+    if (permission === "granted" && registration) {
+      subscribed = Boolean(await registration.pushManager.getSubscription());
     }
 
     container.hidden = false;
 
-    container.innerHTML = `
-      <div class="portal-panel-head">
-        <h2>الإشعارات</h2>
-      </div>
-      <p class="portal-lead portal-lead--compact">
-        فعّل الإشعارات لتذكيرك بالمهام: قبل الموعد بـ 45 دقيقة إذا حدّدت وقتاً، أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط.
-        على iPhone: أضف الموقع إلى الشاشة الرئيسية ثم فعّل الإشعارات (iOS 16.4+).
-      </p>
-      <div class="portal-actions portal-actions--wrap">
-        <button type="button" class="portal-btn-sm" id="pushEnableBtn">تفعيل الإشعارات</button>
-        <button type="button" class="portal-btn-sm portal-btn-sm--muted" id="pushDisableBtn" hidden>إيقاف الإشعارات</button>
-      </div>
-    `;
+    if (permission === "denied") {
+      container.innerHTML = `
+        <div class="portal-panel-head">
+          <h2>الإشعارات</h2>
+        </div>
+        <p class="portal-lead portal-lead--compact">
+          تم حظر الإشعارات من إعدادات المتصفح. فعّلها من إعدادات الموقع ثم أعد تحميل الصفحة.
+        </p>
+      `;
+      return;
+    }
+
+    if (subscribed) {
+      container.innerHTML = `
+        <div class="portal-panel-head">
+          <h2>الإشعارات</h2>
+        </div>
+        <p class="portal-lead portal-lead--compact">
+          الإشعارات مفعّلة على هذا الجهاز — تذكير قبل الموعد بـ 45 دقيقة (أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط).
+        </p>
+        <div class="portal-actions portal-actions--wrap">
+          <button type="button" class="portal-btn-sm portal-btn-sm--muted" id="pushDisableBtn">إيقاف الإشعارات</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="portal-panel-head">
+          <h2>الإشعارات</h2>
+        </div>
+        <p class="portal-lead portal-lead--compact">
+          فعّل الإشعارات لتذكيرك بالمهام: قبل الموعد بـ 45 دقيقة إذا حدّدت وقتاً، أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط.
+          على iPhone: أضف الموقع إلى الشاشة الرئيسية ثم فعّل الإشعارات (iOS 16.4+).
+        </p>
+        <div class="portal-actions portal-actions--wrap">
+          <button type="button" class="portal-btn-sm" id="pushEnableBtn">تفعيل الإشعارات</button>
+        </div>
+      `;
+    }
 
     document.getElementById("pushEnableBtn")?.addEventListener("click", async () => {
       try {
