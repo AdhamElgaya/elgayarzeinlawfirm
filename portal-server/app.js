@@ -12,7 +12,7 @@ import db, { dbMode } from "./db.js";
 import { storageMode } from "./lib/storage.js";
 import { isProductionEnv } from "./lib/env.js";
 import { applySchemaPatches } from "./lib/schema-patches.js";
-import { isPushConfigured } from "./lib/push.js";
+import { countPushSubscriptions, isPushConfigured } from "./lib/push.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -62,6 +62,9 @@ export async function createApp() {
       try {
         await db.ping();
         payload.database_ok = true;
+        if (isPushConfigured()) {
+          payload.push_subscriptions = await countPushSubscriptions();
+        }
       } catch (error) {
         console.error("[portal] health db ping failed:", error);
         payload.ok = false;

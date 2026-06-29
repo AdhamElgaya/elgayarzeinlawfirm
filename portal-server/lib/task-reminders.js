@@ -1,6 +1,6 @@
 import db from "../db.js";
 import { taskDueHasTime } from "./task-datetime.js";
-import { sendPushToUser, isPushConfigured } from "./push.js";
+import { sendPushToUser, isPushConfigured, getNotificationRecipient } from "./push.js";
 import {
   formatReminderDueLabel,
   getReminderTriggerMs,
@@ -57,8 +57,11 @@ async function processReminders() {
         continue;
       }
 
+      const recipient = await getNotificationRecipient(task.assigned_to);
+      if (!recipient) continue;
+
       const dueLabel = formatReminderDueLabel(task.due_at);
-      await sendPushToUser(task.assigned_to, {
+      const result = await sendPushToUser(recipient.id, {
         title: task.title,
         body: `الموعد: ${dueLabel}\nاضغط لعرض تفاصيل المهمة`,
         taskId: task.id,
@@ -66,7 +69,11 @@ async function processReminders() {
         url: `/portal/tasks.html?task=${task.id}`,
       });
 
-      await markReminderSent(task.id);
+      if (result.sent > 0 || result.subscriptions === 0) {
+        await markReminderSent(task.id);
+      } else {
+        console.warn(`[portal] reminder not marked for task ${task.id} — push failed, will retry`);
+      }
     }
   } catch (error) {
     console.error("[portal] task reminder tick failed:", error);

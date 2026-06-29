@@ -1,31 +1,54 @@
 import webpush from "web-push";
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
+import { formatReminderDueLabel } from "./task-datetime.js";
 
 let vapidReady = false;
 
+function vapidPublicKey() {
+  return (process.env.VAPID_PUBLIC_KEY || "").trim();
+}
+
+function vapidPrivateKey() {
+  return (process.env.VAPID_PRIVATE_KEY || "").trim();
+}
+
 export function isPushConfigured() {
-  return Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+  return Boolean(vapidPublicKey() && vapidPrivateKey());
 }
 
 export function getVapidPublicKey() {
-  return process.env.VAPID_PUBLIC_KEY || "";
+  return vapidPublicKey();
 }
 
 function ensureVapid() {
   if (!isPushConfigured() || vapidReady) return;
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:support@gzlawfirm.net",
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
+    (process.env.VAPID_SUBJECT || "mailto:support@gzlawfirm.net").trim(),
+    vapidPublicKey(),
+    vapidPrivateKey()
   );
   vapidReady = true;
+}
+
+export async function countPushSubscriptions(userId = null) {
+  if (userId) {
+    const rows = await db
+      .prepare(`SELECT id FROM push_subscriptions WHERE user_id = ?`)
+      .all(userId);
+    return rows.length;
+  }
+  const rows = await db.prepare(`SELECT id FROM push_subscriptions`).all();
+  return rows.length;
 }
 
 export async function savePushSubscription(userId, subscription) {
   const endpoint = String(subscription?.endpoint || "");
   if (!endpoint) {
     throw new Error("Push subscription endpoint is required.");
+  }
+  if (!subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+    throw new Error("Push subscription keys are missing.");
   }
 
   const existing = await db
@@ -54,6 +77,31 @@ export async function removePushSubscription(userId, endpoint) {
     .run(userId, endpoint);
 }
 
+export async function getNotificationRecipient(userId) {
+  if (!userId) return null;
+  const user = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(userId);
+  if (!user || user.status !== "active") return null;
+  return user;
+}
+
+export async function sendTaskAssignedPush(userId, task) {
+  const recipient = await getNotificationRecipient(userId);
+  if (!recipient || !isPushConfigured()) return { sent: 0, failed: 0 };
+
+  const dueLabel = task.due_at ? formatReminderDueLabel(task.due_at) : "";
+  const body = dueLabel
+    ? `موعد: ${dueLabel}\nاضغط لعرض المهمة`
+    : "اضغط لعرض تفاصيل المهمة";
+
+  return sendPushToUser(userId, {
+    title: `مهمة جديدة: ${task.title}`,
+    body,
+    taskId: task.id,
+    dueLabel,
+    url: `/portal/tasks.html?task=${task.id}`,
+  });
+}
+
 export async function sendPushToUser(userId, payload) {
   if (!isPushConfigured()) return { sent: 0, failed: 0 };
 
@@ -62,28 +110,40 @@ export async function sendPushToUser(userId, payload) {
     .prepare(`SELECT id, endpoint, subscription FROM push_subscriptions WHERE user_id = ?`)
     .all(userId);
 
+  if (!rows.length) {
+    console.warn(`[portal] push: no subscriptions for user ${userId}`);
+    return { sent: 0, failed: 0, subscriptions: 0 };
+  }
+
   let sent = 0;
   let failed = 0;
   const body = JSON.stringify(payload);
 
   for (const row of rows) {
     const subscription = parseSubscription(row.subscription);
-    if (!subscription?.endpoint) {
+    if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+      console.warn(`[portal] push: invalid subscription ${row.id} for user ${userId}`);
       failed += 1;
       continue;
     }
     try {
       await webpush.sendNotification(subscription, body);
       sent += 1;
+      console.log(`[portal] push sent to user ${userId} (${row.id})`);
     } catch (error) {
       failed += 1;
+      console.error(
+        `[portal] push failed for user ${userId} (${row.id}):`,
+        error.statusCode || error.code,
+        error.message
+      );
       if (error.statusCode === 404 || error.statusCode === 410) {
         await db.prepare(`DELETE FROM push_subscriptions WHERE id = ?`).run(row.id);
       }
     }
   }
 
-  return { sent, failed };
+  return { sent, failed, subscriptions: rows.length };
 }
 
 function parseSubscription(value) {

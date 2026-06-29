@@ -6,7 +6,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:migrate": "node scripts/migrate-json-to-supabase.js",
-    "db:reset": "node scripts/reset-portal-data.js"
+    "db:reset": "node scripts/reset-portal-data.js",
+    "vapid:generate": "node scripts/generate-vapid-keys.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.840.0",

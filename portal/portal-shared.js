@@ -354,19 +354,18 @@ const PortalDash = (() => {
   function fillTaskAssigneeSelect(select, selectedId = null) {
     if (!select) return;
     const selfOption =
-      dashboardUser?.id && isAdminUser
+      isAdminUser && dashboardUser?.id
         ? `<option value="${Portal.escapeHtml(dashboardUser.id)}">لنفسي</option>`
         : "";
     const teamOptions = assignees
-      .filter((u) => u.id !== dashboardUser?.id)
       .map(
         (u) =>
           `<option value="${u.id}">${Portal.escapeHtml(u.name)} — ${Portal.roleLabel(u.role)}</option>`
       )
       .join("");
-    select.innerHTML = selfOption + teamOptions;
+    select.innerHTML = `<option value="" disabled${selectedId ? "" : " selected"}>اختر المعيّن</option>${selfOption}${teamOptions}`;
 
-    const targetId = selectedId || (isAdminUser ? dashboardUser?.id : null);
+    const targetId = selectedId || null;
     if (!targetId) return;
 
     if (![...select.options].some((option) => option.value === targetId)) {
@@ -1830,7 +1829,7 @@ const PortalDash = (() => {
       PortalPush.ensureManifest();
       PortalPush.registerServiceWorker();
       if (document.getElementById("pushNotifyPanel")) {
-        await PortalPush.initUi("pushNotifyPanel");
+        await PortalPush.initUi("pushNotifyPanel", { role: user.role });
       }
     } catch {
       /* push optional */

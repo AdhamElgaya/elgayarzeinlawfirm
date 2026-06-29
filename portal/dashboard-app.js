@@ -295,22 +295,21 @@
       .join("");
   }
 
-  function fillTaskAssigneeSelect(select) {
+  function fillTaskAssigneeSelect(select, selectedId = null) {
     if (!select) return;
     const selfOption =
-      dashboardUser?.id && isAdminUser
+      isAdminUser && dashboardUser?.id
         ? `<option value="${Portal.escapeHtml(dashboardUser.id)}">لنفسي</option>`
         : "";
     const teamOptions = assignees
-      .filter((u) => u.id !== dashboardUser?.id)
       .map(
         (u) =>
           `<option value="${u.id}">${Portal.escapeHtml(u.name)} — ${Portal.roleLabel(u.role)}</option>`
       )
       .join("");
-    select.innerHTML = selfOption + teamOptions;
-    if (dashboardUser?.id && isAdminUser) {
-      select.value = dashboardUser.id;
+    select.innerHTML = `<option value="" disabled${selectedId ? "" : " selected"}>اختر المعيّن</option>${selfOption}${teamOptions}`;
+    if (selectedId) {
+      select.value = selectedId;
     }
   }
 

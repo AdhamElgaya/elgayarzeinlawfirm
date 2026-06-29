@@ -25,7 +25,9 @@ const PortalPush = (() => {
   async function registerServiceWorker() {
     if (!("serviceWorker" in navigator)) return null;
     try {
-      return await navigator.serviceWorker.register("/portal/sw.js", { scope: "/portal/" });
+      const registration = await navigator.serviceWorker.register("/portal/sw.js", { scope: "/portal/" });
+      await navigator.serviceWorker.ready;
+      return registration;
     } catch (error) {
       console.warn("Service worker registration failed:", error);
       return null;
@@ -34,7 +36,28 @@ const PortalPush = (() => {
 
   async function getRegistration() {
     if (!("serviceWorker" in navigator)) return null;
-    return navigator.serviceWorker.getRegistration("/portal/");
+    const registration = await navigator.serviceWorker.getRegistration("/portal/");
+    if (registration) {
+      await navigator.serviceWorker.ready;
+    }
+    return registration;
+  }
+
+  async function getBrowserSubscription() {
+    const registration = await getRegistration();
+    if (!registration) return null;
+    return registration.pushManager.getSubscription();
+  }
+
+  async function syncSubscriptionToServer() {
+    if (!isSupported() || Notification.permission !== "granted") return false;
+    const subscription = await getBrowserSubscription();
+    if (!subscription) return false;
+    await Portal.request("/dashboard/push/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ subscription: subscription.toJSON() }),
+    });
+    return true;
   }
 
   async function subscribe() {
@@ -57,13 +80,15 @@ const PortalPush = (() => {
       throw new Error("تعذر تسجيل خدمة الإشعارات.");
     }
 
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(keyData.publicKey),
-      });
+    const existing = await registration.pushManager.getSubscription();
+    if (existing) {
+      await existing.unsubscribe();
     }
+
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(keyData.publicKey),
+    });
 
     await Portal.request("/dashboard/push/subscribe", {
       method: "POST",
@@ -88,11 +113,21 @@ const PortalPush = (() => {
     });
   }
 
-  async function initUi(containerId = "pushNotifyPanel") {
+  async function sendTest() {
+    const data = await Portal.request("/dashboard/push/test", { method: "POST" });
+    return data.message || "تم إرسال إشعار الاختبار.";
+  }
+
+  async function initUi(containerId = "pushNotifyPanel", options = {}) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    const userRole = options.role || "";
+    const assigneeNote =
+      userRole === "admin" ? " ستصلك التذكيرات للمهام المعيّنة لك فقط." : "";
+
     ensureManifest();
+    await registerServiceWorker();
 
     if (!isSupported()) {
       container.hidden = false;
@@ -108,9 +143,13 @@ const PortalPush = (() => {
     }
 
     let serverEnabled = true;
+    let serverStatus = { subscriptions: 0, registered: false };
     try {
       const keyData = await Portal.request("/dashboard/push/vapid-key");
       serverEnabled = Boolean(keyData.enabled && keyData.publicKey);
+      if (serverEnabled) {
+        serverStatus = await Portal.request("/dashboard/push/status");
+      }
     } catch {
       serverEnabled = false;
     }
@@ -122,17 +161,22 @@ const PortalPush = (() => {
           <h2>الإشعارات</h2>
         </div>
         <p class="portal-lead portal-lead--compact">
-          الإشعارات غير مفعّلة على الخادم حالياً. اطلب من المدير ضبط مفاتيح VAPID على Railway.
+          الإشعارات غير مفعّلة على الخادم. أضف مفاتيح VAPID على Railway ثم أعد النشر.
         </p>
       `;
       return;
     }
 
     const permission = Notification.permission;
-    const registration = await getRegistration();
-    let subscribed = false;
-    if (permission === "granted" && registration) {
-      subscribed = Boolean(await registration.pushManager.getSubscription());
+    let browserSubscribed = false;
+    if (permission === "granted") {
+      try {
+        await syncSubscriptionToServer();
+        serverStatus = await Portal.request("/dashboard/push/status");
+        browserSubscribed = Boolean(await getBrowserSubscription());
+      } catch {
+        browserSubscribed = Boolean(await getBrowserSubscription());
+      }
     }
 
     container.hidden = false;
@@ -149,15 +193,18 @@ const PortalPush = (() => {
       return;
     }
 
-    if (subscribed) {
+    const ready = permission === "granted" && browserSubscribed && serverStatus.registered;
+
+    if (ready) {
       container.innerHTML = `
         <div class="portal-panel-head">
           <h2>الإشعارات</h2>
         </div>
         <p class="portal-lead portal-lead--compact">
-          الإشعارات مفعّلة على هذا الجهاز — تذكير قبل الموعد بـ 45 دقيقة (أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط).
+          الإشعارات مفعّلة على هذا الجهاز (${serverStatus.subscriptions} جهاز مسجّل) — تذكير قبل الموعد بـ 45 دقيقة (أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط).${assigneeNote}
         </p>
         <div class="portal-actions portal-actions--wrap">
+          <button type="button" class="portal-btn-sm" id="pushTestBtn">إرسال إشعار تجريبي</button>
           <button type="button" class="portal-btn-sm portal-btn-sm--muted" id="pushDisableBtn">إيقاف الإشعارات</button>
         </div>
       `;
@@ -167,7 +214,7 @@ const PortalPush = (() => {
           <h2>الإشعارات</h2>
         </div>
         <p class="portal-lead portal-lead--compact">
-          فعّل الإشعارات لتذكيرك بالمهام: قبل الموعد بـ 45 دقيقة إذا حدّدت وقتاً، أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط.
+          فعّل الإشعارات لتذكيرك بالمهام المعيّنة لك: قبل الموعد بـ 45 دقيقة إذا حدّدت وقتاً، أو الساعة 6:00 ص في يوم المهمة إذا كان التاريخ فقط.${assigneeNote}
           على iPhone: أضف الموقع إلى الشاشة الرئيسية ثم فعّل الإشعارات (iOS 16.4+).
         </p>
         <div class="portal-actions portal-actions--wrap">
@@ -180,9 +227,22 @@ const PortalPush = (() => {
       try {
         await subscribe();
         Portal.showToast("تم تفعيل الإشعارات.");
-        await initUi(containerId);
+        await initUi(containerId, options);
       } catch (error) {
         Portal.showToast(error.message || "تعذر تفعيل الإشعارات.", "error");
+      }
+    });
+
+    document.getElementById("pushTestBtn")?.addEventListener("click", async () => {
+      const btn = document.getElementById("pushTestBtn");
+      if (btn) btn.disabled = true;
+      try {
+        const message = await sendTest();
+        Portal.showToast(message);
+      } catch (error) {
+        Portal.showToast(error.message || "تعذر إرسال الإشعار التجريبي.", "error");
+      } finally {
+        if (btn) btn.disabled = false;
       }
     });
 
@@ -190,7 +250,7 @@ const PortalPush = (() => {
       try {
         await unsubscribe();
         Portal.showToast("تم إيقاف الإشعارات.");
-        await initUi(containerId);
+        await initUi(containerId, options);
       } catch (error) {
         Portal.showToast(error.message || "تعذر إيقاف الإشعارات.", "error");
       }
@@ -203,6 +263,8 @@ const PortalPush = (() => {
     registerServiceWorker,
     subscribe,
     unsubscribe,
+    sendTest,
+    syncSubscriptionToServer,
     initUi,
   };
 })();

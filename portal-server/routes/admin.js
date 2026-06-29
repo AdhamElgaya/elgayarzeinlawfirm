@@ -7,6 +7,7 @@ import { isValidNewUsername, normalizeUsername, USERNAME_RULES_MESSAGE } from ".
 import { enrichTask, softDeleteCase, softDeleteClient, softDeleteTask, deleteUser } from "../lib/entities.js";
 import { pickCaseAttachments } from "../lib/attachments.js";
 import { normalizeDueAt } from "../lib/task-due.js";
+import { sendTaskAssignedPush } from "../lib/push.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
@@ -403,6 +404,8 @@ router.post("/tasks", async (req, res) => {
       )
       .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
+    await sendTaskAssignedPush(assignedTo, { id: taskId, title, due_at: dueAt });
+
     await writeAudit({
       userId: req.user.id,
       action: "task_created",
@@ -466,13 +469,17 @@ router.patch("/tasks/:id", async (req, res) => {
   }
 
   const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
-  const assignedAt =
-    assignedTo !== taskRow.assigned_to ? new Date().toISOString() : taskRow.assigned_at || taskRow.created_at;
+  const reassigned = assignedTo !== taskRow.assigned_to;
+  const assignedAt = reassigned ? new Date().toISOString() : taskRow.assigned_at || taskRow.created_at;
   await db
     .prepare(
       `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL, assigned_at = ? WHERE id = ?`
     )
     .run(title, assignedTo, dueAt, attachments, assignedAt, taskRow.id);
+
+  if (reassigned) {
+    await sendTaskAssignedPush(assignedTo, { id: taskRow.id, title, due_at: dueAt });
+  }
 
   await writeAudit({
     userId: req.user.id,

@@ -37,10 +37,13 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { normalizeDueAt } from "../lib/task-due.js";
 import {
+  countPushSubscriptions,
   getVapidPublicKey,
   isPushConfigured,
   removePushSubscription,
   savePushSubscription,
+  sendPushToUser,
+  sendTaskAssignedPush,
 } from "../lib/push.js";
 
 const router = Router();
@@ -267,7 +270,7 @@ router.patch("/cases/:id", async (req, res) => {
 
     if (req.body?.assigned_to !== undefined) {
       assignedTo = String(req.body.assigned_to || "");
-      if (!(await getAssignableUser(assignedTo))) {
+      if (!(await getTaskAssignee(assignedTo, req.user))) {
         return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
       }
     }
@@ -656,8 +659,9 @@ router.patch("/tasks/:id", async (req, res) => {
       }
     }
 
+    const reassigned = req.body?.assigned_to !== undefined && assignedTo !== row.assigned_to;
     let assignedAt = row.assigned_at || row.created_at;
-    if (req.body?.assigned_to !== undefined && assignedTo !== row.assigned_to) {
+    if (reassigned) {
       assignedAt = new Date().toISOString();
     }
 
@@ -674,6 +678,10 @@ router.patch("/tasks/:id", async (req, res) => {
         `UPDATE tasks SET title = ?, assigned_to = ?, due_at = ?, attachments = ?, reminder_sent_at = NULL, assigned_at = ? WHERE id = ?`
       )
       .run(title, assignedTo, dueAt, attachments, assignedAt, row.id);
+
+    if (reassigned) {
+      await sendTaskAssignedPush(assignedTo, { id: row.id, title, due_at: dueAt });
+    }
 
     await writeAudit({
       userId: req.user.id,
@@ -768,6 +776,10 @@ router.post("/tasks", async (req, res) => {
       )
       .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
+    if (isAdmin) {
+      await sendTaskAssignedPush(assignedTo, { id: taskId, title, due_at: dueAt });
+    }
+
     await writeAudit({
       userId: req.user.id,
       action: "task_created",
@@ -823,14 +835,46 @@ router.get("/push/vapid-key", requireAuth, (req, res) => {
   res.json({ enabled: true, publicKey: getVapidPublicKey() });
 });
 
+router.get("/push/status", requireAuth, async (req, res) => {
+  const subscriptions = await countPushSubscriptions(req.user.id);
+  res.json({
+    enabled: isPushConfigured(),
+    subscriptions,
+    registered: subscriptions > 0,
+  });
+});
+
+router.post("/push/test", requireAuth, async (req, res) => {
+  if (!isPushConfigured()) {
+    return res.status(503).json({ error: "الإشعارات غير مفعّلة على الخادم." });
+  }
+
+  const result = await sendPushToUser(req.user.id, {
+    title: "اختبار الإشعارات",
+    body: "إذا ظهرت هذه الرسالة، الإشعارات تعمل بنجاح.",
+    url: "/portal/home.html",
+  });
+
+  if (result.sent === 0) {
+    const message =
+      result.subscriptions === 0
+        ? "لا يوجد جهاز مسجّل. اضغط «تفعيل الإشعارات» أولاً."
+        : "فشل إرسال الإشعار. أعد تفعيل الإشعارات ثم جرّب مرة أخرى.";
+    return res.status(400).json({ error: message, ...result });
+  }
+
+  res.json({ message: "تم إرسال إشعار الاختبار.", ...result });
+});
+
 router.post("/push/subscribe", requireAuth, async (req, res) => {
   if (!isPushConfigured()) {
     return res.status(503).json({ error: "الإشعارات غير مفعّلة على الخادم." });
   }
 
   try {
-    await savePushSubscription(req.user.id, req.body?.subscription);
-    res.json({ message: "تم تفعيل الإشعارات." });
+    const id = await savePushSubscription(req.user.id, req.body?.subscription);
+    const subscriptions = await countPushSubscriptions(req.user.id);
+    res.json({ message: "تم تفعيل الإشعارات.", id, subscriptions });
   } catch (error) {
     console.error("[portal] push subscribe error:", error);
     res.status(400).json({ error: error.message || "تعذر حفظ الاشتراك." });
