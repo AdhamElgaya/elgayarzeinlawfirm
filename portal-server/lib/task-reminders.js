@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { taskDueHasTime } from "./task-datetime.js";
 import { sendPushToUser, isPushConfigured } from "./push.js";
 import {
   formatReminderDueLabel,
@@ -41,12 +42,18 @@ async function processReminders() {
       const triggerMs = getReminderTriggerMs(task.due_at, REMINDER_MINUTES);
       if (!Number.isFinite(triggerMs)) continue;
 
-      if (shouldAbandonReminder(task.due_at, now, triggerMs, windowMs)) {
-        await markReminderSent(task.id);
-        continue;
-      }
+      // Not yet time to remind.
+      if (now < triggerMs) continue;
 
-      if (now < triggerMs || now >= triggerMs + windowMs) {
+      if (taskDueHasTime(task.due_at)) {
+        const dueMs = new Date(task.due_at).getTime();
+        // Task already due or overdue — skip without notifying.
+        if (!Number.isFinite(dueMs) || now >= dueMs) {
+          await markReminderSent(task.id);
+          continue;
+        }
+      } else if (shouldAbandonReminder(task.due_at, now, triggerMs, windowMs)) {
+        await markReminderSent(task.id);
         continue;
       }
 

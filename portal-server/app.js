@@ -12,6 +12,7 @@ import db, { dbMode } from "./db.js";
 import { storageMode } from "./lib/storage.js";
 import { isProductionEnv } from "./lib/env.js";
 import { applySchemaPatches } from "./lib/schema-patches.js";
+import { isPushConfigured } from "./lib/push.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -56,7 +57,7 @@ export async function createApp() {
   app.use("/api/dashboard", dashboardRoutes);
 
   app.get("/api/health", async (_req, res) => {
-    const payload = { ok: true, database: dbMode, storage: storageMode };
+    const payload = { ok: true, database: dbMode, storage: storageMode, push_configured: isPushConfigured() };
     if (typeof db.ping === "function") {
       try {
         await db.ping();

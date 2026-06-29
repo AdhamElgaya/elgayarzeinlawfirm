@@ -67,8 +67,13 @@ export async function sendPushToUser(userId, payload) {
   const body = JSON.stringify(payload);
 
   for (const row of rows) {
+    const subscription = parseSubscription(row.subscription);
+    if (!subscription?.endpoint) {
+      failed += 1;
+      continue;
+    }
     try {
-      await webpush.sendNotification(row.subscription, body);
+      await webpush.sendNotification(subscription, body);
       sent += 1;
     } catch (error) {
       failed += 1;
@@ -79,4 +84,16 @@ export async function sendPushToUser(userId, payload) {
   }
 
   return { sent, failed };
+}
+
+function parseSubscription(value) {
+  if (!value) return null;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }
+  return value;
 }

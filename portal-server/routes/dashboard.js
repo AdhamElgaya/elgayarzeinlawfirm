@@ -832,6 +832,7 @@ router.post("/push/subscribe", requireAuth, async (req, res) => {
     await savePushSubscription(req.user.id, req.body?.subscription);
     res.json({ message: "تم تفعيل الإشعارات." });
   } catch (error) {
+    console.error("[portal] push subscribe error:", error);
     res.status(400).json({ error: error.message || "تعذر حفظ الاشتراك." });
   }
 });
