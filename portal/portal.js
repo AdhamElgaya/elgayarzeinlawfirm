@@ -235,7 +235,10 @@ const Portal = (() => {
     if (!date) return null;
     const time = String(timeValue || "").trim();
     if (!time) return date;
-    const parsed = new Date(`${date}T${time}:00`);
+    const [y, m, d] = date.split("-").map(Number);
+    const [hh, mm] = time.split(":").map(Number);
+    if (!y || !m || !d || Number.isNaN(hh) || Number.isNaN(mm)) return null;
+    const parsed = new Date(y, m - 1, d, hh, mm, 0, 0);
     if (Number.isNaN(parsed.getTime())) return null;
     return parsed.toISOString();
   }

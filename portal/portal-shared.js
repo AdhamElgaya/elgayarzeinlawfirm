@@ -1298,6 +1298,10 @@ const PortalDash = (() => {
           (el) => el.value
         ),
       };
+      if (fd.get("due_time") && !body.due_at) {
+        Portal.showAlert(addTaskAlert, "موعد المهمة غير صالح. تحقق من التاريخ والوقت.");
+        return;
+      }
       if (isAdminUser) {
         body.assigned_to = fd.get("assigned_to");
       }

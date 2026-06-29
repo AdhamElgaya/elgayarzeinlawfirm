@@ -6,6 +6,7 @@ import { hashPassword } from "../lib/password.js";
 import { isValidNewUsername, normalizeUsername, USERNAME_RULES_MESSAGE } from "../lib/username.js";
 import { enrichTask, softDeleteCase, softDeleteClient, softDeleteTask, deleteUser } from "../lib/entities.js";
 import { pickCaseAttachments } from "../lib/attachments.js";
+import { normalizeDueAt } from "../lib/task-due.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
@@ -370,58 +371,68 @@ router.delete("/cases/:id", async (req, res) => {
 });
 
 router.post("/tasks", async (req, res) => {
-  const caseId = String(req.body?.case_id || "");
-  const title = String(req.body?.title || "").trim();
-  const assignedTo = String(req.body?.assigned_to || "");
-  const dueAt = req.body?.due_at ? String(req.body.due_at) : null;
+  try {
+    const caseId = String(req.body?.case_id || "");
+    const title = String(req.body?.title || "").trim();
+    const assignedTo = String(req.body?.assigned_to || "");
+    const dueAt = normalizeDueAt(req.body?.due_at);
 
-  if (!caseId || !title || !assignedTo) {
-    return res.status(400).json({ error: "القضية وعنوان المهمة والمحامي المعيّن مطلوبون." });
-  }
+    if (!caseId || !title || !assignedTo) {
+      return res.status(400).json({ error: "القضية وعنوان المهمة والمحامي المعيّن مطلوبون." });
+    }
 
-  const caseRow = await db
-    .prepare(`SELECT id, title, status, attachments FROM cases WHERE id = ? AND deleted_at IS NULL`)
-    .get(caseId);
-  if (!caseRow || caseRow.status === "archived") {
-    return res.status(400).json({ error: "القضية غير موجودة أو مؤرشفة." });
-  }
+    const caseRow = await db
+      .prepare(`SELECT id, title, status, attachments FROM cases WHERE id = ? AND deleted_at IS NULL`)
+      .get(caseId);
+    if (!caseRow || caseRow.status === "archived") {
+      return res.status(400).json({ error: "القضية غير موجودة أو مؤرشفة." });
+    }
 
-  const assignee = await getTaskAssignee(assignedTo, req.user);
-  if (!assignee) {
-    return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
-  }
+    const assignee = await getTaskAssignee(assignedTo, req.user);
+    if (!assignee) {
+      return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+    }
 
-  const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
-  const taskId = uuid();
-  const assignedAt = new Date().toISOString();
-  await db
-    .prepare(
-      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
+    const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
+    const taskId = uuid();
+    const assignedAt = new Date().toISOString();
+    await db
+      .prepare(
+        `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
+      )
+      .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
-  await writeAudit({
-    userId: req.user.id,
-    action: "task_created",
-    entityType: "task",
-    entityId: taskId,
-    metadata: { title, case_id: caseId, assigned_to: assignedTo, attachments_count: attachments.length },
-    ip: req.ip,
-  });
+    await writeAudit({
+      userId: req.user.id,
+      action: "task_created",
+      entityType: "task",
+      entityId: taskId,
+      metadata: { title, case_id: caseId, assigned_to: assignedTo, attachments_count: attachments.length },
+      ip: req.ip,
+    });
 
-  res.status(201).json({
-    task: {
-      id: taskId,
-      case_id: caseId,
-      title,
-      assigned_to: assignedTo,
-      status: "open",
-      due_at: dueAt,
-      attachments,
-    },
-    message: "تم إنشاء المهمة وتعيينها للمحامي.",
-  });
+    res.status(201).json({
+      task: await enrichTask({
+        id: taskId,
+        case_id: caseId,
+        title,
+        assigned_to: assignedTo,
+        status: "open",
+        due_at: dueAt,
+        attachments,
+        assigned_at: assignedAt,
+        created_at: assignedAt,
+      }),
+      message: "تم إنشاء المهمة وتعيينها للمحامي.",
+    });
+  } catch (error) {
+    console.error("[portal] admin create task error:", error);
+    const status = error.statusCode || 500;
+    res.status(status).json({
+      error: status === 500 ? "تعذر إنشاء المهمة. حاول مرة أخرى." : error.message,
+    });
+  }
 });
 
 router.patch("/tasks/:id", async (req, res) => {
@@ -436,7 +447,7 @@ router.patch("/tasks/:id", async (req, res) => {
 
   const title = String(req.body?.title || "").trim();
   const assignedTo = String(req.body?.assigned_to || "");
-  const dueAt = req.body?.due_at ? String(req.body.due_at) : null;
+  const dueAt = normalizeDueAt(req.body?.due_at);
 
   if (!title || !assignedTo) {
     return res.status(400).json({ error: "عنوان المهمة والمحامي المعيّن مطلوبان." });

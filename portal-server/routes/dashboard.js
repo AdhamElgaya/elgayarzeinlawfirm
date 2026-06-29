@@ -35,6 +35,7 @@ import {
   softDeleteTask,
 } from "../lib/entities.js";
 import { requireAuth } from "../middleware/auth.js";
+import { normalizeDueAt } from "../lib/task-due.js";
 import {
   getVapidPublicKey,
   isPushConfigured,
@@ -661,7 +662,7 @@ router.patch("/tasks/:id", async (req, res) => {
     }
 
     if (req.body?.due_at !== undefined) {
-      dueAt = req.body.due_at ? String(req.body.due_at) : null;
+      dueAt = normalizeDueAt(req.body.due_at);
     }
 
     if (req.body?.attachments !== undefined) {
@@ -732,63 +733,71 @@ router.delete("/tasks/:id", async (req, res) => {
 });
 
 router.post("/tasks", async (req, res) => {
-  const caseId = String(req.body?.case_id || "");
-  const title = String(req.body?.title || "").trim();
-  const dueAt = req.body?.due_at ? String(req.body.due_at) : null;
-  const isAdmin = req.user.role === "admin";
-  let assignedTo = isAdmin ? String(req.body?.assigned_to || "") : req.user.id;
+  try {
+    const caseId = String(req.body?.case_id || "");
+    const title = String(req.body?.title || "").trim();
+    const dueAt = normalizeDueAt(req.body?.due_at);
+    const isAdmin = req.user.role === "admin";
+    let assignedTo = isAdmin ? String(req.body?.assigned_to || "") : req.user.id;
 
-  if (!caseId || !title) {
-    return res.status(400).json({ error: "القضية وعنوان المهمة مطلوبان." });
-  }
-
-  const caseRow = await getCaseIfAccessible(req.user, caseId);
-  if (!caseRow || caseRow.status === "archived") {
-    return res.status(400).json({ error: "القضية غير موجودة أو مؤرشفة." });
-  }
-
-  if (isAdmin) {
-    const assignee = await getTaskAssignee(assignedTo, req.user);
-    if (!assignee) {
-      return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+    if (!caseId || !title) {
+      return res.status(400).json({ error: "القضية وعنوان المهمة مطلوبان." });
     }
-  } else {
-    assignedTo = req.user.id;
-  }
 
-  const taskId = uuid();
-  const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
-  const assignedAt = new Date().toISOString();
-  await db
-    .prepare(
-      `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
+    const caseRow = await getCaseIfAccessible(req.user, caseId);
+    if (!caseRow || caseRow.status === "archived") {
+      return res.status(400).json({ error: "القضية غير موجودة أو مؤرشفة." });
+    }
+
+    if (isAdmin) {
+      const assignee = await getTaskAssignee(assignedTo, req.user);
+      if (!assignee) {
+        return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+      }
+    } else {
+      assignedTo = req.user.id;
+    }
+
+    const taskId = uuid();
+    const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
+    const assignedAt = new Date().toISOString();
+    await db
+      .prepare(
+        `INSERT INTO tasks (id, case_id, title, assigned_to, due_at, created_by, attachments, assigned_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
+      )
+      .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
 
-  await writeAudit({
-    userId: req.user.id,
-    action: "task_created",
-    entityType: "task",
-    entityId: taskId,
-    metadata: { title, case_id: caseId, assigned_to: assignedTo, attachments_count: attachments.length },
-    ip: req.ip,
-  });
+    await writeAudit({
+      userId: req.user.id,
+      action: "task_created",
+      entityType: "task",
+      entityId: taskId,
+      metadata: { title, case_id: caseId, assigned_to: assignedTo, attachments_count: attachments.length },
+      ip: req.ip,
+    });
 
-  res.status(201).json({
-    task: await enrichTask({
-      id: taskId,
-      case_id: caseId,
-      title,
-      assigned_to: assignedTo,
-      status: "open",
-      due_at: dueAt,
-      attachments,
-      assigned_at: assignedAt,
-      created_at: assignedAt,
-    }),
-    message: "تم إنشاء المهمة.",
-  });
+    res.status(201).json({
+      task: await enrichTask({
+        id: taskId,
+        case_id: caseId,
+        title,
+        assigned_to: assignedTo,
+        status: "open",
+        due_at: dueAt,
+        attachments,
+        assigned_at: assignedAt,
+        created_at: assignedAt,
+      }),
+      message: "تم إنشاء المهمة.",
+    });
+  } catch (error) {
+    console.error("[portal] create task error:", error);
+    const status = error.statusCode || 500;
+    res.status(status).json({
+      error: status === 500 ? "تعذر إنشاء المهمة. حاول مرة أخرى." : error.message,
+    });
+  }
 });
 
 router.get("/assignees", async (req, res) => {

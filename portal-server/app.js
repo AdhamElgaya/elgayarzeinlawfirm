@@ -11,6 +11,7 @@ import { seedAdmin } from "./seed.js";
 import db, { dbMode } from "./db.js";
 import { storageMode } from "./lib/storage.js";
 import { isProductionEnv } from "./lib/env.js";
+import { applySchemaPatches } from "./lib/schema-patches.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -89,6 +90,7 @@ export async function createApp() {
   });
 
   try {
+    await applySchemaPatches();
     await seedAdmin();
   } catch (error) {
     console.error("[portal] seed admin failed:", error);
