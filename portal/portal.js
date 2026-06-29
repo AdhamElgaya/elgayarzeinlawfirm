@@ -37,21 +37,23 @@ const Portal = (() => {
     }
 
     if (!res.ok) {
+      if (data?.error) {
+        throw new Error(data.error);
+      }
       if (res.status === 404) {
         throw new Error(
-          data?.error ||
-            (usingExternalApi()
-              ? "Portal API not available on the backend server."
-              : "Portal API not available. Set PORTAL_API_BASE on Vercel to your Railway URL.")
+          usingExternalApi()
+            ? "Portal API not available on the backend server."
+            : "مسار API غير موجود. تأكد أن النطاق مربوط بنشر Vercel الصحيح (مثل elgayarzeinlawfirm.vercel.app)."
         );
       }
-      if (res.status === 500 && !usingExternalApi()) {
-        throw new Error(
-          "الخادم يحاول الاتصال بـ /api على Vercel. أضف PORTAL_API_BASE في إعدادات Vercel (رابط Railway + /api) ثم أعد النشر."
-        );
+      if (res.status === 502 || res.status === 503) {
+        throw new Error("تعذر الاتصال بالخادم (Railway). انتظر دقيقة ثم أعد المحاولة.");
       }
-      const message = data?.error || `Request failed (${res.status}).`;
-      throw new Error(message);
+      if (res.status >= 500) {
+        throw new Error(`خطأ في الخادم (${res.status}). تحقق من سجلات Railway ثم أعد المحاولة.`);
+      }
+      throw new Error(`Request failed (${res.status}).`);
     }
 
     return data;
