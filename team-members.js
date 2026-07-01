@@ -207,12 +207,18 @@ const teamMembersData = {
     ar: {
       name: "أ / احمد ابراهيم الخديوي",
       role: "محام لدي المحاكم الجنائيه",
-      points: ["متخصص بقضايا الجنح والجنايات بجميع أنواعها ودرجاتها (جزئي - إستئناف- محاكم اقتصاديه)"],
+      points: [
+        "متخصص بقضايا الجنح والجنايات بجميع أنواعها ودرجاتها (جزئي - إستئناف- محاكم اقتصاديه)",
+        "باحث ومدقق بالقانون الجنائي"
+      ],
     },
     en: {
       name: "Ahmed Ibrahim Elkhediwy",
       role: "Lawyer at Criminal Courts",
-      points: ["Specialist in misdemeanor and felony cases of all types and levels (Partial - Appeal - Economic Courts)"],
+      points: [
+        "Specialist in misdemeanor and felony cases of all types and levels (Partial - Appeal - Economic Courts)",
+        "Researcher and auditor in Criminal Law"
+      ],
     },
   },
   "mohamed-magdy": {
