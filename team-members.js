@@ -206,13 +206,13 @@ const teamMembersData = {
     image: "assets/team/ahmed-ibrahim-elkhediwy.jpg",
     ar: {
       name: "أ / احمد ابراهيم الخديوي",
-      role: "المحامي لدي محاكم الجنايات",
-      points: ["المحامي لدي محاكم الجنايات"],
+      role: "محام لدي المحاكم الجنائيه",
+      points: ["متخصص بقضايا الجنح والجنايات بجميع أنواعها ودرجاتها (جزئي - إستئناف- محاكم اقتصاديه)"],
     },
     en: {
       name: "Ahmed Ibrahim Elkhediwy",
-      role: "Lawyer at Felony Courts",
-      points: ["Lawyer at Felony Courts"],
+      role: "Lawyer at Criminal Courts",
+      points: ["Specialist in misdemeanor and felony cases of all types and levels (Partial - Appeal - Economic Courts)"],
     },
   },
   "mohamed-magdy": {
