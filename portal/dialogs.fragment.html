@@ -177,3 +177,26 @@
     <div id="attachmentPreviewBody" class="portal-preview-body"></div>
   </div>
 </dialog>
+
+<dialog id="changePasswordDialog" class="portal-dialog">
+  <form id="changePasswordForm" class="portal-dialog-form portal-form">
+    <h2>تغيير كلمة المرور</h2>
+    <div id="changePasswordAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>كلمة المرور الحالية</span>
+      <input type="password" name="currentPassword" autocomplete="current-password" required />
+    </label>
+    <label>
+      <span>كلمة المرور الجديدة</span>
+      <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
+    </label>
+    <label>
+      <span>تأكيد كلمة المرور الجديدة</span>
+      <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="cancelChangePasswordBtn">إلغاء</button>
+      <button class="btn" type="submit">تغيير كلمة المرور</button>
+    </div>
+  </form>
+</dialog>

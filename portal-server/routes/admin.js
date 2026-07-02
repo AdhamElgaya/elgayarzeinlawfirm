@@ -8,13 +8,13 @@ import { enrichTask, softDeleteCase, softDeleteClient, softDeleteTask, deleteUse
 import { pickCaseAttachments } from "../lib/attachments.js";
 import { normalizeDueAt } from "../lib/task-due.js";
 import { sendTaskAssignedPush } from "../lib/push.js";
-import { requireAuth, requireAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdminOrAssistant, requireAdminOnly } from "../middleware/auth.js";
 
 const router = Router();
 
-router.use(requireAuth, requireAdmin);
+router.use(requireAuth);
 
-router.get("/users", async (req, res) => {
+router.get("/users", requireAdminOnly, async (req, res) => {
   const users = await db
     .prepare(
       `SELECT id, username, name, role, status, created_at, activated_at
@@ -25,7 +25,7 @@ router.get("/users", async (req, res) => {
   res.json({ users });
 });
 
-router.post("/users", async (req, res) => {
+router.post("/users", requireAdminOnly, async (req, res) => {
   const username = normalizeUsername(req.body?.username);
   const name = String(req.body?.name || "").trim();
   const role = String(req.body?.role || "lawyer");
@@ -83,12 +83,10 @@ router.post("/users", async (req, res) => {
   });
 });
 
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/:id", requireAdminOnly, async (req, res) => {
   const userId = String(req.params.id || "");
   const name = String(req.body?.name || "").trim();
   const username = normalizeUsername(req.body?.username);
-  const password = String(req.body?.password || "");
-  const confirmPassword = String(req.body?.confirmPassword || "");
 
   if (!userId || !name || !username) {
     return res.status(400).json({ error: "Name and username are required." });
@@ -110,27 +108,9 @@ router.patch("/users/:id", async (req, res) => {
     return res.status(409).json({ error: "اسم المستخدم مستخدم بالفعل." });
   }
 
-  const changingPassword = password.length > 0;
-  if (changingPassword) {
-    if (password.length < 8) {
-      return res.status(400).json({ error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل." });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: "كلمتا المرور غير متطابقتين." });
-    }
-  }
-
-  if (changingPassword) {
-    const passwordHash = await hashPassword(password);
-    await db
-      .prepare(`UPDATE users SET name = ?, username = ?, password_hash = ? WHERE id = ?`)
-      .run(name, username, passwordHash, userId);
+  await db.prepare(`UPDATE users SET name = ?, username = ? WHERE id = ?`).run(name, username, userId);
+  if (user.username !== username) {
     await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
-  } else {
-    await db.prepare(`UPDATE users SET name = ?, username = ? WHERE id = ?`).run(name, username, userId);
-    if (user.username !== username) {
-      await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
-    }
   }
 
   await writeAudit({
@@ -141,7 +121,6 @@ router.patch("/users/:id", async (req, res) => {
     metadata: {
       username,
       name,
-      password_changed: changingPassword,
       username_changed: user.username !== username,
     },
     ip: req.ip,
@@ -149,11 +128,11 @@ router.patch("/users/:id", async (req, res) => {
 
   res.json({
     user: { id: userId, username, name, role: user.role, status: user.status },
-    message: changingPassword ? "تم تحديث الحساب وكلمة المرور." : "تم تحديث الحساب.",
+    message: "تم تحديث الحساب.",
   });
 });
 
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", requireAdminOnly, async (req, res) => {
   const userId = String(req.params.id || "");
   if (!userId) {
     return res.status(400).json({ error: "معرّف المستخدم مطلوب." });
@@ -191,7 +170,7 @@ router.delete("/users/:id", async (req, res) => {
   res.json({ message: "تم حذف الحساب." });
 });
 
-router.get("/audit", async (req, res) => {
+router.get("/audit", requireAdminOrAssistant, async (req, res) => {
   const logs = await db
     .prepare(
       `SELECT a.id, a.action, a.entity_type, a.entity_id, a.metadata, a.ip, a.created_at,
@@ -205,7 +184,7 @@ router.get("/audit", async (req, res) => {
   res.json({ logs });
 });
 
-router.get("/assignees", async (req, res) => {
+router.get("/assignees", requireAdminOrAssistant, async (req, res) => {
   const users = (
     await db
       .prepare(
@@ -218,14 +197,14 @@ router.get("/assignees", async (req, res) => {
   res.json({ users });
 });
 
-router.get("/clients", async (req, res) => {
+router.get("/clients", requireAdminOrAssistant, async (req, res) => {
   const clients = await db
     .prepare(`SELECT id, name, phone, created_at FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`)
     .all();
   res.json({ clients });
 });
 
-router.post("/clients", async (req, res) => {
+router.post("/clients", requireAdminOrAssistant, async (req, res) => {
   const name = String(req.body?.name || "").trim();
   const phone = String(req.body?.phone || "").trim() || null;
 
@@ -256,7 +235,7 @@ router.post("/clients", async (req, res) => {
   });
 });
 
-router.delete("/clients/:id", async (req, res) => {
+router.delete("/clients/:id", requireAdminOrAssistant, async (req, res) => {
   const client = await db
     .prepare(`SELECT id, name FROM clients WHERE id = ? AND deleted_at IS NULL`)
     .get(req.params.id);
@@ -289,13 +268,13 @@ async function getAssignableUser(userId) {
 async function getTaskAssignee(userId, actor) {
   const assignee = await getAssignableUser(userId);
   if (assignee) return assignee;
-  if (actor?.role === "admin" && actor.id === userId && actor.status === "active") {
+  if ((actor?.role === "admin" || actor?.role === "assistant") && actor.id === userId && actor.status === "active") {
     return actor;
   }
   return null;
 }
 
-router.post("/cases", async (req, res) => {
+router.post("/cases", requireAdminOrAssistant, async (req, res) => {
   const title = String(req.body?.title || "").trim();
   const clientId = String(req.body?.client_id || "");
   const assignedTo = String(req.body?.assigned_to || "");
@@ -349,7 +328,7 @@ router.post("/cases", async (req, res) => {
   });
 });
 
-router.delete("/cases/:id", async (req, res) => {
+router.delete("/cases/:id", requireAdminOrAssistant, async (req, res) => {
   const caseRow = await db
     .prepare(`SELECT id, title FROM cases WHERE id = ? AND deleted_at IS NULL`)
     .get(req.params.id);
@@ -371,7 +350,7 @@ router.delete("/cases/:id", async (req, res) => {
   res.json({ message: "تم حذف القضية والمهام المرتبطة." });
 });
 
-router.post("/tasks", async (req, res) => {
+router.post("/tasks", requireAdminOrAssistant, async (req, res) => {
   try {
     const caseId = String(req.body?.case_id || "");
     const title = String(req.body?.title || "").trim();
@@ -438,7 +417,7 @@ router.post("/tasks", async (req, res) => {
   }
 });
 
-router.patch("/tasks/:id", async (req, res) => {
+router.patch("/tasks/:id", requireAdminOrAssistant, async (req, res) => {
   const taskRow = await db
     .prepare(
       `SELECT id, case_id, title, assigned_to, status, due_at, assigned_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
@@ -503,7 +482,7 @@ router.patch("/tasks/:id", async (req, res) => {
   });
 });
 
-router.delete("/tasks/:id", async (req, res) => {
+router.delete("/tasks/:id", requireAdminOrAssistant, async (req, res) => {
   const task = await db
     .prepare(`SELECT id, title FROM tasks WHERE id = ? AND deleted_at IS NULL`)
     .get(req.params.id);

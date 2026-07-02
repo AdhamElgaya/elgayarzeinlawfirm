@@ -952,7 +952,7 @@
     if (!user) return;
 
     dashboardUser = user;
-    isAdminUser = user.role === "admin";
+    isAdminUser = user.role === "admin" || user.role === "assistant";
 
     if (isAdminUser) {
       document.body.classList.add("portal-admin-nav");
@@ -961,7 +961,7 @@
       await loadAssignees();
       setupAdminControls();
       if (taskAssigneeFilterWrap) taskAssigneeFilterWrap.hidden = false;
-    } else if (user.role === "lawyer" || user.role === "assistant") {
+    } else if (user.role === "lawyer") {
       assigneeNames = { [user.id]: user.name };
     }
 

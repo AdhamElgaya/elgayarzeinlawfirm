@@ -96,7 +96,7 @@ async function getTaskAssignee(userId, actor) {
 }
 
 router.get("/summary", async (req, res) => {
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
 
   const caseRows = await db
     .prepare(
@@ -152,7 +152,7 @@ router.get("/summary", async (req, res) => {
 });
 
 router.get("/archived", async (req, res) => {
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
 
   const rows = await db
     .prepare(
@@ -241,7 +241,7 @@ router.patch("/cases/:id", async (req, res) => {
     return res.status(403).json({ error: "غير مصرح بتعديل هذه القضية." });
   }
 
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
   const canEditMeta = isAdmin && row.status !== "archived";
 
   let title = row.title;
@@ -621,7 +621,7 @@ router.patch("/tasks/:id", async (req, res) => {
     return res.status(404).json({ error: "المهمة غير موجودة أو غير متاحة." });
   }
 
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
   const hasMetaUpdate =
     req.body?.title !== undefined ||
     req.body?.assigned_to !== undefined ||
@@ -745,7 +745,7 @@ router.post("/tasks", async (req, res) => {
     const caseId = String(req.body?.case_id || "");
     const title = String(req.body?.title || "").trim();
     const dueAt = normalizeDueAt(req.body?.due_at);
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
     let assignedTo = isAdmin ? String(req.body?.assigned_to || "") : req.user.id;
 
     if (!caseId || !title) {

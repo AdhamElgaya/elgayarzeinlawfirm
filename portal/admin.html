@@ -32,7 +32,7 @@
               <span data-i18n="portal.back">الرجوع</span>
             </a>
             <h1>إدارة المستخدمين</h1>
-            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب (بما في ذلك حسابك) من زر «تعديل» لتغيير الاسم أو كلمة المرور.</p>
+            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب من زر «تعديل» لتغيير الاسم أو اسم المستخدم. لتغيير كلمة المرور الخاصة بك، استخدم زر "تغيير كلمة المرور" في الأعلى.</p>
           </div>
         </div>
 
@@ -123,14 +123,6 @@
             required
           />
           <span class="portal-field-hint">الاسم الأول والأخير بالعربية، بمسافة واحدة فقط.</span>
-        </label>
-        <label>
-          <span>كلمة مرور جديدة (اختياري)</span>
-          <input type="password" name="password" id="editUserPassword" autocomplete="new-password" minlength="8" />
-        </label>
-        <label>
-          <span>تأكيد كلمة المرور</span>
-          <input type="password" name="confirmPassword" id="editUserConfirmPassword" autocomplete="new-password" minlength="8" />
         </label>
         <div class="portal-dialog-actions">
           <button type="button" class="portal-btn-ghost" id="cancelEditUserBtn">إلغاء</button>
@@ -236,8 +228,6 @@
         document.getElementById("editUserName").value = user.name;
         document.getElementById("editUserUsername").value = user.username;
         document.getElementById("editUserRole").textContent = Portal.roleLabel(user.role);
-        document.getElementById("editUserPassword").value = "";
-        document.getElementById("editUserConfirmPassword").value = "";
         const isSelf = user.id === currentAdminId;
         document.querySelector("#editUserDialog h2").textContent = isSelf
           ? "تعديل حسابك"
@@ -252,23 +242,6 @@
 
         const fd = new FormData(editUserForm);
         const userId = fd.get("user_id");
-        const password = String(fd.get("password") || "");
-        const confirmPassword = String(fd.get("confirmPassword") || "");
-
-        if (password && password.length < 8) {
-          Portal.showAlert(editUserAlert, "كلمة المرور يجب أن تكون 8 أحرف على الأقل.");
-          return;
-        }
-        if (password && password !== confirmPassword) {
-          Portal.showAlert(editUserAlert, "كلمتا المرور غير متطابقتين.");
-          return;
-        }
-        if ((password && !confirmPassword) || (!password && confirmPassword)) {
-          Portal.showAlert(editUserAlert, "أدخل كلمة المرور وتأكيدها معاً.");
-          return;
-        }
-
-        const editingSelf = userId === currentAdminId;
         const submitBtn = document.getElementById("saveEditUserBtn");
         if (submitBtn) submitBtn.disabled = true;
 
@@ -277,10 +250,6 @@
             name: fd.get("name"),
             username: fd.get("username"),
           };
-          if (password) {
-            body.password = password;
-            body.confirmPassword = confirmPassword;
-          }
 
           const data = await Portal.request(`/admin/users/${userId}`, {
             method: "PATCH",
@@ -288,13 +257,6 @@
           });
 
           editUserDialog.close();
-          if (editingSelf && password) {
-            Portal.showToast("تم تغيير كلمة المرور. سجّل الدخول مرة أخرى.", "success", 4000);
-            window.setTimeout(() => {
-              window.location.href = "login.html";
-            }, 1500);
-            return;
-          }
           Portal.showToast(data.message || "تم تحديث الحساب.", "success");
           await loadUsers();
         } catch (error) {
@@ -313,7 +275,6 @@
         }
         currentAdminId = user.id;
         Portal.initPasswordToggles(createUserForm);
-        Portal.initPasswordToggles(editUserForm);
         document.getElementById("cancelEditUserBtn")?.addEventListener("click", () => editUserDialog.close());
         editUserForm?.addEventListener("submit", saveEditUserForm);
         usersList.addEventListener("click", async (event) => {

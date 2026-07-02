@@ -106,6 +106,20 @@ export function requireAdmin(req, res, next) {
   next();
 }
 
+export function requireAdminOrAssistant(req, res, next) {
+  if (req.user?.role !== "admin" && req.user?.role !== "assistant") {
+    return res.status(403).json({ error: "Admin or assistant access required." });
+  }
+  next();
+}
+
+export function requireAdminOnly(req, res, next) {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ error: "Admin-only access required." });
+  }
+  next();
+}
+
 export function publicUser(user) {
   return {
     id: user.id,

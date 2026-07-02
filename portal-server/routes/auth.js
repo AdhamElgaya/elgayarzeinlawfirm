@@ -2,7 +2,7 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
-import { verifyPassword } from "../lib/password.js";
+import { verifyPassword, hashPassword } from "../lib/password.js";
 import { writeAudit } from "../lib/audit.js";
 import { sessionExpiry } from "../lib/crypto-utils.js";
 import { normalizeUsername } from "../lib/username.js";
@@ -102,6 +102,61 @@ router.post("/logout", requireAuth, async (req, res) => {
   clearSessionCookie(res);
   await writeAudit({ userId: req.user.id, action: "logout", ip: req.ip });
   res.json({ ok: true });
+});
+
+router.post("/change-password", requireAuth, async (req, res) => {
+  try {
+    const currentPassword = String(req.body?.currentPassword || "");
+    const newPassword = String(req.body?.newPassword || "");
+    const confirmPassword = String(req.body?.confirmPassword || "");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "جميع الحقول مطلوبة." });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل." });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "كلمتا المرور غير متطابقتين." });
+    }
+
+    const user = await db
+      .prepare(`SELECT id, username, password_hash FROM users WHERE id = ?`)
+      .get(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ error: "المستخدم غير موجود." });
+    }
+
+    const validCurrentPassword = await verifyPassword(currentPassword, user.password_hash);
+    if (!validCurrentPassword) {
+      return res.status(401).json({ error: "كلمة المرور الحالية غير صحيحة." });
+    }
+
+    const newPasswordHash = await hashPassword(newPassword);
+    await db
+      .prepare(`UPDATE users SET password_hash = ? WHERE id = ?`)
+      .run(newPasswordHash, user.id);
+
+    await db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(user.id);
+
+    await writeAudit({
+      userId: req.user.id,
+      action: "password_changed",
+      entityType: "user",
+      entityId: user.id,
+      metadata: { self_change: true },
+      ip: req.ip,
+    });
+
+    clearSessionCookie(res);
+    res.json({ message: "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى." });
+  } catch (error) {
+    console.error("[portal] change password error:", error);
+    res.status(500).json({ error: "تعذر تغيير كلمة المرور." });
+  }
 });
 
 export default router;

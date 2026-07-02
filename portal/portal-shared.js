@@ -1778,12 +1778,15 @@ const PortalDash = (() => {
   async function boot(page = "home") {
     pageType = page;
     await ensureDialogs();
+    if (typeof PortalNav !== "undefined" && PortalNav.initChangePasswordDialog) {
+      PortalNav.initChangePasswordDialog();
+    }
 
     const user = await Portal.requireAuth();
     if (!user) return;
 
     dashboardUser = user;
-    isAdminUser = user.role === "admin";
+    isAdminUser = user.role === "admin" || user.role === "assistant";
 
     if (pageType === "clients" && !isAdminUser) {
       window.location.href = "home.html";
@@ -1803,7 +1806,7 @@ const PortalDash = (() => {
 
       if (pageType === "clients") setupClientControls();
       if (pageType === "cases") setupCaseControls();
-    } else if (user.role === "lawyer" || user.role === "assistant") {
+    } else if (user.role === "lawyer") {
       assigneeNames = { [user.id]: user.name };
     }
 
