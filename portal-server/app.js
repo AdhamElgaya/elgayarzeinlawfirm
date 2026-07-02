@@ -77,7 +77,7 @@ export async function createApp() {
     res.status(payload.ok ? 200 : 503).json(payload);
   });
 
-  const portalPages = ["login", "home", "clients", "cases", "archived", "tasks", "dashboard", "admin"];
+  const portalPages = ["login", "home", "clients", "cases", "archived", "tasks", "dashboard", "admin", "profile"];
   if (!apiOnly) {
     for (const page of portalPages) {
       app.get(`/portal/${page}`, (_req, res, next) => {

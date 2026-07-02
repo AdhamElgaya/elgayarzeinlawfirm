@@ -32,7 +32,7 @@
               <span data-i18n="portal.back">الرجوع</span>
             </a>
             <h1>إدارة المستخدمين</h1>
-            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب من زر «تعديل» لتغيير الاسم أو اسم المستخدم. لتغيير كلمة المرور الخاصة بك، استخدم زر "تغيير كلمة المرور" في الأعلى.</p>
+            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب من زر «تعديل» لتغيير الاسم أو اسم المستخدم. لتغيير كلمة المرور الخاصة بك، استخدم القسم أدناه.</p>
           </div>
         </div>
 
@@ -84,6 +84,27 @@
           <h2 class="portal-section-title">المستخدمون</h2>
           <ul class="portal-list" id="usersList"></ul>
         </section>
+
+        <div class="portal-card portal-card--wide">
+          <h2 class="portal-section-title">تغيير كلمة المرور الخاصة بك</h2>
+          <div id="changePasswordAlert" class="portal-alert portal-alert--error" hidden></div>
+          <div id="changePasswordSuccess" class="portal-alert portal-alert--success" hidden></div>
+          <form id="changePasswordForm" class="portal-form">
+            <label>
+              <span>كلمة المرور الحالية</span>
+              <input type="password" name="currentPassword" autocomplete="current-password" required />
+            </label>
+            <label>
+              <span>كلمة المرور الجديدة</span>
+              <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label>
+              <span>تأكيد كلمة المرور الجديدة</span>
+              <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+            </label>
+            <button type="submit" class="btn">تغيير كلمة المرور</button>
+          </form>
+        </div>
       </div>
     </main>
 
@@ -312,6 +333,54 @@
           await loadUsers();
         } catch (error) {
           Portal.showAlert(adminAlert, error.message);
+        }
+      });
+
+      const changePasswordForm = document.getElementById("changePasswordForm");
+      const changePasswordAlert = document.getElementById("changePasswordAlert");
+      const changePasswordSuccess = document.getElementById("changePasswordSuccess");
+
+      Portal.initPasswordToggles(changePasswordForm);
+
+      changePasswordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        Portal.hideAlert(changePasswordAlert);
+        changePasswordSuccess.hidden = true;
+
+        const fd = new FormData(changePasswordForm);
+        const currentPassword = String(fd.get("currentPassword") || "");
+        const newPassword = String(fd.get("newPassword") || "");
+        const confirmPassword = String(fd.get("confirmPassword") || "");
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          Portal.showAlert(changePasswordAlert, "جميع الحقول مطلوبة.");
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          Portal.showAlert(changePasswordAlert, "كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل.");
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          Portal.showAlert(changePasswordAlert, "كلمتا المرور غير متطابقتين.");
+          return;
+        }
+
+        try {
+          const result = await Portal.request("/auth/change-password", {
+            method: "POST",
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+          });
+          changePasswordSuccess.hidden = false;
+          changePasswordSuccess.textContent = result.message || "تم تغيير كلمة المرور بنجاح.";
+          changePasswordForm.reset();
+          Portal.showToast("تم تغيير كلمة المرور. سجّل الدخول مرة أخرى.", "success", 3000);
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
+        } catch (error) {
+          Portal.showAlert(changePasswordAlert, error.message || "تعذر تغيير كلمة المرور.");
         }
       });
 

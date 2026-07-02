@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | الملف الشخصي</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css" />
+  </head>
+  <body class="portal-page" data-page="portal-profile" data-portal-page="profile">
+    <header class="portal-header">
+      <div class="container portal-header__bar">
+        <a class="portal-brand" href="../index.html">
+          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
+          <span class="portal-brand-tag" data-i18n="portal.brand.portal">بوابة المحامين</span>
+        </a>
+        <div class="portal-header__end">
+          <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
+            <svg class="portal-nav-toggle__open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+            <svg class="portal-nav-toggle__close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+          <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
+            <div class="portal-header-nav__links" id="adminNavLinks">
+              <a class="portal-nav-link" href="home.html" data-nav="home">المنزل</a>
+              <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
+              <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
+              <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
+              <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
+              <a class="portal-nav-link" href="profile.html" data-nav="profile" id="profileNavLink" hidden>الملف الشخصي</a>
+            </div>
+          </nav>
+          <button id="logoutBtn" class="portal-btn-sm portal-header-cta" type="button" data-i18n="portal.logout">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="portal-nav-backdrop" id="portalNavBackdrop" hidden></div>
+    </header>
+    <main class="portal-main">
+      <div class="container portal-dashboard">
+        <div class="portal-dashboard-head">
+          <div>
+            <a class="portal-back-link" href="home.html">
+              <svg class="portal-back-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span data-i18n="portal.back">الرجوع</span>
+            </a>
+            <h1>الملف الشخصي</h1>
+            <p id="profileWelcome">إدارة معلومات حسابك</p>
+          </div>
+        </div>
+
+        <div class="portal-card portal-card--wide">
+          <h2 class="portal-section-title">معلومات الحساب</h2>
+          <div class="portal-detail">
+            <div class="portal-detail-row">
+              <span>الاسم</span>
+              <strong id="profileName">—</strong>
+            </div>
+            <div class="portal-detail-row">
+              <span>اسم المستخدم</span>
+              <strong id="profileUsername">—</strong>
+            </div>
+            <div class="portal-detail-row">
+              <span>الدور</span>
+              <strong id="profileRole">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-card portal-card--wide">
+          <h2 class="portal-section-title">تغيير كلمة المرور</h2>
+          <div id="profilePasswordAlert" class="portal-alert portal-alert--error" hidden></div>
+          <div id="profilePasswordSuccess" class="portal-alert portal-alert--success" hidden></div>
+          <form id="profilePasswordForm" class="portal-form">
+            <label>
+              <span>كلمة المرور الحالية</span>
+              <input type="password" name="currentPassword" autocomplete="current-password" required />
+            </label>
+            <label>
+              <span>كلمة المرور الجديدة</span>
+              <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label>
+              <span>تأكيد كلمة المرور الجديدة</span>
+              <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+            </label>
+            <button type="submit" class="btn">تغيير كلمة المرور</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <script src="../i18n-en.js"></script>
+    <script src="../i18n.js"></script>
+    <script src="api-config.js"></script>
+    <script src="portal.js"></script>
+    <script src="portal-nav.js"></script>
+    <script>
+      const profileName = document.getElementById("profileName");
+      const profileUsername = document.getElementById("profileUsername");
+      const profileRole = document.getElementById("profileRole");
+      const profilePasswordForm = document.getElementById("profilePasswordForm");
+      const profilePasswordAlert = document.getElementById("profilePasswordAlert");
+      const profilePasswordSuccess = document.getElementById("profilePasswordSuccess");
+      const profileNavLink = document.getElementById("profileNavLink");
+
+      Portal.initPasswordToggles(profilePasswordForm);
+
+      profilePasswordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        Portal.hideAlert(profilePasswordAlert);
+        profilePasswordSuccess.hidden = true;
+
+        const fd = new FormData(profilePasswordForm);
+        const currentPassword = String(fd.get("currentPassword") || "");
+        const newPassword = String(fd.get("newPassword") || "");
+        const confirmPassword = String(fd.get("confirmPassword") || "");
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          Portal.showAlert(profilePasswordAlert, "جميع الحقول مطلوبة.");
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          Portal.showAlert(profilePasswordAlert, "كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل.");
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          Portal.showAlert(profilePasswordAlert, "كلمتا المرور غير متطابقتين.");
+          return;
+        }
+
+        try {
+          const result = await Portal.request("/auth/change-password", {
+            method: "POST",
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+          });
+          profilePasswordSuccess.hidden = false;
+          profilePasswordSuccess.textContent = result.message || "تم تغيير كلمة المرور بنجاح.";
+          profilePasswordForm.reset();
+          Portal.showToast("تم تغيير كلمة المرور. سجّل الدخول مرة أخرى.", "success", 3000);
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
+        } catch (error) {
+          Portal.showAlert(profilePasswordAlert, error.message || "تعذر تغيير كلمة المرور.");
+        }
+      });
+
+      async function boot() {
+        const user = await Portal.requireAuth();
+        if (!user) return;
+
+        if (user.role === "admin") {
+          window.location.href = "admin.html";
+          return;
+        }
+
+        profileName.textContent = user.name;
+        profileUsername.textContent = user.username;
+        profileRole.textContent = Portal.roleLabel(user.role);
+
+        profileNavLink.hidden = false;
+        PortalNav.init(user);
+      }
+
+      boot();
+    </script>
+  </body>
+</html>

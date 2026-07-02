@@ -3,6 +3,7 @@ const PortalNav = (() => {
     const page = document.body.dataset.portalPage || "";
     const isAdmin = user?.role === "admin" || user?.role === "assistant";
     const isAdminOnly = user?.role === "admin";
+    const isLawyerOrAssistant = user?.role === "lawyer" || user?.role === "assistant";
 
     document.querySelectorAll("[data-admin-only]").forEach((el) => {
       const show = isAdminOnly;
@@ -10,6 +11,11 @@ const PortalNav = (() => {
       el.style.display = show ? "" : "none";
       el.setAttribute("aria-hidden", show ? "false" : "true");
     });
+
+    const profileNavLink = document.getElementById("profileNavLink");
+    if (profileNavLink && isLawyerOrAssistant) {
+      profileNavLink.hidden = false;
+    }
 
     if (isAdmin) {
       document.body.classList.add("portal-admin-nav");
@@ -56,12 +62,6 @@ const PortalNav = (() => {
         /* ignore */
       }
       window.location.href = "/portal/login.html";
-    });
-
-    const changePasswordBtn = document.getElementById("changePasswordBtn");
-    changePasswordBtn?.addEventListener("click", () => {
-      const dialog = document.getElementById("changePasswordDialog");
-      if (dialog) dialog.showModal();
     });
   }
 
