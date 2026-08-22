@@ -1119,6 +1119,36 @@ h1 {
   }
 }
 
+/* إيهاب علي صابون — صورة مكتبية واسعة: إطار مثل باقي البطاقات + تركيز على الوجه */
+.team-photo-frame.team-photo-frame--ehab-face {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid #2e2e2e;
+  background: #0f0f0f;
+}
+
+@media (min-width: 761px) {
+  .team-photo-frame.team-photo-frame--ehab-face {
+    aspect-ratio: 4 / 4.08;
+  }
+}
+
+.team-photo-frame--ehab-face .team-photo.team-photo--ehab-ali-saboun {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: unset;
+  border: none;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center 18%;
+  transform: scale(2.05);
+  transform-origin: center 16%;
+}
+
 .team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy {
   width: 100%;
   height: 100%;
@@ -2877,6 +2907,7 @@ textarea:focus {
   .team-brief-card .team-photo,
   .team-member-detail-head .team-photo,
   .team-photo-frame--zoom-face .team-photo.team-photo--abdulaziz-elgayar,
+  .team-photo-frame--ehab-face .team-photo.team-photo--ehab-ali-saboun,
   .team-photo-frame--magdy-face .team-photo.team-photo--mohamed-magdy,
   .team-photo-frame--nassar-face .team-photo.team-photo--nassar-metwaly,
   .team-photo-frame--shahin-face .team-photo.team-photo--mohamed-shaheen,
