@@ -82,38 +82,26 @@ const observer = new IntersectionObserver(
 
 revealItems.forEach((item) => observer.observe(item));
 
+document.querySelectorAll("img").forEach((img) => {
+  if (!img.hasAttribute("decoding")) {
+    img.decoding = "async";
+  }
+});
+
 document.addEventListener("click", (event) => {
   const link = event.target.closest("a[href]");
-  if (!link) return;
+  if (!link || link.target === "_blank") return;
 
   const href = link.getAttribute("href");
-  if (!href) return;
-  if (link.target === "_blank") return;
-  if (href.startsWith("#")) return;
-  if (href.startsWith("mailto:") || href.startsWith("tel:")) return;
+  if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
   if (href.startsWith("http://") || href.startsWith("https://")) return;
 
-  let destination = href;
-  let memberId = null;
   try {
-    const url = new URL(href, window.location.href);
-    destination = url.href;
-    memberId = url.searchParams.get("id");
-  } catch {
-    destination = href;
-  }
-
-  if (memberId) {
-    try {
+    const memberId = new URL(href, window.location.href).searchParams.get("id");
+    if (memberId) {
       sessionStorage.setItem("gz-team-member-id", memberId);
-    } catch {
-      /* ignore */
     }
+  } catch {
+    /* ignore */
   }
-
-  event.preventDefault();
-  document.body.classList.add("page-exit");
-  setTimeout(() => {
-    window.location.assign(destination);
-  }, 220);
 });

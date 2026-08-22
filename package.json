@@ -8,7 +8,8 @@
     "portal:dev": "npm --prefix portal-server run dev",
     "site": "npx --yes serve -l 3001",
     "postinstall": "node scripts/postinstall.js",
-    "vercel:config": "node scripts/sync-deploy-config.js"
+    "vercel:config": "node scripts/sync-deploy-config.js",
+    "optimize:images": "py -3 scripts/optimize-site-images.py"
   },
   "engines": {
     "node": ">=20"

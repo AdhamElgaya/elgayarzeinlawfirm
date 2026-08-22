@@ -39,6 +39,9 @@
   if (chosen && lang === "en") {
     document.documentElement.lang = "en";
     document.documentElement.dir = "ltr";
+    const bootSrc = document.currentScript && document.currentScript.getAttribute("src");
+    const enSrc = (bootSrc || "i18n-boot.js").replace("i18n-boot.js", "i18n-en.js");
+    document.write('<script src="' + enSrc + '"><\/script>');
   }
 
   window.GZ_I18N_BOOT = {

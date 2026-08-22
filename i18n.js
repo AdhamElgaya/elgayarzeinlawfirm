@@ -559,6 +559,41 @@
     document.body.classList.remove("lang-picker-open");
   }
 
+  function getEnScriptSrc() {
+    const boot = document.querySelector('script[src*="i18n-boot.js"]');
+    if (boot) {
+      return boot.getAttribute("src").replace("i18n-boot.js", "i18n-en.js");
+    }
+    return "i18n-en.js";
+  }
+
+  let enLoadPromise = null;
+  function ensureEnDictionary() {
+    if (window.GZ_I18N_EN) return Promise.resolve();
+    if (enLoadPromise) return enLoadPromise;
+    enLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = getEnScriptSrc();
+      script.onload = resolve;
+      script.onerror = () => {
+        enLoadPromise = null;
+        reject(new Error("Failed to load English translations"));
+      };
+      document.head.appendChild(script);
+    });
+    return enLoadPromise;
+  }
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    setCookie(STORAGE_KEY, lang);
+    markLanguageChosen();
+    setDocumentLang(lang);
+    applyBindings(lang);
+    updateSwitcher();
+    window.dispatchEvent(new CustomEvent("gz:languagechange", { detail: { lang } }));
+  }
+
   function chooseLanguage(lang) {
     markLanguageChosen();
     setLanguage(lang);
@@ -567,13 +602,11 @@
 
   function setLanguage(lang) {
     if (!SUPPORTED.includes(lang)) lang = "ar";
-    currentLang = lang;
-    setCookie(STORAGE_KEY, lang);
-    markLanguageChosen();
-    setDocumentLang(lang);
-    applyBindings(lang);
-    updateSwitcher();
-    window.dispatchEvent(new CustomEvent("gz:languagechange", { detail: { lang } }));
+    if (lang === "en") {
+      ensureEnDictionary().then(() => applyLanguage(lang)).catch(() => applyLanguage(lang));
+      return;
+    }
+    applyLanguage(lang);
   }
 
   window.GZ_I18N = {
@@ -596,16 +629,24 @@
     const chosen = hasChosenLanguage();
     currentLang = chosen ? getStoredLang() : "ar";
 
-    setDocumentLang(currentLang);
-    applyBindings(currentLang);
-    updateSwitcher();
+    const finishInit = () => {
+      setDocumentLang(currentLang);
+      applyBindings(currentLang);
+      updateSwitcher();
 
-    if (!chosen) {
-      showLanguagePicker();
+      if (!chosen) {
+        showLanguagePicker();
+      }
+
+      window.GZ_I18N._ready = true;
+      window.dispatchEvent(new CustomEvent("gz:i18nready", { detail: { lang: currentLang } }));
+    };
+
+    if (currentLang === "en") {
+      ensureEnDictionary().then(finishInit).catch(finishInit);
+      return;
     }
-
-    window.GZ_I18N._ready = true;
-    window.dispatchEvent(new CustomEvent("gz:i18nready", { detail: { lang: currentLang } }));
+    finishInit();
   }
 
   window.GZ_I18N._ready = false;

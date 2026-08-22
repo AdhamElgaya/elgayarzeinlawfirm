@@ -1,6 +1,6 @@
 const teamMembersData = {
   "mostafa-zain": {
-    image: "assets/team/mostafa-zain.jpg",
+    image: "assets/team/mostafa-zain.webp",
     ar: {
       name: "أ.د / مصطفى زين",
       role: "شريك المؤسسه",
@@ -25,7 +25,7 @@ const teamMembersData = {
     },
   },
   "mahmoud-elgayar": {
-    image: "assets/team/mahmoud-elgayar.jpg",
+    image: "assets/team/mahmoud-elgayar.webp",
     ar: {
       name: "أ / محمود الجيار",
       role: "المدير التنفيذى وشريك مؤسس",
@@ -54,7 +54,7 @@ const teamMembersData = {
     },
   },
   "mahmoud-ahmed-emam": {
-    image: "assets/team/mahmoud-ahmed-emam.jpg",
+    image: "assets/team/mahmoud-ahmed-emam.webp",
     ar: {
       name: "أ / محمود احمد امام",
       role: "المحامي بالنقض",
@@ -69,7 +69,7 @@ const teamMembersData = {
     },
   },
   "fahima-ahmed-alkomary": {
-    image: "assets/team/fahima-ahmed-alkomary.jpg",
+    image: "assets/team/fahima-ahmed-alkomary.webp",
     ar: {
       name: "أ.د / فهيمة أحمد علي القماري",
       role: "أستاذ قانون المرافعات",
@@ -100,7 +100,7 @@ const teamMembersData = {
     },
   },
   "ibrahim-ali-aref": {
-    image: "assets/team/ibrahim-ali-aref.jpg",
+    image: "assets/team/ibrahim-ali-aref.webp",
     ar: {
       name: "أ / ابراهيم علي عارف",
       role: "المدير العام مكتب القاهرة",
@@ -115,7 +115,7 @@ const teamMembersData = {
     },
   },
   "noha-mohamed-elsayed": {
-    image: "assets/team/noha-mohamed-elsayed.jpg",
+    image: "assets/team/noha-mohamed-elsayed.webp",
     ar: {
       name: "أ / نهي محمد السيد",
       role: "مستشار قضايا الاسرة",
@@ -130,7 +130,7 @@ const teamMembersData = {
     },
   },
   "nassar-metwaly-nassar": {
-    image: "assets/team/nassar-metwaly-nassar.png",
+    image: "assets/team/nassar-metwaly-nassar.webp",
     ar: {
       name: "أ / نصار متولي نصار",
       role: "المدير التنفيذي لمكتب الاسكندرية",
@@ -145,7 +145,7 @@ const teamMembersData = {
     },
   },
   "mohamed-ahmed-daghidy": {
-    image: "assets/team/mohamed-ahmed-daghidy.jpg",
+    image: "assets/team/mohamed-ahmed-daghidy.webp",
     ar: {
       name: "أ / محمد احمد دغيدي",
       role: "المحامي بالنقض",
@@ -160,7 +160,7 @@ const teamMembersData = {
     },
   },
   "mohamed-abdelhafiz": {
-    image: "assets/team/mohamed-abdelhafiz.jpg",
+    image: "assets/team/mohamed-abdelhafiz.webp",
     ar: {
       name: "أ / محمد عبدالحفيظ",
       role: "المحامي بالاستئناف العالي ومجلس الدوله",
@@ -173,7 +173,7 @@ const teamMembersData = {
     },
   },
   "mohamed-shaheen": {
-    image: "assets/team/mohamed-shaheen.png",
+    image: "assets/team/mohamed-shaheen.webp",
     ar: {
       name: "أ / محمد شاهين",
       role: "المدير التنفيذي لمكتب الأسكندريه والعلمين",
@@ -186,7 +186,7 @@ const teamMembersData = {
     },
   },
   "abdulaziz-elgayar": {
-    image: "assets/team/abdulaziz-elgayar.jpg",
+    image: "assets/team/abdulaziz-elgayar.webp",
     ar: {
       name: "أ / عبد العزيز الجيار",
       role: "المحامى",
@@ -203,7 +203,7 @@ const teamMembersData = {
     },
   },
   "ahmed-ibrahim-elkhediwy": {
-    image: "assets/team/ahmed-ibrahim-elkhediwy.jpg",
+    image: "assets/team/ahmed-ibrahim-elkhediwy.webp",
     ar: {
       name: "أ / احمد ابراهيم الخديوي",
       role: "محام لدي المحاكم الجنائيه",
@@ -222,7 +222,7 @@ const teamMembersData = {
     },
   },
   "ehab-ali-saboun": {
-    image: "assets/team/ehab.jpeg",
+    image: "assets/team/ehab.webp",
     ar: {
       name: "أ / إيهاب علي صابون",
       role: "المدير الإداري",
@@ -235,7 +235,7 @@ const teamMembersData = {
     },
   },
   "mohamed-magdy": {
-    image: "assets/team/mohamed-magdy.png",
+    image: "assets/team/mohamed-magdy.webp",
     ar: {
       name: "أ / محمد مجدي",
       role: "المحامى",
@@ -261,7 +261,7 @@ const teamMembersData = {
     },
   },
   habiba: {
-    image: "assets/team/habiba.png",
+    image: "assets/team/habiba.webp",
     ar: {
       name: "أ / حبيبه",
       role: "المحامية",
@@ -274,7 +274,7 @@ const teamMembersData = {
     },
   },
   "aya-mostafa-zain": {
-    image: "assets/team/aya-mostafa-zain.jpg",
+    image: "assets/team/aya-mostafa-zain.webp",
     ar: {
       name: "أ / اية مصطفى زين",
       role: "المحامية",
@@ -287,7 +287,7 @@ const teamMembersData = {
     },
   },
   "wesam-talal": {
-    image: "assets/team/wesam-talal.jpg",
+    image: "assets/team/wesam-talal.webp",
     ar: {
       name: "أ / وسام طلال",
       role: "المحامي بالاستئناف العالي ومجلس الدوله",
