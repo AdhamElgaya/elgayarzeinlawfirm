@@ -221,19 +221,6 @@ const teamMembersData = {
       ],
     },
   },
-  "ehab-ali-saboun": {
-    image: "assets/team/ehab.webp",
-    ar: {
-      name: "أ / إيهاب علي صابون",
-      role: "المدير الإداري",
-      points: [],
-    },
-    en: {
-      name: "Ehab Ali Saboun",
-      role: "Administrative Director",
-      points: [],
-    },
-  },
   "mohamed-magdy": {
     image: "assets/team/mohamed-magdy.webp",
     ar: {
@@ -403,9 +390,6 @@ function getMemberIdFromUrl() {
 function getPhotoMarkup(memberId, image, name) {
   if (memberId === "abdulaziz-elgayar") {
     return `<div class="team-photo-frame team-photo-frame--zoom-face"><img class="team-photo team-photo--abdulaziz-elgayar" src="${image}" alt="${name}" loading="lazy" /></div>`;
-  }
-  if (memberId === "ehab-ali-saboun") {
-    return `<div class="team-photo-frame team-photo-frame--ehab-face"><img class="team-photo team-photo--ehab-ali-saboun" src="${image}" alt="${name}" loading="lazy" /></div>`;
   }
   if (memberId === "mohamed-magdy") {
     return `<div class="team-photo-frame team-photo-frame--magdy-face"><img class="team-photo team-photo--mohamed-magdy" src="${image}" alt="${name}" loading="lazy" /></div>`;

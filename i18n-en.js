@@ -255,8 +255,6 @@ window.GZ_I18N_EN = {
   "team.abdulaziz-elgayar.roleCard": "Lawyer",
   "team.ahmed-ibrahim-elkhediwy.name": "Mr. Ahmed Ibrahim Elkhediwy",
   "team.ahmed-ibrahim-elkhediwy.roleCard": "Lawyer at Felony Courts",
-  "team.ehab-ali-saboun.name": "Mr. Ehab Ali Saboun",
-  "team.ehab-ali-saboun.roleCard": "Administrative Director",
   "team.mohamed-magdy.name": "Mr. Mohamed Magdy",
   "team.mohamed-magdy.roleCard": "Lawyer",
   "team.mai-hanafy.name": "Ms. Mai Hanafy",

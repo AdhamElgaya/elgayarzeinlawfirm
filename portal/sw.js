@@ -20,8 +20,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: "/assets/favicon.png",
-      badge: "/assets/favicon.png",
+      icon: "/assets/favicon.svg",
+      badge: "/assets/favicon.svg",
       tag: payload.taskId ? `task-${payload.taskId}` : "portal-task",
       data: {
         url: targetUrl,
