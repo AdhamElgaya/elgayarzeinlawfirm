@@ -17,14 +17,52 @@ import { countPushSubscriptions, isPushConfigured } from "./lib/push.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
 
+function isCloudflarePreviewOrigin(origin) {
+  try {
+    const url = new URL(origin);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname.endsWith(".pages.dev") || url.hostname.endsWith(".workers.dev"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isLanOrLocalOrigin(origin) {
+  try {
+    const url = new URL(origin);
+    if (url.protocol !== "http:") return false;
+    const host = url.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1") return true;
+    if (/^10(?:\.\d{1,3}){3}$/.test(host)) return true;
+    if (/^192\.168(?:\.\d{1,3}){2}$/.test(host)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2}$/.test(host)) return true;
+    if (/^169\.254(?:\.\d{1,3}){2}$/.test(host)) return true;
+    if (!host.includes(".") || host.endsWith(".local")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function createApp() {
   const app = express();
   const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
+  const localDevOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+  ];
+  const corsOrigins = isProductionEnv()
+    ? allowedOrigins
+    : [...new Set([...allowedOrigins, ...localDevOrigins])];
   const crossOriginApi = allowedOrigins.length > 0;
-  const apiOnly = process.env.API_ONLY === "true" || crossOriginApi;
+  const apiOnly = process.env.API_ONLY === "true" || (isProductionEnv() && crossOriginApi);
 
   app.set("trust proxy", 1);
 
@@ -32,13 +70,21 @@ export async function createApp() {
     helmet({
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: isProductionEnv()
+        ? { policy: "same-origin" }
+        : { policy: "cross-origin" },
     })
   );
 
-  if (crossOriginApi) {
+  if (corsOrigins.length > 0 || !isProductionEnv()) {
     app.use((req, res, next) => {
       const origin = req.headers.origin;
-      if (origin && allowedOrigins.includes(origin)) {
+      const allowOrigin =
+        Boolean(origin) &&
+        (corsOrigins.includes(origin) ||
+          isCloudflarePreviewOrigin(origin) ||
+          (!isProductionEnv() && isLanOrLocalOrigin(origin)));
+      if (allowOrigin) {
         res.setHeader("Access-Control-Allow-Origin", origin);
         res.setHeader("Access-Control-Allow-Credentials", "true");
         res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");

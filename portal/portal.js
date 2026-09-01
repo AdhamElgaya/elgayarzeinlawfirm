@@ -44,7 +44,7 @@ const Portal = (() => {
         throw new Error(
           usingExternalApi()
             ? "Portal API not available on the backend server."
-            : "مسار API غير موجود. تأكد أن النطاق مربوط بنشر Vercel الصحيح (مثل elgayarzeinlawfirm.vercel.app)."
+            : "مسار API غير موجود. تأكد أن النطاق مربوط بنشر Cloudflare Pages الصحيح."
         );
       }
       if (res.status === 502 || res.status === 503) {

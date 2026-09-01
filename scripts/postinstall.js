@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import fs from "fs";
 
-if (process.env.VERCEL) {
+if (process.env.VERCEL || process.env.CF_PAGES || process.env.CI) {
   process.exit(0);
 }
 

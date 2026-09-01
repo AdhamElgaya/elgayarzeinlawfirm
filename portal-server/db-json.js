@@ -167,6 +167,17 @@ function runQuery(dbRef, sql, params, mutate) {
         created_at: now,
         activated_at: params[5],
       };
+    } else if (params.length === 5 && lower.includes("'admin'")) {
+      row = {
+        id: params[0],
+        username: params[1],
+        name: params[2],
+        role: "admin",
+        status: "active",
+        password_hash: params[3],
+        created_at: now,
+        activated_at: params[4],
+      };
     } else if (params.length === 4 && lower.includes("'admin'")) {
       row = {
         id: params[0],

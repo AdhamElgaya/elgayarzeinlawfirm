@@ -5,3 +5,4 @@ portal-server/uploads/
 .env
 assets/**/originals/
 *.heic
+dist/
