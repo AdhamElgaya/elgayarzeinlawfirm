@@ -13,8 +13,8 @@ const jsonPath = process.env.DATABASE_PATH || path.join(__dirname, "..", "data",
 const USER_ID_FIELDS = ["user_id", "assigned_to", "created_by"];
 const JSONB_FIELDS = new Set(["attachments", "metadata"]);
 
-if (dbMode !== "supabase") {
-  console.error("Set DATABASE_URL (Supabase connection string) before running migration.");
+if (dbMode !== "postgres") {
+  console.error("Set DATABASE_URL (Railway Postgres connection string) before running migration.");
   process.exit(1);
 }
 
@@ -153,7 +153,7 @@ const inserts = {
   },
 };
 
-console.log(`Migrating ${jsonPath} → Supabase...`);
+console.log(`Migrating ${jsonPath} → PostgreSQL...`);
 
 const userIdMap = await buildUserIdMap(data.users || []);
 

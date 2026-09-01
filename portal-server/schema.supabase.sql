@@ -1,5 +1,4 @@
--- Run this in Supabase → SQL Editor after creating a project.
--- Then set DATABASE_URL in .env to the pooled connection string.
+-- Applied automatically on portal-server start when DATABASE_URL is set (Railway Postgres or any PostgreSQL).
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,

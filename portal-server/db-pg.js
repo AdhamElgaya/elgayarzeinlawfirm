@@ -5,11 +5,17 @@ if (!connectionString) {
   throw new Error("DATABASE_URL or SUPABASE_DB_URL is required for PostgreSQL mode.");
 }
 
-const isLocalDb = /localhost|127\.0\.0\.1/.test(connectionString);
+function pgSslConfig(url) {
+  const value = String(url || "").toLowerCase();
+  if (/localhost|127\.0\.0\.1/.test(value)) return undefined;
+  if (value.includes(".railway.internal")) return undefined;
+  if (value.includes("sslmode=disable")) return undefined;
+  return { rejectUnauthorized: false };
+}
 
 const pool = new pg.Pool({
   connectionString,
-  ssl: isLocalDb ? undefined : { rejectUnauthorized: false },
+  ssl: pgSslConfig(connectionString),
 });
 
 function toPgSql(sql) {

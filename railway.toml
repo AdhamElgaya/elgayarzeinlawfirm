@@ -1,8 +1,22 @@
 [build]
+builder = "NIXPACKS"
 buildCommand = "npm install && npm install --prefix portal-server"
+watchPatterns = [
+  "portal-server/**",
+  "package.json",
+  "package-lock.json",
+  "railway.toml",
+]
 
 [deploy]
 startCommand = "npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
+
+# Non-secret API flags. Set DATABASE_URL, SESSION_SECRET, ADMIN_PASSWORD,
+# and ALLOWED_ORIGINS in the Railway dashboard (or ${{Postgres.DATABASE_URL}}).
+[variables]
+API_ONLY = "true"
+NODE_ENV = "production"
