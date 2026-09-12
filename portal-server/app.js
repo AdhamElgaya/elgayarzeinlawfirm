@@ -96,10 +96,14 @@ function isLanOrLocalOrigin(origin) {
 
 export async function createApp() {
   const app = express();
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
-    .split(",")
-    .map((value) => value.trim())
+  const allowedOrigins = [
+    "https://www.gzlawfirm.net",
+    "https://gzlawfirm.net",
+    ...(process.env.ALLOWED_ORIGINS || "").split(","),
+  ]
+    .map((value) => value.trim().replace(/\/$/, ""))
     .filter(Boolean);
+  const uniqueOrigins = [...new Set(allowedOrigins)];
   const localDevOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -107,9 +111,9 @@ export async function createApp() {
     "http://127.0.0.1:3001",
   ];
   const corsOrigins = isProductionEnv()
-    ? allowedOrigins
-    : [...new Set([...allowedOrigins, ...localDevOrigins])];
-  const crossOriginApi = allowedOrigins.length > 0;
+    ? uniqueOrigins
+    : [...new Set([...uniqueOrigins, ...localDevOrigins])];
+  const crossOriginApi = uniqueOrigins.length > 0;
   const apiOnly = process.env.API_ONLY === "true" || (isProductionEnv() && crossOriginApi);
 
   app.set("trust proxy", 1);
@@ -146,26 +150,33 @@ export async function createApp() {
     })
   );
 
-  if (corsOrigins.length > 0 || !isProductionEnv()) {
-    app.use((req, res, next) => {
-      const origin = req.headers.origin;
-      const allowOrigin =
-        Boolean(origin) &&
-        (corsOrigins.includes(origin) ||
-          isAllowedProjectPreview(origin, corsOrigins) ||
-          (!isProductionEnv() && isLanOrLocalOrigin(origin)));
-      if (allowOrigin) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
-        res.setHeader("Access-Control-Allow-Credentials", "true");
-        res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-      }
-      if (req.method === "OPTIONS") {
-        return allowOrigin || !origin ? res.sendStatus(204) : res.sendStatus(403);
-      }
-      next();
-    });
-  }
+  app.use((req, res, next) => {
+    const origin = String(req.headers.origin || "").replace(/\/$/, "");
+    let siteHost = "";
+    try {
+      siteHost = origin ? new URL(origin).hostname : "";
+    } catch {
+      siteHost = "";
+    }
+    const allowOrigin =
+      Boolean(origin) &&
+      (corsOrigins.includes(origin) ||
+        isAllowedProjectPreview(origin, corsOrigins) ||
+        siteHost === "gzlawfirm.net" ||
+        siteHost.endsWith(".gzlawfirm.net") ||
+        (!isProductionEnv() && isLanOrLocalOrigin(origin)));
+    if (allowOrigin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      res.setHeader("Vary", "Origin");
+    }
+    if (req.method === "OPTIONS") {
+      return allowOrigin || !origin ? res.sendStatus(204) : res.sendStatus(403);
+    }
+    next();
+  });
 
   app.use((req, res, next) => {
     const ip = String(req.ip || "").replace(/^::ffff:/, "");
