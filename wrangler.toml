@@ -1,6 +1,0 @@
-name = "elgayarzeinlawfirm"
-compatibility_date = "2026-09-01"
-pages_build_output_dir = "dist"
-
-[vars]
-RAILWAY_API_URL = "https://elgayarzeinlawfirm-production-f6ce.up.railway.app"
