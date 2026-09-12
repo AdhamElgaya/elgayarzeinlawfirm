@@ -33,6 +33,15 @@ async function proxyToRailway(request, env) {
 
   try {
     const upstream = await fetch(target, init);
+    if (upstream.status === 404) {
+      return Response.json(
+        {
+          error:
+            "خادم Railway لا يستجيب على مسار API. افتح إعدادات Railway وانسخ Public Domain وتأكد أن الخدمة تعمل.",
+        },
+        { status: 502 }
+      );
+    }
     return new Response(upstream.body, {
       status: upstream.status,
       statusText: upstream.statusText,
