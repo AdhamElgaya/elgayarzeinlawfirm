@@ -17,4 +17,4 @@ pattern = "gzlawfirm.net/*"
 zone_name = "gzlawfirm.net"
 
 [vars]
-RAILWAY_API_URL = "https://elgayarzeinlawfirm-production-f6ce.up.railway.app"
+RAILWAY_API_URL = "https://elgayarzeinlawfirm-production.up.railway.app"

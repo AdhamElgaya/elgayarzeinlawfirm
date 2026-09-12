@@ -1,4 +1,4 @@
-const FALLBACK_API_ORIGIN = "https://elgayarzeinlawfirm-production-f6ce.up.railway.app";
+const FALLBACK_API_ORIGIN = "https://elgayarzeinlawfirm-production.up.railway.app";
 
 export async function onRequest(context) {
   const origin = String(context.env.RAILWAY_API_URL || FALLBACK_API_ORIGIN || "")
