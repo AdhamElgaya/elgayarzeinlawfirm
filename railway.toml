@@ -21,6 +21,7 @@ restartPolicyMaxRetries = 5
 [variables]
 API_ONLY = "true"
 NODE_ENV = "production"
+CROSS_ORIGIN_COOKIES = "true"
 NIXPACKS_NODE_VERSION = "20"
 DATABASE_URL = "${{Postgres.DATABASE_URL}}"
 PUBLIC_BASE_URL = "https://www.gzlawfirm.net"

@@ -32,11 +32,10 @@ if (onPagesOrVercel && !railwayOrigin) {
 }
 
 const apiConfigPath = path.join(root, "portal", "api-config.js");
-const useDirectApi =
-  process.env.PORTAL_USE_DIRECT_API === "true" ||
-  process.env.CF_USE_DIRECT_API === "true" ||
-  process.env.VERCEL_USE_DIRECT_API === "true";
-const productionApiBase = useDirectApi && railwayOrigin ? `${railwayOrigin}/api` : "";
+const skipDirectApi =
+  process.env.PORTAL_USE_DIRECT_API === "false" ||
+  process.env.CF_USE_DIRECT_API === "false";
+const productionApiBase = !skipDirectApi && railwayOrigin ? `${railwayOrigin}/api` : "";
 const productionComment = productionApiBase
   ? "direct Railway"
   : "/api (Cloudflare Pages Function → Railway)";

@@ -136,9 +136,12 @@ export async function createApp() {
         },
       },
       crossOriginEmbedderPolicy: false,
-      crossOriginResourcePolicy: isProductionEnv()
-        ? { policy: "same-origin" }
-        : { policy: "cross-origin" },
+      crossOriginResourcePolicy:
+        apiOnly || process.env.CROSS_ORIGIN_COOKIES === "true"
+          ? { policy: "cross-origin" }
+          : isProductionEnv()
+            ? { policy: "same-origin" }
+            : { policy: "cross-origin" },
       referrerPolicy: { policy: "no-referrer" },
     })
   );
