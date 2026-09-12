@@ -173,6 +173,11 @@ function copyPublicSite() {
 
   fs.writeFileSync(path.join(distDir, "_headers"), headersBody);
   fs.writeFileSync(path.join(distDir, "_routes.json"), routesBody);
+
+  const workerSrc = path.join(root, "workers", "frontend.js");
+  if (fs.existsSync(workerSrc)) {
+    fs.copyFileSync(workerSrc, path.join(distDir, "_worker.js"));
+  }
 }
 
 copyPublicSite();
