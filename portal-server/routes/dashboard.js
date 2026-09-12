@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
+import { composeCaseTitle } from "../lib/case-fields.js";
 import { writeAudit } from "../lib/audit.js";
 import {
   canEditCase,
@@ -21,8 +22,9 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { openFile, putFile, signedGetUrl, signedPutUrl, fileExists } from "../lib/storage.js";
-import { assertAllowedUpload } from "../lib/upload-policy.js";
+import { openFile, putFile, signedGetUrl, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
+import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
+import { CLIENT_SELECT_COLUMNS, publicClient } from "../lib/client-docs.js";
 import {
   archiveCase,
   displayId,
@@ -36,6 +38,27 @@ import {
 } from "../lib/entities.js";
 import { requireAuth } from "../middleware/auth.js";
 import { normalizeDueAt } from "../lib/task-due.js";
+import { isDueDatePassed } from "../lib/task-datetime.js";
+import {
+  VALID_SECTION_IDS,
+  getManagedSection,
+  getSection,
+  getSubsectionLead,
+  getUserMembership,
+  isOfficeStaff,
+  isAdminOnly,
+  isSectionManager,
+  isUserInSection,
+  isLawyerInSubsection,
+  listLedSubsections,
+  listSectionCases,
+  listSectionLawyers,
+  listSubsectionMembers,
+  listTasksForCase,
+  normalizeSubsectionId,
+  subsectionsFor,
+  visibilityParams,
+} from "../lib/sections.js";
 import {
   countPushSubscriptions,
   getVapidPublicKey,
@@ -80,62 +103,113 @@ router.use(requireAuth);
 
 async function getAssignableUser(userId) {
   const user = await db.prepare(`SELECT id, name, role, status FROM users WHERE id = ?`).get(userId);
-  if (!user || user.status !== "active" || !["lawyer", "assistant"].includes(user.role)) {
-    return null;
-  }
+  if (!user || user.status !== "active") return null;
   return user;
 }
 
 async function getTaskAssignee(userId, actor) {
   const assignee = await getAssignableUser(userId);
   if (assignee) return assignee;
-  if (actor?.role === "admin" && actor.id === userId && actor.status === "active") {
+  if (isOfficeStaff(actor) && actor.id === userId) {
     return actor;
   }
   return null;
 }
 
 router.get("/summary", async (req, res) => {
-  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
+  const [userId, seeAll, sectionId] = await visibilityParams(req.user);
+  const isStaff = isOfficeStaff(req.user);
 
   const caseRows = await db
     .prepare(
-      `SELECT id, title, client_id, client_ref, notes, attachments, status, opened_at, finished_at, archived_at, assigned_to
+      `SELECT id, title, client_id, client_ref, notes, attachments, status, opened_at, finished_at, archived_at, assigned_to, section_id, subsection_id, opponent_name, case_number
        FROM cases
        WHERE deleted_at IS NULL
          AND status != 'archived'
-         AND (assigned_to = ? OR ? = 1)
+         AND (assigned_to = ? OR ? = 1 OR section_id = ?)
        ORDER BY opened_at DESC`
     )
-    .all(req.user.id, isAdmin ? 1 : 0);
+    .all(userId, seeAll, sectionId);
   const myCases = await Promise.all(caseRows.map((row) => enrichCase(row)));
 
   const taskRows = await db
     .prepare(
-      `SELECT t.id, t.title, t.status, t.due_at, t.case_id, t.assigned_to, t.assigned_at, t.created_at, c.title AS case_title
+      `SELECT t.id, t.title, t.status, t.due_at, t.incomplete_reason, t.case_id, t.assigned_to, t.assigned_at, t.created_at, t.section_id, c.title AS case_title
        FROM tasks t
        JOIN cases c ON c.id = t.case_id
        WHERE t.deleted_at IS NULL
          AND c.deleted_at IS NULL
          AND c.status != 'archived'
-         AND (t.assigned_to = ? OR ? = 1)
+         AND (t.assigned_to = ? OR ? = 1 OR t.section_id = ? OR c.section_id = ?)
        ORDER BY t.created_at DESC`
     )
-    .all(req.user.id, isAdmin ? 1 : 0);
+    .all(userId, seeAll, sectionId, sectionId);
   const myTasks = await Promise.all(taskRows.map((row) => enrichTask(row)));
 
   const archivedCount = await db
     .prepare(
       `SELECT COUNT(*) AS count FROM cases
-       WHERE status = 'archived' AND deleted_at IS NULL AND (assigned_to = ? OR ? = 1)`
+       WHERE status = 'archived' AND deleted_at IS NULL AND (assigned_to = ? OR ? = 1 OR section_id = ?)`
     )
-    .get(req.user.id, isAdmin ? 1 : 0);
+    .get(userId, seeAll, sectionId);
 
-  const clients = isAdmin
-    ? await db
-        .prepare(`SELECT id, name, phone, created_at FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`)
-        .all()
+  const clients = isStaff
+    ? (await db
+        .prepare(
+          `SELECT ${CLIENT_SELECT_COLUMNS} FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`
+        )
+        .all()).map((row) => publicClient(row))
     : [];
+
+  const ledSubsections = req.user.role === "lawyer" ? await listLedSubsections(req.user.id) : [];
+  const membership = req.user.role === "lawyer" ? await getUserMembership(req.user.id) : null;
+  const extraGroups = ledSubsections.length
+    ? ledSubsections
+    : membership?.section_id && membership.subsection_id
+      ? [{ section_id: membership.section_id, subsection_id: membership.subsection_id }]
+      : [];
+  if (extraGroups.length) {
+    const seenCases = new Set(myCases.map((item) => item.id));
+    const seenTasks = new Set(myTasks.map((item) => item.id));
+    const includeAllSsTasks = ledSubsections.length > 0;
+    for (const item of extraGroups) {
+      const ssCases = (await listSectionCases(item.section_id)).filter(
+        (row) => row.subsection_id === item.subsection_id
+      );
+      for (const caseRow of ssCases) {
+        if (!seenCases.has(caseRow.id)) {
+          seenCases.add(caseRow.id);
+          myCases.push(await enrichCase(caseRow));
+        }
+        const extraTasks = await listTasksForCase(caseRow.id);
+        for (const taskRow of extraTasks) {
+          if (seenTasks.has(taskRow.id)) continue;
+          if (!includeAllSsTasks && taskRow.assigned_to !== req.user.id) continue;
+          seenTasks.add(taskRow.id);
+          myTasks.push(await enrichTask(taskRow));
+        }
+      }
+    }
+  }
+
+  let inbox = null;
+  if (isStaff) {
+    inbox = {
+      kind: "admin",
+      count: myCases.filter((item) => !item.section_id).length,
+    };
+  } else if (isSectionManager(req.user)) {
+    const managed = await getManagedSection(req.user.id);
+    const groups = managed ? subsectionsFor(managed.id) : [];
+    if (managed && groups.length) {
+      const allowed = new Set(groups.map((item) => item.id));
+      inbox = {
+        kind: "section",
+        section_id: managed.id,
+        count: myCases.filter((item) => !allowed.has(item.subsection_id)).length,
+      };
+    }
+  }
 
   res.json({
     user: req.user,
@@ -148,34 +222,36 @@ router.get("/summary", async (req, res) => {
     clients: clients.map((c) => ({ ...c, display_id: displayId(c.id) })),
     cases: myCases,
     tasks: myTasks,
+    inbox,
+    led_subsections: ledSubsections,
   });
 });
 
 router.get("/archived", async (req, res) => {
-  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
+  const [userId, seeAll, sectionId] = await visibilityParams(req.user);
 
   const rows = await db
     .prepare(
-      `SELECT id, title, client_id, client_ref, notes, attachments, status, opened_at, finished_at, archived_at, assigned_to
+      `SELECT id, title, client_id, client_ref, notes, attachments, status, opened_at, finished_at, archived_at, assigned_to, section_id, subsection_id, opponent_name, case_number
        FROM cases
        WHERE deleted_at IS NULL
          AND status = 'archived'
-         AND (assigned_to = ? OR ? = 1)
+         AND (assigned_to = ? OR ? = 1 OR section_id = ?)
        ORDER BY archived_at DESC`
     )
-    .all(req.user.id, isAdmin ? 1 : 0);
+    .all(userId, seeAll, sectionId);
   const archivedCases = await Promise.all(rows.map((row) => enrichCase(row)));
 
   res.json({ cases: archivedCases });
 });
 
 router.get("/clients/:id", async (req, res) => {
-  if (req.user.role !== "admin") {
+  if (!isOfficeStaff(req.user)) {
     return res.status(403).json({ error: "غير مصرح." });
   }
 
   const client = await db
-    .prepare(`SELECT id, name, phone, created_at FROM clients WHERE id = ? AND deleted_at IS NULL`)
+    .prepare(`SELECT ${CLIENT_SELECT_COLUMNS} FROM clients WHERE id = ? AND deleted_at IS NULL`)
     .get(req.params.id);
   if (!client) {
     return res.status(404).json({ error: "الموكل غير موجود." });
@@ -190,7 +266,7 @@ router.get("/clients/:id", async (req, res) => {
   ).map((c) => ({ ...c, display_id: displayId(c.id) }));
 
   res.json({
-    client: { ...client, display_id: displayId(client.id) },
+    client: { ...publicClient(client), display_id: displayId(client.id) },
     cases,
   });
 });
@@ -214,9 +290,9 @@ router.get("/cases/:id", async (req, res) => {
             phone: enriched.client_phone,
           }
         : null,
-      lawyer: enriched.assigned_to
+      lawyer: enriched.lawyer_id
         ? {
-            id: enriched.assigned_to,
+            id: enriched.lawyer_id,
             name: enriched.lawyer_name,
             role: enriched.lawyer_role,
           }
@@ -237,21 +313,37 @@ router.patch("/cases/:id", async (req, res) => {
     return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
   }
 
-  if (!canEditCase(req.user, row)) {
+  if (!(await canEditCase(req.user, row))) {
     return res.status(403).json({ error: "غير مصرح بتعديل هذه القضية." });
   }
 
-  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
+  const isAdmin = isOfficeStaff(req.user);
   const canEditMeta = isAdmin && row.status !== "archived";
+  const managed = isSectionManager(req.user) ? await getManagedSection(req.user.id) : null;
 
   let title = row.title;
   let clientId = row.client_id;
   let assignedTo = row.assigned_to;
   let status = row.status;
   let finishedAt = row.finished_at || null;
+  let sectionId = row.section_id || null;
+  let subsectionId = row.subsection_id || null;
+  let opponentName = row.opponent_name || "";
+  let caseNumber = row.case_number || "";
 
   if (canEditMeta) {
-    if (req.body?.title !== undefined) {
+    if (req.body?.opponent_name !== undefined || req.body?.case_number !== undefined) {
+      if (req.body?.opponent_name !== undefined) {
+        opponentName = String(req.body.opponent_name || "").trim();
+      }
+      if (req.body?.case_number !== undefined) {
+        caseNumber = String(req.body.case_number || "").trim();
+      }
+      if (!opponentName || !caseNumber) {
+        return res.status(400).json({ error: "اسم الخصم ورقم القضية مطلوبان." });
+      }
+      title = composeCaseTitle(caseNumber, opponentName, title);
+    } else if (req.body?.title !== undefined) {
       title = String(req.body.title || "").trim();
       if (!title) {
         return res.status(400).json({ error: "عنوان القضية مطلوب." });
@@ -268,10 +360,28 @@ router.patch("/cases/:id", async (req, res) => {
       }
     }
 
-    if (req.body?.assigned_to !== undefined) {
-      assignedTo = String(req.body.assigned_to || "");
-      if (!(await getTaskAssignee(assignedTo, req.user))) {
-        return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+    if (req.body?.section_id !== undefined) {
+      const nextSectionId = String(req.body.section_id || "").trim();
+      const toInbox = !nextSectionId || nextSectionId === "inbox";
+      if (toInbox) {
+        sectionId = null;
+        assignedTo = null;
+        subsectionId = null;
+      } else {
+        if (!VALID_SECTION_IDS.includes(nextSectionId)) {
+          return res.status(400).json({ error: "يجب اختيار قسماً صالحاً." });
+        }
+        const section = await getSection(nextSectionId);
+        if (!section?.manager_id) {
+          return res.status(400).json({ error: "عيّن مدير هذا القسم أولاً من صفحة الأقسام." });
+        }
+        sectionId = nextSectionId;
+        assignedTo = section.manager_id;
+        if (!subsectionsFor(sectionId).length) {
+          subsectionId = null;
+        } else {
+          subsectionId = normalizeSubsectionId(sectionId, subsectionId);
+        }
       }
     }
 
@@ -286,6 +396,58 @@ router.patch("/cases/:id", async (req, res) => {
         finishedAt = null;
       }
       status = nextStatus;
+    }
+  }
+
+  if (isSectionManager(req.user) && req.body?.status !== undefined) {
+    if (row.status === "archived") {
+      return res.status(400).json({ error: "لا يمكن تعديل حالة قضية مؤرشفة." });
+    }
+    if (!managed || row.section_id !== managed.id) {
+      return res.status(403).json({ error: "يمكنك تعديل قضايا قسمك فقط." });
+    }
+    const nextStatus = String(req.body.status || "");
+    if (!["active", "finished"].includes(nextStatus)) {
+      return res.status(400).json({ error: "حالة القضية غير صالحة." });
+    }
+    if (nextStatus === "finished" && status !== "finished") {
+      finishedAt = new Date().toISOString();
+    } else if (nextStatus === "active" && status === "finished") {
+      finishedAt = null;
+    }
+    status = nextStatus;
+  }
+
+  if (isSectionManager(req.user) && req.body?.assigned_to !== undefined) {
+    if (!managed || row.section_id !== managed.id) {
+      return res.status(403).json({ error: "يمكنك تعيين قضايا قسمك فقط." });
+    }
+    const lawyerId = String(req.body.assigned_to || "");
+    if (!(await isUserInSection(lawyerId, managed.id))) {
+      return res.status(400).json({ error: "يجب اختيار محامٍ من قسمك." });
+    }
+    const lawyer = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(lawyerId);
+    if (!lawyer || lawyer.status !== "active" || lawyer.role !== "lawyer") {
+      return res.status(400).json({ error: "يجب اختيار محامٍ نشط من قسمك." });
+    }
+    assignedTo = lawyerId;
+  }
+
+  if (isSectionManager(req.user) && req.body?.subsection_id !== undefined) {
+    if (!managed || row.section_id !== managed.id) {
+      return res.status(403).json({ error: "يمكنك تصنيف قضايا قسمك فقط." });
+    }
+    if (subsectionsFor(managed.id).length) {
+      subsectionId = normalizeSubsectionId(managed.id, req.body.subsection_id);
+      if (!subsectionId) {
+        return res.status(400).json({ error: "يجب اختيار القسم الفرعي." });
+      }
+      if (req.body?.assigned_to === undefined) {
+        const leadId = await getSubsectionLead(managed.id, subsectionId);
+        if (leadId && (await isUserInSection(leadId, managed.id))) {
+          assignedTo = leadId;
+        }
+      }
     }
   }
 
@@ -315,9 +477,22 @@ router.patch("/cases/:id", async (req, res) => {
 
   await db
     .prepare(
-      `UPDATE cases SET title = ?, client_id = ?, assigned_to = ?, status = ?, finished_at = ?, notes = ?, attachments = ? WHERE id = ?`
+      `UPDATE cases SET title = ?, client_id = ?, assigned_to = ?, status = ?, finished_at = ?, notes = ?, attachments = ?, section_id = ?, subsection_id = ?, opponent_name = ?, case_number = ? WHERE id = ?`
     )
-    .run(title, clientId, assignedTo, status, finishedAt, notes, attachments, row.id);
+    .run(
+      title,
+      clientId,
+      assignedTo,
+      status,
+      finishedAt,
+      notes,
+      attachments,
+      sectionId,
+      subsectionId,
+      opponentName || null,
+      caseNumber || null,
+      row.id
+    );
 
   const updatedRow = {
     ...row,
@@ -328,6 +503,10 @@ router.patch("/cases/:id", async (req, res) => {
     finished_at: finishedAt,
     notes,
     attachments,
+    section_id: sectionId,
+    subsection_id: subsectionId,
+    opponent_name: opponentName || null,
+    case_number: caseNumber || null,
   };
 
   await writeAudit({
@@ -339,6 +518,8 @@ router.patch("/cases/:id", async (req, res) => {
       title,
       client_id: clientId,
       assigned_to: assignedTo,
+      section_id: sectionId,
+      subsection_id: subsectionId,
       status,
       notes_length: notes.length,
       attachments_count: attachments.length,
@@ -387,7 +568,7 @@ router.post(
       return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
     }
 
-    if (!canEditCase(req.user, row)) {
+    if (!(await canEditCase(req.user, row))) {
       return res.status(403).json({ error: "غير مصرح برفع مرفقات لهذه القضية." });
     }
 
@@ -434,7 +615,7 @@ router.post("/cases/:caseId/attachments/finalize", async (req, res) => {
     return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
   }
 
-  if (!canEditCase(req.user, row)) {
+  if (!(await canEditCase(req.user, row))) {
     return res.status(403).json({ error: "غير مصرح برفع مرفقات لهذه القضية." });
   }
 
@@ -462,6 +643,16 @@ router.post("/cases/:caseId/attachments/finalize", async (req, res) => {
 
   if (!(await fileExists(key))) {
     return res.status(400).json({ error: "لم يتم العثور على الملف المرفوع. أعد الرفع وحاول مرة أخرى." });
+  }
+
+  const storedBytes = await peekStoredBytes(key);
+  if (!storedBytes?.length) {
+    return res.status(400).json({ error: "تعذر التحقق من الملف المرفوع." });
+  }
+  try {
+    assertAllowedUpload(originalName, mimeType, storedBytes);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
   }
 
   const attachment = normalizeAttachment({
@@ -510,7 +701,7 @@ router.post(
       return res.status(404).json({ error: "القضية غير موجودة أو غير متاحة." });
     }
 
-    if (!canEditCase(req.user, row)) {
+    if (!(await canEditCase(req.user, row))) {
       await cleanup();
       return res.status(403).json({ error: "غير مصرح برفع مرفقات لهذه القضية." });
     }
@@ -526,7 +717,7 @@ router.post(
     }
 
     try {
-      assertAllowedUpload(req.file.originalname, req.file.mimetype);
+      assertAllowedUpload(req.file.originalname, req.file.mimetype, peekUploadBytes(req.file));
     } catch (error) {
       await cleanup();
       return res.status(error.statusCode || 400).json({ error: error.message });
@@ -621,7 +812,8 @@ router.patch("/tasks/:id", async (req, res) => {
     return res.status(404).json({ error: "المهمة غير موجودة أو غير متاحة." });
   }
 
-  const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
+  const isAdmin = isOfficeStaff(req.user);
+  const managed = isSectionManager(req.user) ? await getManagedSection(req.user.id) : null;
   const hasMetaUpdate =
     req.body?.title !== undefined ||
     req.body?.assigned_to !== undefined ||
@@ -629,15 +821,26 @@ router.patch("/tasks/:id", async (req, res) => {
     req.body?.attachments !== undefined;
 
   if (hasMetaUpdate) {
-    if (!isAdmin) {
-      return res.status(403).json({ error: "غير مصرح بتعديل المهمة." });
-    }
-
     const caseRow = await db
-      .prepare(`SELECT id, title, status, attachments FROM cases WHERE id = ? AND deleted_at IS NULL`)
+      .prepare(`SELECT id, title, status, attachments, section_id, subsection_id FROM cases WHERE id = ? AND deleted_at IS NULL`)
       .get(row.case_id);
     if (!caseRow || caseRow.status === "archived") {
       return res.status(400).json({ error: "القضية المرتبطة بالمهمة غير موجودة أو مؤرشفة." });
+    }
+
+    const taskSectionId = row.section_id || caseRow.section_id;
+    const smOwnsTask = Boolean(managed && taskSectionId === managed.id);
+    const led = !isAdmin && !managed ? await listLedSubsections(req.user.id) : [];
+    const leadOwnsTask = led.some(
+      (item) => item.section_id === caseRow.section_id && item.subsection_id === caseRow.subsection_id
+    );
+
+    if (!isAdmin && !smOwnsTask && !leadOwnsTask) {
+      return res.status(403).json({ error: "غير مصرح بتعديل المهمة." });
+    }
+
+    if (isSectionManager(req.user) && row.status !== "open" && req.body?.assigned_to !== undefined) {
+      return res.status(400).json({ error: "يمكن إعادة تعيين المهام غير المكتملة فقط." });
     }
 
     let title = row.title;
@@ -646,6 +849,9 @@ router.patch("/tasks/:id", async (req, res) => {
     let attachments = Array.isArray(row.attachments) ? row.attachments : [];
 
     if (req.body?.title !== undefined) {
+      if (!isAdmin && !smOwnsTask && !leadOwnsTask) {
+        return res.status(403).json({ error: "غير مصرح بتعديل المهمة." });
+      }
       title = String(req.body.title || "").trim();
       if (!title) {
         return res.status(400).json({ error: "عنوان المهمة مطلوب." });
@@ -654,8 +860,34 @@ router.patch("/tasks/:id", async (req, res) => {
 
     if (req.body?.assigned_to !== undefined) {
       assignedTo = String(req.body.assigned_to || "");
-      if (!(await getTaskAssignee(assignedTo, req.user))) {
-        return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+      if (isAdmin) {
+        const section = await getSection(caseRow.section_id);
+        const assigningSelf = assignedTo === req.user.id;
+        if (!assigningSelf && (!section?.manager_id || assignedTo !== section.manager_id)) {
+          return res.status(400).json({ error: "يجب تعيين المهمة لمدير قسم القضية." });
+        }
+      } else if (leadOwnsTask) {
+        if (row.status !== "open") {
+          return res.status(400).json({ error: "يمكن إعادة تعيين المهام غير المكتملة فقط." });
+        }
+        if (!(await isLawyerInSubsection(assignedTo, caseRow.section_id, caseRow.subsection_id))) {
+          return res.status(400).json({ error: "يمكن إعادة التعيين لمحامٍ في القسم الفرعي فقط." });
+        }
+        const lawyer = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(assignedTo);
+        if (!lawyer || lawyer.status !== "active" || lawyer.role !== "lawyer") {
+          return res.status(400).json({ error: "يجب اختيار محامٍ نشط من القسم الفرعي." });
+        }
+      } else {
+        if (row.status !== "open") {
+          return res.status(400).json({ error: "يمكن إعادة تعيين المهام غير المكتملة فقط." });
+        }
+        if (!(await isUserInSection(assignedTo, managed.id))) {
+          return res.status(400).json({ error: "يمكن إعادة التعيين لمحامٍ في قسمك فقط." });
+        }
+        const lawyer = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(assignedTo);
+        if (!lawyer || lawyer.status !== "active" || lawyer.role !== "lawyer") {
+          return res.status(400).json({ error: "يجب اختيار محامٍ نشط من قسمك." });
+        }
       }
     }
 
@@ -703,20 +935,51 @@ router.patch("/tasks/:id", async (req, res) => {
     return res.status(400).json({ error: "حالة المهمة غير صالحة." });
   }
 
-  await db.prepare(`UPDATE tasks SET status = ? WHERE id = ?`).run(status, row.id);
+  const canChangeStatus =
+    isOfficeStaff(req.user) ||
+    row.assigned_to === req.user.id ||
+    Boolean(managed && (row.section_id === managed.id));
+  if (!canChangeStatus) {
+    return res.status(403).json({ error: "غير مصرح بتغيير حالة هذه المهمة." });
+  }
+
+  let nextStatus = status;
+  let incompleteReason = row.incomplete_reason || null;
+  if (status === "open") {
+    const reason = String(req.body?.incomplete_reason || "").trim();
+    if (!reason) {
+      return res.status(400).json({ error: "اكتب سبب عدم اكتمال المهمة." });
+    }
+    incompleteReason = reason;
+    if (isDueDatePassed(row.due_at)) {
+      nextStatus = "missed";
+    }
+  } else {
+    incompleteReason = null;
+  }
+
+  await db
+    .prepare(`UPDATE tasks SET status = ?, incomplete_reason = ? WHERE id = ?`)
+    .run(nextStatus, incompleteReason, row.id);
 
   await writeAudit({
     userId: req.user.id,
-    action: status === "done" ? "task_completed" : "task_reopened",
+    action: nextStatus === "done" ? "task_completed" : nextStatus === "missed" ? "task_missed" : "task_reopened",
     entityType: "task",
     entityId: row.id,
-    metadata: { status },
+    metadata: { status: nextStatus, incomplete_reason: incompleteReason },
     ip: req.ip,
   });
 
+  const messages = {
+    done: "تم إنجاز المهمة.",
+    missed: "المهمة فائتة. تم حفظ السبب.",
+    open: "تم تحديد المهمة كغير مكتملة.",
+  };
+
   res.json({
-    task: await enrichTask({ ...row, status }),
-    message: status === "done" ? "تم إنجاز المهمة." : "تمت إعادة فتح المهمة.",
+    task: await enrichTask({ ...row, status: nextStatus, incomplete_reason: incompleteReason }),
+    message: messages[nextStatus],
   });
 });
 
@@ -724,6 +987,11 @@ router.delete("/tasks/:id", async (req, res) => {
   const row = await getTaskIfAccessible(req.user, req.params.id);
   if (!row) {
     return res.status(404).json({ error: "المهمة غير موجودة أو غير متاحة." });
+  }
+
+  const canDelete = isAdminOnly(req.user) || (!isOfficeStaff(req.user) && row.assigned_to === req.user.id);
+  if (!canDelete) {
+    return res.status(403).json({ error: "الحذف متاح للمدير فقط." });
   }
 
   await softDeleteTask(row.id);
@@ -745,8 +1013,9 @@ router.post("/tasks", async (req, res) => {
     const caseId = String(req.body?.case_id || "");
     const title = String(req.body?.title || "").trim();
     const dueAt = normalizeDueAt(req.body?.due_at);
-    const isAdmin = req.user.role === "admin" || req.user.role === "assistant";
-    let assignedTo = isAdmin ? String(req.body?.assigned_to || "") : req.user.id;
+    const isAdmin = isOfficeStaff(req.user);
+    const managed = isSectionManager(req.user) ? await getManagedSection(req.user.id) : null;
+    let assignedTo = String(req.body?.assigned_to || "");
 
     if (!caseId || !title) {
       return res.status(400).json({ error: "القضية وعنوان المهمة مطلوبان." });
@@ -758,25 +1027,63 @@ router.post("/tasks", async (req, res) => {
     }
 
     if (isAdmin) {
-      const assignee = await getTaskAssignee(assignedTo, req.user);
-      if (!assignee) {
-        return res.status(400).json({ error: "يجب اختيار محامٍ أو مساعد نشط." });
+      if (!assignedTo) assignedTo = req.user.id;
+      const assigningSelf = assignedTo === req.user.id;
+      if (!assigningSelf) {
+        const section = await getSection(caseRow.section_id);
+        if (!section?.manager_id) {
+          return res.status(400).json({ error: "عيّن مدير قسم هذه القضية أولاً من صفحة الأقسام." });
+        }
+        if (assignedTo !== section.manager_id) {
+          return res.status(400).json({ error: "يجب تعيين المهمة لمدير قسم القضية." });
+        }
+      }
+    } else if (managed) {
+      if (caseRow.section_id !== managed.id) {
+        return res.status(403).json({ error: "يمكنك إضافة مهام لقضايا قسمك فقط." });
+      }
+      if (!(await isUserInSection(assignedTo, managed.id))) {
+        return res.status(400).json({ error: "يجب اختيار محامٍ من قسمك." });
+      }
+      const lawyer = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(assignedTo);
+      if (!lawyer || lawyer.status !== "active" || lawyer.role !== "lawyer") {
+        return res.status(400).json({ error: "يجب اختيار محامٍ نشط من قسمك." });
       }
     } else {
-      assignedTo = req.user.id;
+      const led = await listLedSubsections(req.user.id);
+      const match = led.find(
+        (item) => item.section_id === caseRow.section_id && item.subsection_id === caseRow.subsection_id
+      );
+      if (!match) {
+        assignedTo = req.user.id;
+      } else {
+        if (!assignedTo) {
+          return res.status(400).json({ error: "يجب اختيار محامٍ من القسم الفرعي." });
+        }
+        if (!(await isLawyerInSubsection(assignedTo, match.section_id, match.subsection_id))) {
+          return res.status(400).json({ error: "يجب اختيار محامٍ معيّن لهذا القسم الفرعي." });
+        }
+        const lawyer = await db.prepare(`SELECT id, role, status FROM users WHERE id = ?`).get(assignedTo);
+        if (!lawyer || lawyer.status !== "active" || lawyer.role !== "lawyer") {
+          return res.status(400).json({ error: "يجب اختيار محامٍ نشط من القسم الفرعي." });
+        }
+      }
     }
 
     const taskId = uuid();
     const attachments = pickCaseAttachments(caseRow, req.body?.attachments);
     const assignedAt = new Date().toISOString();
+    const sectionId = caseRow.section_id || managed?.id || null;
     await db
       .prepare(
-        `INSERT INTO tasks (id, case_id, title, assigned_to, status, due_at, created_by, attachments, assigned_at)
-     VALUES (?, ?, ?, ?, 'open', ?, ?, ?, ?)`
+        `INSERT INTO tasks (id, case_id, title, assigned_to, status, due_at, created_by, attachments, assigned_at, section_id)
+     VALUES (?, ?, ?, ?, 'open', ?, ?, ?, ?, ?)`
       )
-      .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt);
+      .run(taskId, caseId, title, assignedTo, dueAt, req.user.id, attachments, assignedAt, sectionId);
 
-    if (isAdmin) {
+    if (isAdmin || managed) {
+      await sendTaskAssignedPush(assignedTo, { id: taskId, title, due_at: dueAt });
+    } else if (assignedTo && assignedTo !== req.user.id) {
       await sendTaskAssignedPush(assignedTo, { id: taskId, title, due_at: dueAt });
     }
 
@@ -798,6 +1105,7 @@ router.post("/tasks", async (req, res) => {
         status: "open",
         due_at: dueAt,
         attachments,
+        section_id: sectionId,
         assigned_at: assignedAt,
         created_at: assignedAt,
       }),
@@ -813,19 +1121,64 @@ router.post("/tasks", async (req, res) => {
 });
 
 router.get("/assignees", async (req, res) => {
-  if (req.user.role !== "admin") {
+  if (isSectionManager(req.user)) {
+    const managed = await getManagedSection(req.user.id);
+    if (!managed) {
+      return res.json({ users: [] });
+    }
+    const users = await listSectionLawyers(managed.id);
+    return res.json({ users, section: { id: managed.id, name: managed.name } });
+  }
+  const led = req.user.role === "lawyer" ? await listLedSubsections(req.user.id) : [];
+  if (led.length && req.user.role === "lawyer") {
+    const seen = new Set();
+    const users = [];
+    for (const item of led) {
+      const members = await listSubsectionMembers(item.section_id, item.subsection_id);
+      for (const lawyer of members) {
+        if (seen.has(lawyer.id)) continue;
+        seen.add(lawyer.id);
+        users.push({
+          ...lawyer,
+          section_id: item.section_id,
+          subsection_id: item.subsection_id,
+          subsection_name: item.subsection_name,
+        });
+      }
+    }
+    return res.json({ users, led_subsections: led });
+  }
+  if (req.user.role === "lawyer") {
+    const membership = await getUserMembership(req.user.id);
+    return res.json({
+      users: [
+        {
+          id: req.user.id,
+          username: req.user.username,
+          name: req.user.name,
+          role: req.user.role,
+          status: req.user.status,
+          section_id: membership?.section_id || null,
+          subsection_id: membership?.subsection_id || null,
+        },
+      ],
+    });
+  }
+  if (!isOfficeStaff(req.user)) {
     return res.status(403).json({ error: "غير مصرح." });
   }
-  const users = (
-    await db
-      .prepare(
-        `SELECT id, username, name, role, status, created_at, activated_at
-       FROM users
-       ORDER BY created_at DESC`
-      )
-      .all()
-  ).filter((u) => u.status === "active" && ["lawyer", "assistant"].includes(u.role));
-  res.json({ users });
+  const sections = await db.prepare(`SELECT id, name, manager_id FROM sections ORDER BY id`).all();
+  const users = [];
+  for (const section of sections) {
+    if (!section.manager_id) continue;
+    const manager = await db
+      .prepare(`SELECT id, username, name, role, status FROM users WHERE id = ?`)
+      .get(section.manager_id);
+    if (manager?.status === "active") {
+      users.push({ ...manager, section_id: section.id, section_name: section.name });
+    }
+  }
+  res.json({ users, sections });
 });
 
 router.get("/push/vapid-key", requireAuth, (req, res) => {

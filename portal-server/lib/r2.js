@@ -50,13 +50,26 @@ export async function r2PutObject(key, body, contentType) {
   );
 }
 
-export async function r2GetObject(key) {
+export async function r2GetObject(key, options = {}) {
   return getClient().send(
     new GetObjectCommand({
       Bucket: bucket(),
       Key: key,
+      ...(options.range ? { Range: options.range } : {}),
     })
   );
+}
+
+export async function r2PeekObject(key, length = 8) {
+  const result = await r2GetObject(key, { range: `bytes=0-${Math.max(0, length - 1)}` });
+  if (result.Body?.transformToByteArray) {
+    return Buffer.from(await result.Body.transformToByteArray());
+  }
+  const chunks = [];
+  for await (const chunk of result.Body || []) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
 export async function r2DeleteObject(key) {

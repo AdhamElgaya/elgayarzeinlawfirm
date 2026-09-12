@@ -3,19 +3,29 @@
     <h2>إضافة قضية</h2>
     <div id="addCaseAlert" class="portal-alert portal-alert--error" hidden></div>
     <label>
-      <span>عنوان القضية</span>
-      <input type="text" name="title" required />
-    </label>
-    <label>
       <span>اسم الموكل</span>
       <select name="client_id" id="caseClientSelect" required></select>
     </label>
     <label>
-      <span>تعيين إلى</span>
-      <select name="assigned_to" id="caseAssigneeSelect" required></select>
+      <span>اسم الخصم</span>
+      <input type="text" name="opponent_name" required autocomplete="off" />
     </label>
-    <h3 class="portal-detail-subtitle">ملاحظات القضية</h3>
-    <textarea id="addCaseNotesInput" name="notes" class="portal-detail-notes" rows="4" placeholder="أضف ملاحظات عن القضية..."></textarea>
+    <label>
+      <span>رقم القضيه</span>
+      <input type="text" name="case_number" required autocomplete="off" />
+    </label>
+    <label id="caseSectionField">
+      <span>القسم</span>
+      <select name="section_id" id="caseSectionSelect"></select>
+    </label>
+    <label id="caseSubsectionField" hidden>
+      <span>القسم الفرعي</span>
+      <select name="subsection_id" id="caseSubsectionSelect">
+        <option value="">اختر القسم الفرعي</option>
+      </select>
+    </label>
+    <h3 class="portal-detail-subtitle">مستجدات القضيه</h3>
+    <textarea id="addCaseNotesInput" name="notes" class="portal-detail-notes" rows="4" placeholder="أضف مستجدات عن القضية..."></textarea>
     <h3 class="portal-detail-subtitle">مرفقات القضية</h3>
     <div id="addCaseAttachmentsList" class="portal-attachments"></div>
     <div class="portal-detail-actions portal-detail-actions--case">
@@ -35,23 +45,41 @@
     <h2>تعديل القضية</h2>
     <input type="hidden" name="case_id" id="editCaseId" />
     <div id="editCaseAlert" class="portal-alert portal-alert--error" hidden></div>
-    <label>
-      <span>عنوان القضية</span>
-      <input type="text" name="title" id="editCaseTitle" required />
-    </label>
-    <label>
+    <label id="editCaseClientField">
       <span>اسم الموكل</span>
       <select name="client_id" id="editCaseClientSelect" required></select>
     </label>
-    <label>
-      <span>تعيين إلى</span>
-      <select name="assigned_to" id="editCaseAssigneeSelect" required></select>
+    <label id="editCaseTitleField" hidden>
+      <span>القضية</span>
+      <input type="text" name="title" id="editCaseTitle" />
     </label>
-    <label>
+    <label id="editCaseOpponentField">
+      <span>اسم الخصم</span>
+      <input type="text" name="opponent_name" id="editCaseOpponent" required autocomplete="off" />
+    </label>
+    <label id="editCaseNumberField">
+      <span>رقم القضيه</span>
+      <input type="text" name="case_number" id="editCaseNumber" required autocomplete="off" />
+    </label>
+    <label id="editCaseSectionField">
+      <span>القسم</span>
+      <select name="section_id" id="editCaseSectionSelect"></select>
+    </label>
+    <label id="editCaseSubsectionField" hidden>
+      <span>القسم الفرعي</span>
+      <select name="subsection_id" id="editCaseSubsectionSelect">
+        <option value="">اختر القسم الفرعي</option>
+      </select>
+    </label>
+    <label id="editCaseLawyerField" hidden>
+      <span>تعيين للمحامي</span>
+      <select name="assigned_to" id="editCaseAssigneeSelect"></select>
+    </label>
+    <label id="editCaseStatusField">
       <span>الحالة</span>
       <select name="status" id="editCaseStatus">
-        <option value="active">نشطة</option>
-        <option value="finished">منتهية</option>
+        <option value="active">متداوله</option>
+        <option value="finished">موقوفه</option>
       </select>
     </label>
     <div class="portal-dialog-actions">
@@ -62,7 +90,7 @@
 </dialog>
 
 <dialog id="addTaskDialog" class="portal-dialog">
-  <form id="addTaskForm" class="portal-dialog-form portal-form" method="dialog">
+  <form id="addTaskForm" class="portal-dialog-form portal-form" novalidate>
     <h2>إضافة مهمة</h2>
     <div id="addTaskAlert" class="portal-alert portal-alert--error" hidden></div>
     <label>
@@ -79,14 +107,14 @@
       <input type="text" name="title" required />
     </label>
     <label id="taskAssigneeField">
-      <span>تعيين إلى</span>
+      <span id="taskAssigneeLabel">تعيين إلى مدير القسم</span>
       <select name="assigned_to" id="taskAssigneeSelect" required></select>
     </label>
-    <label>
+    <label id="taskDueDateField">
       <span>تاريخ الاستحقاق (اختياري)</span>
       <input type="date" name="due_at" />
     </label>
-    <label>
+    <label id="taskDueTimeField">
       <span>وقت المهمة (اختياري — بدونه يُذكَّر الساعة 6:00 ص)</span>
       <input type="time" name="due_time" />
     </label>
@@ -116,7 +144,7 @@
       <input type="text" name="title" id="editTaskTitle" required />
     </label>
     <label>
-      <span>تعيين إلى</span>
+      <span id="editTaskAssigneeLabel">تعيين إلى</span>
       <select name="assigned_to" id="editTaskAssigneeSelect" required></select>
     </label>
     <label>
@@ -134,17 +162,47 @@
   </form>
 </dialog>
 
-<dialog id="addClientDialog" class="portal-dialog">
+<dialog id="addClientDialog" class="portal-dialog portal-dialog--wide">
   <form id="addClientForm" class="portal-dialog-form portal-form" method="dialog">
     <h2>إضافة موكل</h2>
     <div id="addClientAlert" class="portal-alert portal-alert--error" hidden></div>
     <label>
       <span>اسم الموكل</span>
-      <input type="text" name="name" required />
+      <input type="text" name="name" required autocomplete="name" />
     </label>
     <label>
       <span>رقم الهاتف (اختياري)</span>
-      <input type="tel" name="phone" dir="ltr" />
+      <input type="tel" name="phone" dir="ltr" autocomplete="tel" />
+    </label>
+    <label>
+      <span>البريد الإلكتروني (اختياري)</span>
+      <input type="email" name="email" dir="ltr" autocomplete="email" />
+    </label>
+    <label>
+      <span>العنوان</span>
+      <textarea name="address" class="portal-detail-notes" rows="2" required placeholder="العنوان"></textarea>
+    </label>
+    <label>
+      <span>صورة التوكيل</span>
+      <span class="portal-client-file">
+        <span class="portal-client-file__pick">
+          <span class="portal-client-file__btn">اختيار ملف</span>
+          <input type="file" name="poa" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" required />
+        </span>
+        <span class="portal-client-file__name">لم يُختر ملف</span>
+        <button type="button" class="portal-btn-ghost portal-btn-ghost--sm portal-client-file__clear" hidden>إزالة</button>
+      </span>
+    </label>
+    <label>
+      <span>صورة البطاقة</span>
+      <span class="portal-client-file">
+        <span class="portal-client-file__pick">
+          <span class="portal-client-file__btn">اختيار ملف</span>
+          <input type="file" name="id_card" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" required />
+        </span>
+        <span class="portal-client-file__name">لم يُختر ملف</span>
+        <button type="button" class="portal-btn-ghost portal-btn-ghost--sm portal-client-file__clear" hidden>إزالة</button>
+      </span>
     </label>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelClientBtn">إلغاء</button>
@@ -155,6 +213,22 @@
 
 <dialog id="detailDialog" class="portal-dialog portal-dialog--wide">
   <div id="detailDialogBody" class="portal-dialog-form portal-detail-wrap"></div>
+</dialog>
+
+<dialog id="incompleteReasonDialog" class="portal-dialog">
+  <form id="incompleteReasonForm" class="portal-dialog-form portal-form">
+    <h2>سبب عدم الاكتمال</h2>
+    <p class="portal-confirm-text">اكتب سبب تحديد هذه المهمة كغير مكتملة.</p>
+    <div id="incompleteReasonAlert" class="portal-alert portal-alert--error" hidden></div>
+    <label>
+      <span>السبب</span>
+      <textarea id="incompleteReasonInput" name="reason" class="portal-detail-notes" rows="4" required placeholder="مثال: انتظرنا مستنداً من الموكل"></textarea>
+    </label>
+    <div class="portal-dialog-actions">
+      <button type="button" class="portal-btn-ghost" id="incompleteReasonCancel">إلغاء</button>
+      <button class="btn" type="submit" id="incompleteReasonOk">حفظ</button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="confirmDeleteDialog" class="portal-dialog">
@@ -199,4 +273,43 @@
       <button class="btn" type="submit">تغيير كلمة المرور</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="libraryPickerDialog" class="portal-dialog portal-dialog--wide">
+  <div class="portal-dialog-form">
+    <div class="portal-panel-head">
+      <h2 id="libraryPickerTitle">اختر ملفاً</h2>
+      <button type="button" class="portal-add-btn" id="libraryAddNewBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        ملف جديد
+      </button>
+    </div>
+    <div id="libraryPickerAlert" class="portal-alert portal-alert--error" hidden></div>
+    <form id="libraryUploadForm" class="portal-library-upload" hidden>
+      <label>
+        <span>الاسم</span>
+        <input type="text" name="label" required />
+      </label>
+      <label>
+        <span>الملف</span>
+        <div class="portal-file-picker">
+          <input type="file" name="file" id="libraryUploadFile" required class="portal-file-picker__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt" />
+          <span class="portal-file-picker__btn">اختيار ملف</span>
+          <span class="portal-file-picker__name" id="libraryUploadFileName">لم يُختر ملف</span>
+        </div>
+      </label>
+      <fieldset class="portal-library-sections" id="librarySectionAccess" hidden></fieldset>
+      <div class="portal-dialog-actions">
+        <button type="button" class="portal-btn-ghost" id="cancelLibraryUploadBtn">رجوع</button>
+        <button class="btn" type="submit">رفع</button>
+      </div>
+    </form>
+    <div class="portal-library-scroll" id="libraryPickerScroll">
+      <ul class="portal-list" id="libraryPickerBody"></ul>
+      <div id="libraryPickerSentinel" class="portal-library-sentinel" hidden></div>
+    </div>
+    <div class="portal-dialog-actions" id="libraryPickerFooter">
+      <button type="button" class="portal-btn-ghost" id="cancelLibraryPickerBtn">إغلاق</button>
+    </div>
+  </div>
 </dialog>

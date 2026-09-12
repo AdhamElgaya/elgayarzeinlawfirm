@@ -31,7 +31,9 @@ console.log(`Keeping admin: ${admin.name} (${admin.username})`);
 
 await resetPortalData(admin.id);
 
-const remainingUsers = await db.prepare(`SELECT id, username, name, role FROM users`).all();
+const remainingUsers = await db
+  .prepare(`SELECT id, username, name, role, status, created_at, activated_at FROM users ORDER BY created_at DESC`)
+  .all();
 console.log(`Users remaining: ${remainingUsers.length}`);
 for (const user of remainingUsers) {
   console.log(`  - ${user.name} (${user.username}) · ${user.role}`);

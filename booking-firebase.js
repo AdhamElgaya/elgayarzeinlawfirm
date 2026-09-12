@@ -44,6 +44,7 @@
     iconWrap.innerHTML = type === "success" ? ICON_SUCCESS : ICON_ERROR;
     msgEl.textContent = message;
     toastEl.classList.remove("booking-toast--success", "booking-toast--error");
+    
     toastEl.classList.add(type === "success" ? "booking-toast--success" : "booking-toast--error");
 
     requestAnimationFrame(() => {

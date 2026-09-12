@@ -9,14 +9,23 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "npm start"
+startCommand = "node portal-server/server.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
 
-# Non-secret API flags. Set DATABASE_URL, SESSION_SECRET, ADMIN_PASSWORD,
-# and ALLOWED_ORIGINS in the Railway dashboard (or ${{Postgres.DATABASE_URL}}).
+# Non-secret API flags. Set these secrets in the Railway dashboard:
+# SESSION_SECRET, ADMIN_PASSWORD, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY,
+# and R2_*. DATABASE_URL comes from the Postgres plugin.
 [variables]
 API_ONLY = "true"
 NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "20"
+DATABASE_URL = "${{Postgres.DATABASE_URL}}"
+PUBLIC_BASE_URL = "https://www.gzlawfirm.net"
+ALLOWED_ORIGINS = "https://www.gzlawfirm.net,https://gzlawfirm.net,https://elgayarzeinlawfirm.pages.dev"
+PORTAL_TIMEZONE = "Africa/Cairo"
+TASK_REMINDER_MINUTES = "45"
+TASK_DATE_ONLY_REMINDER_HOUR = "6"
+VAPID_SUBJECT = "mailto:support@gzlawfirm.net"

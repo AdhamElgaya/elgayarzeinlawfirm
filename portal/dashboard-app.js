@@ -76,10 +76,10 @@
 
   function renderStats(stats) {
     const items = [
-      [Portal.t("portal.dashboard.stat.activeCases", "قضايا نشطة"), stats.activeCases],
-      [Portal.t("portal.dashboard.stat.finishedCases", "قضايا منتهية"), stats.finishedCases],
-      [Portal.t("portal.dashboard.stat.openTasks", "مهام مفتوحة"), stats.openTasks],
-      [Portal.t("portal.dashboard.stat.archivedCases", "قضايا مؤرشفة"), stats.archivedCases],
+      [Portal.t("portal.dashboard.stat.activeCases", "دعاوي متداوله"), stats.activeCases],
+      [Portal.t("portal.dashboard.stat.finishedCases", "دعاوي موقوفه"), stats.finishedCases],
+      [Portal.t("portal.dashboard.stat.archivedCases", "دعاوي محفوظه"), stats.archivedCases],
+      [Portal.t("portal.dashboard.stat.openTasks", "مهام اداريه"), stats.openTasks],
     ];
     statsGrid.innerHTML = items
       .map(

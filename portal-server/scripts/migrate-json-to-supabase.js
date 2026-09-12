@@ -101,10 +101,21 @@ const inserts = {
     columns: ["id", "user_id", "token_hash", "expires_at", "used_at", "created_at"],
   },
   clients: {
-    text: `INSERT INTO clients (id, name, phone, created_by, deleted_at, created_at)
-           VALUES (?, ?, ?, ?, ?, ?)
+    text: `INSERT INTO clients (id, name, phone, email, address, poa_document, id_document, created_by, deleted_at, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT (id) DO NOTHING`,
-    columns: ["id", "name", "phone", "created_by", "deleted_at", "created_at"],
+    columns: [
+      "id",
+      "name",
+      "phone",
+      "email",
+      "address",
+      "poa_document",
+      "id_document",
+      "created_by",
+      "deleted_at",
+      "created_at",
+    ],
   },
   cases: {
     text: `INSERT INTO cases (id, title, client_id, client_ref, notes, attachments, status, assigned_to, opened_at, finished_at, archived_at, created_by, deleted_at, created_at)

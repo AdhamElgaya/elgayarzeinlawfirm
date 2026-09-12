@@ -4,8 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "npm --prefix portal-server start",
+    "local": "npm --prefix portal-server run local",
+    "railway": "npm --prefix portal-server run railway",
     "portal": "npm --prefix portal-server start",
     "portal:dev": "npm --prefix portal-server run dev",
+    "portal:local": "npm --prefix portal-server run local",
+    "portal:railway": "npm --prefix portal-server run railway",
     "site": "npx --yes serve -l tcp://0.0.0.0:3001",
     "postinstall": "node scripts/postinstall.js",
     "build": "node scripts/sync-deploy-config.js",

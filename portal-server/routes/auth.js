@@ -1,5 +1,4 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
 import { verifyPassword, hashPassword } from "../lib/password.js";
@@ -16,18 +15,20 @@ import {
   setSessionCookie,
   clearSessionCookie,
 } from "../middleware/auth.js";
+import { listLedSubsections, getManagedSection } from "../lib/sections.js";
+import { loginLimiter, passwordActionLimiter } from "../lib/rate-limits.js";
 
 const router = Router();
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (_req, res) => {
-    res.status(429).json({ error: "محاولات كثيرة. حاول مرة أخرى لاحقاً." });
-  },
-});
+async function sessionUserPayload(user) {
+  const led = user?.role === "lawyer" ? await listLedSubsections(user.id) : [];
+  const managed = user?.role === "section_manager" ? await getManagedSection(user.id) : null;
+  return {
+    ...publicUser(user),
+    led_subsections: led,
+    managed_section: managed ? { id: managed.id, name: managed.name } : null,
+  };
+}
 
 router.get("/me", async (req, res) => {
   try {
@@ -36,7 +37,7 @@ router.get("/me", async (req, res) => {
     if (!user) {
       return res.status(401).json({ authenticated: false });
     }
-    res.json({ authenticated: true, user: publicUser(user) });
+    res.json({ authenticated: true, user: await sessionUserPayload(user) });
   } catch (error) {
     console.error("[portal] auth/me error:", error);
     res.status(500).json({ error: "تعذر التحقق من الجلسة." });
@@ -45,6 +46,10 @@ router.get("/me", async (req, res) => {
 
 router.post("/login", loginLimiter, async (req, res) => {
   try {
+    if (req.query?.token || req.query?.session || req.query?.password || req.query?.username) {
+      return res.status(400).json({ error: "تسجيل الدخول يتم بكلمة المرور من صفحة الدخول فقط." });
+    }
+
     const username = normalizeUsername(req.body?.username);
     const password = String(req.body?.password || "");
     const rememberMe = Boolean(req.body?.remember_me);
@@ -86,11 +91,11 @@ router.post("/login", loginLimiter, async (req, res) => {
     });
 
     res.json({
-      user: publicUser(user),
+      user: await sessionUserPayload(user),
     });
   } catch (error) {
     console.error("[portal] login error:", error);
-    res.status(500).json({ error: "تعذر تسجيل الدخول. تحقق من إعدادات قاعدة البيانات على الخادم." });
+    res.status(500).json({ error: "تعذر تسجيل الدخول." });
   }
 });
 
@@ -104,7 +109,7 @@ router.post("/logout", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-router.post("/change-password", requireAuth, async (req, res) => {
+router.post("/change-password", requireAuth, passwordActionLimiter, async (req, res) => {
   try {
     const currentPassword = String(req.body?.currentPassword || "");
     const newPassword = String(req.body?.newPassword || "");

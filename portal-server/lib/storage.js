@@ -5,6 +5,7 @@ import {
   r2Configured,
   r2PutObject,
   r2GetObject,
+  r2PeekObject,
   r2DeleteObject,
   r2SignedGetUrl,
   r2SignedPutUrl,
@@ -109,4 +110,25 @@ export async function fileExists(key) {
   }
   const filePath = getLocalFilePath(path.basename(key));
   return Boolean(filePath && fs.existsSync(filePath));
+}
+
+export async function peekStoredBytes(key, length = 8) {
+  if (!key) return null;
+  try {
+    if (storageMode === "r2") {
+      return await r2PeekObject(key, length);
+    }
+    const filePath = getLocalFilePath(path.basename(key));
+    if (!filePath || !fs.existsSync(filePath)) return null;
+    const fd = fs.openSync(filePath, "r");
+    try {
+      const buf = Buffer.alloc(length);
+      const bytesRead = fs.readSync(fd, buf, 0, length, 0);
+      return buf.subarray(0, bytesRead);
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch {
+    return null;
+  }
 }

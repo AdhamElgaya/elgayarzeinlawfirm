@@ -72,7 +72,7 @@ const PortalPush = (() => {
 
     const keyData = await Portal.request("/dashboard/push/vapid-key");
     if (!keyData.enabled || !keyData.publicKey) {
-      throw new Error("الإشعارات غير مفعّلة على الخادم.");
+      throw new Error("تعذر تفعيل الإشعارات حالياً.");
     }
 
     const registration = (await getRegistration()) || (await registerServiceWorker());
@@ -155,15 +155,9 @@ const PortalPush = (() => {
     }
 
     if (!serverEnabled) {
-      container.hidden = false;
-      container.innerHTML = `
-        <div class="portal-panel-head">
-          <h2>الإشعارات</h2>
-        </div>
-        <p class="portal-lead portal-lead--compact">
-          الإشعارات غير مفعّلة على الخادم. أضف مفاتيح VAPID على Railway ثم أعد النشر.
-        </p>
-      `;
+      console.warn("[portal] Push notifications are off: add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY, then restart.");
+      container.hidden = true;
+      container.innerHTML = "";
       return;
     }
 

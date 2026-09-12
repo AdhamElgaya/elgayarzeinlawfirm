@@ -1,9 +1,55 @@
 import pg from "pg";
 
-const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL or SUPABASE_DB_URL is required for PostgreSQL mode.");
+function normalizeConnectionString(raw) {
+  let value = String(raw || "").trim();
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+  return value;
 }
+
+function assertDatabaseUrl(value) {
+  const looksUnresolved =
+    !value ||
+    value.includes("${{") ||
+    /PASSWORD@HOST/i.test(value) ||
+    /@HOST:/i.test(value) ||
+    value.includes(":PORT/");
+
+  if (looksUnresolved) {
+    throw new Error(
+      "DATABASE_URL is not a real Postgres URL. In Railway, open the API service → Variables, delete DATABASE_URL, then Add Variable → insert a reference to Postgres DATABASE_URL (or paste DATABASE_URL from the Postgres service). Do not use the .env.example placeholder."
+    );
+  }
+
+  try {
+    // pg accepts postgres:// and postgresql://
+    new URL(value.replace(/^postgresql:/i, "http:").replace(/^postgres:/i, "http:"));
+  } catch {
+    throw new Error(
+      "DATABASE_URL is invalid. Copy postgres://... from the Postgres service Variables tab, with no quotes."
+    );
+  }
+}
+
+function pickDatabaseUrl() {
+  const primary = String(process.env.DATABASE_URL || "").trim();
+  const publicUrl = String(process.env.DATABASE_PUBLIC_URL || process.env.SUPABASE_DB_URL || "").trim();
+  const onRailway = Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
+  if (primary && !(/\.railway\.internal/i.test(primary) && !onRailway)) {
+    return primary;
+  }
+  return publicUrl || primary;
+}
+
+const connectionString = normalizeConnectionString(pickDatabaseUrl());
+if (!connectionString) {
+  throw new Error("DATABASE_URL, DATABASE_PUBLIC_URL, or SUPABASE_DB_URL is required for PostgreSQL mode.");
+}
+assertDatabaseUrl(connectionString);
 
 function pgSslConfig(url) {
   const value = String(url || "").toLowerCase();
@@ -17,6 +63,17 @@ const pool = new pg.Pool({
   connectionString,
   ssl: pgSslConfig(connectionString),
 });
+
+function databaseHostLabel(url) {
+  try {
+    return new URL(url.replace(/^postgresql:/i, "http:").replace(/^postgres:/i, "http:")).host;
+  } catch {
+    return "unknown-host";
+  }
+}
+
+export const postgresHost = databaseHostLabel(connectionString);
+console.log(`[portal] Using Postgres at ${postgresHost}`);
 
 function toPgSql(sql) {
   let index = 0;
@@ -41,7 +98,7 @@ function normalizeRow(row) {
   if (!row) return row;
   const out = { ...row };
   if (out.count !== undefined) out.count = Number(out.count);
-  for (const key of ["attachments", "metadata", "subscription"]) {
+  for (const key of ["attachments", "metadata", "subscription", "section_ids", "poa_document", "id_document"]) {
     out[key] = normalizeValue(out[key]);
   }
   if (out.attachments === null) out.attachments = [];

@@ -1,4 +1,13 @@
 (function () {
+  try {
+    if (/(?:^|\/)portal(?:\/|$)/.test(location.pathname)) {
+      const theme = localStorage.getItem("gz-portal-theme");
+      document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "dark");
+    }
+  } catch {
+    /* ignore */
+  }
+
   const LANG_COOKIE = "gz-lang";
   const CHOSEN_COOKIE = "gz-lang-chosen";
   const COOKIE_DAYS = 365;

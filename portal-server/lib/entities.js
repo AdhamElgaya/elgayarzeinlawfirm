@@ -1,5 +1,15 @@
 import db from "../db.js";
 import { deleteStoredFile, findAttachmentRecord } from "./attachments.js";
+import { clientDocumentFilenames } from "./client-docs.js";
+import {
+  canAccessCase,
+  canAccessTask,
+  getSection,
+  getSubsectionLead,
+  isOfficeStaff,
+  subsectionName,
+} from "./sections.js";
+import { canViewLibraryAttachment, getLibraryAttachment } from "./library-attachments.js";
 
 export function displayId(id) {
   return String(id || "").slice(0, 8).toUpperCase();
@@ -27,14 +37,25 @@ async function getCaseById(caseId) {
 export async function enrichCase(caseRow) {
   if (!caseRow) return null;
   const client = await getClientById(caseRow.client_id);
-  const lawyer = await getUserById(caseRow.assigned_to);
+  const assignee = await getUserById(caseRow.assigned_to);
+  let displayLawyer = assignee;
+  if (caseRow.subsection_id) {
+    const leadId = await getSubsectionLead(caseRow.section_id, caseRow.subsection_id);
+    displayLawyer = leadId ? await getUserById(leadId) : null;
+  }
+  const section = await getSection(caseRow.section_id);
   return {
     ...caseRow,
     display_id: displayId(caseRow.id),
     client_name: client?.name || caseRow.client_ref || null,
     client_phone: client?.phone || null,
-    lawyer_name: lawyer?.name || null,
-    lawyer_role: lawyer?.role || null,
+    lawyer_name: displayLawyer?.name || null,
+    lawyer_role: displayLawyer?.role || null,
+    lawyer_id: displayLawyer?.id || null,
+    section_id: caseRow.section_id || null,
+    section_name: section?.name || null,
+    subsection_id: caseRow.subsection_id || null,
+    subsection_name: subsectionName(caseRow.section_id, caseRow.subsection_id),
     notes: caseRow.notes || "",
     attachments: Array.isArray(caseRow.attachments) ? caseRow.attachments : [],
   };
@@ -53,6 +74,7 @@ export async function enrichTask(taskRow) {
     case_display_id: caseRow ? displayId(caseRow.id) : "",
     assignee_name: assignee?.name || null,
     assignee_role: assignee?.role || null,
+    section_id: taskRow.section_id || caseRow?.section_id || null,
     attachments: Array.isArray(taskRow.attachments) ? taskRow.attachments : [],
   };
 }
@@ -60,28 +82,27 @@ export async function enrichTask(taskRow) {
 export async function getCaseIfAccessible(user, caseId) {
   const row = await db
     .prepare(
-      `SELECT id, title, client_id, client_ref, notes, attachments, status, assigned_to, opened_at, finished_at, archived_at, created_by, created_at FROM cases WHERE id = ? AND deleted_at IS NULL`
+      `SELECT id, title, client_id, client_ref, notes, attachments, status, assigned_to, section_id, subsection_id, opened_at, finished_at, archived_at, created_by, created_at, opponent_name, case_number FROM cases WHERE id = ? AND deleted_at IS NULL`
     )
     .get(caseId);
   if (!row) return null;
-  if (user.role !== "admin" && row.assigned_to !== user.id) return null;
+  if (!(await canAccessCase(user, row))) return null;
   return row;
 }
 
 export async function getTaskIfAccessible(user, taskId) {
   const row = await db
     .prepare(
-      `SELECT id, case_id, title, assigned_to, status, due_at, assigned_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
+      `SELECT id, case_id, title, assigned_to, section_id, status, due_at, incomplete_reason, assigned_at, attachments, created_at, created_by FROM tasks WHERE id = ? AND deleted_at IS NULL`
     )
     .get(taskId);
   if (!row) return null;
 
-  if (user.role === "admin") return row;
-
-  if (row.assigned_to !== user.id) return null;
-
-  const caseRow = await db.prepare(`SELECT id, status FROM cases WHERE id = ? AND deleted_at IS NULL`).get(row.case_id);
+  const caseRow = await db
+    .prepare(`SELECT id, status, section_id, subsection_id FROM cases WHERE id = ? AND deleted_at IS NULL`)
+    .get(row.case_id);
   if (!caseRow || caseRow.status === "archived") return null;
+  if (!(await canAccessTask(user, row, caseRow))) return null;
 
   return row;
 }
@@ -91,6 +112,19 @@ export async function getAttachmentIfAccessible(user, attachmentId) {
   if (!record?.attachment?.filename) return null;
 
   const { caseRow, attachment } = record;
+
+  if (record.library) {
+    const libraryRow = await getLibraryAttachment(attachmentId);
+    if (libraryRow && (await canViewLibraryAttachment(user, libraryRow))) {
+      return { caseRow, attachment };
+    }
+    return null;
+  }
+
+  if (record.client) {
+    if (isOfficeStaff(user)) return { attachment };
+    return null;
+  }
 
   if (await getCaseIfAccessible(user, caseRow.id)) {
     return { caseRow, attachment };
@@ -148,6 +182,12 @@ export async function softDeleteCase(id) {
 
 export async function softDeleteClient(id) {
   const now = new Date().toISOString();
+  const client = await db
+    .prepare(`SELECT id, poa_document, id_document FROM clients WHERE id = ? AND deleted_at IS NULL`)
+    .get(id);
+  for (const filename of clientDocumentFilenames(client)) {
+    await deleteStoredFile(filename);
+  }
   const cases = await db
     .prepare(`SELECT id FROM cases WHERE client_id = ? AND deleted_at IS NULL`)
     .all(id);
@@ -168,7 +208,18 @@ export async function deleteUser(userId) {
     await db.prepare(`DELETE FROM cases WHERE id = ?`).run(caseRow.id);
   }
 
+  await db.prepare(`DELETE FROM section_members WHERE user_id = ?`).run(userId);
+  await db.prepare(`DELETE FROM subsection_leads WHERE user_id = ?`).run(userId);
+  await db.prepare(`UPDATE sections SET manager_id = NULL WHERE manager_id = ?`).run(userId);
   await db.prepare(`DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?`).run(userId, userId);
+  const ownedClients = await db
+    .prepare(`SELECT poa_document, id_document FROM clients WHERE created_by = ?`)
+    .all(userId);
+  for (const row of ownedClients || []) {
+    for (const filename of clientDocumentFilenames(row)) {
+      await deleteStoredFile(filename);
+    }
+  }
   await db.prepare(`DELETE FROM clients WHERE created_by = ?`).run(userId);
   await db.prepare(`DELETE FROM audit_logs WHERE user_id = ?`).run(userId);
   await db.prepare(`DELETE FROM push_subscriptions WHERE user_id = ?`).run(userId);
@@ -178,12 +229,46 @@ export async function deleteUser(userId) {
 }
 
 export async function resetPortalData(adminUserId) {
+  const filenames = new Set();
+  const cases = await db.prepare(`SELECT attachments FROM cases`).all();
+  for (const row of cases || []) {
+    for (const item of row.attachments || []) {
+      if (item?.filename) filenames.add(item.filename);
+    }
+  }
+  const tasks = await db.prepare(`SELECT attachments FROM tasks`).all();
+  for (const row of tasks || []) {
+    for (const item of row.attachments || []) {
+      if (item?.filename) filenames.add(item.filename);
+    }
+  }
+  const library = await db.prepare(`SELECT filename FROM library_attachments`).all();
+  for (const row of library || []) {
+    if (row?.filename) filenames.add(row.filename);
+  }
+  const clients = await db.prepare(`SELECT poa_document, id_document FROM clients`).all();
+  for (const row of clients || []) {
+    for (const filename of clientDocumentFilenames(row)) {
+      filenames.add(filename);
+    }
+  }
+  for (const filename of filenames) {
+    await deleteStoredFile(filename);
+  }
+
   await db.prepare(`DELETE FROM tasks`).run();
   await db.prepare(`DELETE FROM cases`).run();
   await db.prepare(`DELETE FROM clients`).run();
+  await db.prepare(`DELETE FROM library_attachments`).run();
+  await db.prepare(`DELETE FROM section_members`).run();
+  await db.prepare(`DELETE FROM subsection_leads`).run();
   await db.prepare(`DELETE FROM audit_logs`).run();
   await db.prepare(`DELETE FROM push_subscriptions`).run();
   await db.prepare(`DELETE FROM sessions`).run();
   await db.prepare(`DELETE FROM invitations`).run();
+  const sections = await db.prepare(`SELECT id FROM sections`).all();
+  for (const section of sections || []) {
+    await db.prepare(`UPDATE sections SET manager_id = ? WHERE id = ?`).run(null, section.id);
+  }
   await db.prepare(`DELETE FROM users WHERE id != ?`).run(adminUserId);
 }

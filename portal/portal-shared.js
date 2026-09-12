@@ -38,6 +38,7 @@ const PortalDash = (() => {
   let editCaseAlert;
   let addClientAlert;
   let caseAssigneeSelect;
+  let caseSectionSelect;
   let caseClientSelect;
   let taskAssigneeSelect;
   let editTaskAssigneeSelect;
@@ -59,9 +60,22 @@ const PortalDash = (() => {
   const taskScopeAllBtn = document.getElementById("taskScopeAllBtn");
 
   let assignees = [];
+  let sections = [];
   let clients = [];
   let assigneeNames = {};
   let isAdminUser = false;
+  let isAdminOnly = false;
+  let isSectionManager = false;
+  let isSubsectionLead = false;
+  let canCreateTasks = false;
+  let canAssignTaskToOthers = false;
+  let caseInboxMode = new URLSearchParams(window.location.search).get("inbox") === "1" ? "inbox" : "all";
+  let libraryPickerTarget = null;
+  let libraryPickerItems = [];
+  let libraryPickerTotal = 0;
+  let libraryPickerOffset = 0;
+  let libraryPickerLoading = false;
+  const LIBRARY_PAGE_SIZE = 25;
   let dashboardUser = null;
   let dashboardData = null;
   let archivedCases = [];
@@ -70,19 +84,52 @@ const PortalDash = (() => {
   let selectedTaskDate = Portal.formatDateInput(new Date());
 
   function badge(status) {
-    const valid = ["active", "finished", "open", "done", "archived"];
+    const valid = ["active", "finished", "open", "done", "missed", "archived"];
     if (!valid.includes(status)) return "";
     const cls =
       status === "active"
         ? "portal-badge--active"
         : status === "finished" || status === "done"
           ? "portal-badge--finished"
-          : "portal-badge--open";
+          : status === "missed"
+            ? "portal-badge--missed"
+            : "portal-badge--open";
     return `<span class="portal-badge ${cls}">${Portal.statusLabel(status)}</span>`;
   }
 
   function showMoreBtn(action, id) {
-    return `<button type="button" class="portal-link-btn" data-action="${action}" data-id="${Portal.escapeHtml(id)}">عرض المزيد</button>`;
+    return `<button type="button" class="portal-link-btn" data-action="${action}" data-id="${Portal.escapeHtml(id)}">عرض</button>`;
+  }
+
+  function infoIconBtn(action, id, label = "التفاصيل") {
+    return `<button type="button" class="portal-quick-btn portal-quick-btn--info" data-action="${action}" data-id="${Portal.escapeHtml(id)}" title="${Portal.escapeHtml(label)}" aria-label="${Portal.escapeHtml(label)}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6" stroke-linecap="round" />
+        <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    </button>`;
+  }
+
+  function taskQuickActions(task) {
+    if (task.status === "missed") {
+      return `<div class="portal-quick-actions">${infoIconBtn("show-task", task.id)}</div>`;
+    }
+    const checkActive = task.status === "done" ? " is-active" : "";
+    const missActive = task.status === "open" ? " is-active" : "";
+    return `<div class="portal-quick-actions">
+      <button type="button" class="portal-quick-btn portal-quick-btn--done${checkActive}" data-action="task-done" data-id="${Portal.escapeHtml(task.id)}" title="مكتملة" aria-label="مكتملة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M5 12.5l5 5L19 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button type="button" class="portal-quick-btn portal-quick-btn--open${missActive}" data-action="task-incomplete" data-id="${Portal.escapeHtml(task.id)}" title="غير مكتملة" aria-label="غير مكتملة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+        </svg>
+      </button>
+      ${infoIconBtn("show-task", task.id)}
+    </div>`;
   }
 
   function renderWelcome(user) {
@@ -93,10 +140,10 @@ const PortalDash = (() => {
   function renderStats(stats) {
     if (!statsGrid) return;
     const items = [
-      [Portal.t("portal.dashboard.stat.activeCases", "قضايا نشطة"), stats.activeCases],
-      [Portal.t("portal.dashboard.stat.finishedCases", "قضايا منتهية"), stats.finishedCases],
+      [Portal.t("portal.dashboard.stat.activeCases", "قضايا جارية"), stats.activeCases],
+      [Portal.t("portal.dashboard.stat.finishedCases", "قضايا موقوفة"), stats.finishedCases],
+      [Portal.t("portal.dashboard.stat.archivedCases", "قضايا محفوظة"), stats.archivedCases],
       [Portal.t("portal.dashboard.stat.openTasks", "مهام مفتوحة"), stats.openTasks],
-      [Portal.t("portal.dashboard.stat.archivedCases", "قضايا مؤرشفة"), stats.archivedCases],
     ];
     statsGrid.innerHTML = items
       .map(
@@ -125,21 +172,52 @@ const PortalDash = (() => {
     return rows.filter((client) => {
       const relatedCases = (dashboardData?.cases || []).filter((c) => c.client_id === client.id);
       const caseTitles = relatedCases.map((c) => c.title).join(" ");
-      const haystack = [client.name, client.phone || "", caseTitles]
+      const haystack = [client.name, client.phone || "", client.email || "", client.address || "", caseTitles]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
     });
   }
 
+  function caseSectionLabel(c) {
+    if (c?.section_name) return c.section_name;
+    if (c?.section_id) return c.section_id;
+    return "صندوق الوارد";
+  }
+
+  function isStaffInboxCase(c) {
+    return Boolean(isAdminUser && c && !c.section_id && c.status !== "archived");
+  }
+
+  function assignSectionBtn(id) {
+    return `<button type="button" class="btn" data-action="assign-case-section" data-id="${Portal.escapeHtml(id)}">تعيين إلى الأقسام</button>`;
+  }
+
+  function setEditCaseDialogMode(assignSection) {
+    const dialog = document.getElementById("editCaseDialog");
+    const form = document.getElementById("editCaseForm");
+    const titleEl = dialog?.querySelector("h2");
+    const submitBtn = dialog?.querySelector('button[type="submit"]');
+    if (form) form.dataset.assignSection = assignSection ? "1" : "";
+    if (titleEl) titleEl.textContent = assignSection ? "تعيين إلى الأقسام" : "تعديل القضية";
+    if (submitBtn) submitBtn.textContent = assignSection ? "تعيين" : "حفظ التعديلات";
+  }
+
   function filterCases(rows) {
+    let filtered = [...rows];
+    if (pageType === "cases" && isAdminUser && caseInboxMode === "inbox") {
+      filtered = filtered.filter((c) => !c.section_id);
+    }
     const q = normalizeSearch(casesSearch?.value);
-    if (!q) return rows;
-    return rows.filter((c) => {
+    if (!q) return filtered;
+    return filtered.filter((c) => {
       const lawyer = assigneeNames[c.assigned_to] || "";
       const haystack = [
+        c.case_number,
+        c.opponent_name,
         c.title,
         c.client_name || "",
+        caseSectionLabel(c),
         lawyer,
         Portal.statusLabel(c.status),
       ]
@@ -152,7 +230,7 @@ const PortalDash = (() => {
   function filterTasks(rows) {
     let filtered = [...rows];
 
-    if (isAdminUser && pageType === "tasks" && taskScopeMode === "mine" && dashboardUser?.id) {
+    if ((isAdminUser || isSectionManager || isSubsectionLead) && pageType === "tasks" && taskScopeMode === "mine" && dashboardUser?.id) {
       filtered = filtered.filter((t) => t.assigned_to === dashboardUser.id);
     }
 
@@ -205,16 +283,17 @@ const PortalDash = (() => {
     }
     listEl.innerHTML = rows
       .map(
-        (client) => `<li class="portal-list-item">
+        (client) => `<li class="portal-list-item" data-action="show-client" data-id="${Portal.escapeHtml(client.id)}">
           <div class="portal-list-item__row">
             <div class="portal-list-item__content">
               <div class="portal-list-item__head">
                 <strong>${Portal.escapeHtml(client.name)}</strong>
               </div>
               ${
-                client.phone
-                  ? `<span class="portal-list-item__meta">${Portal.escapeHtml(client.phone)}</span>`
-                  : ""
+                [client.phone, client.email]
+                  .filter(Boolean)
+                  .map((value) => `<span class="portal-list-item__meta">${Portal.escapeHtml(value)}</span>`)
+                  .join("")
               }
             </div>
             ${showMoreBtn("show-client", client.id)}
@@ -234,9 +313,11 @@ const PortalDash = (() => {
           ? cases.length
             ? "لا توجد نتائج مطابقة للبحث."
             : "لا توجد قضايا مؤرشفة."
-          : cases.length
+          : normalizeSearch(casesSearch?.value)
             ? "لا توجد نتائج مطابقة للبحث."
-            : Portal.t("portal.dashboard.noCases", "لا توجد قضايا معينة بعد.");
+            : caseInboxMode === "inbox"
+              ? "لا توجد قضايا في صندوق الوارد."
+              : Portal.t("portal.dashboard.noCases", "لا توجد قضايا معينة بعد.");
       listEl.innerHTML = emptyState(emptyMsg);
       return;
     }
@@ -244,18 +325,23 @@ const PortalDash = (() => {
     listEl.innerHTML = rows
       .map((c) => {
         const assigneeLine =
-          isAdminUser && c.assigned_to && assigneeNames[c.assigned_to]
-            ? `${assigned} ${Portal.escapeHtml(assigneeNames[c.assigned_to])}`
+          (isAdminUser || isSectionManager) && c.assigned_to && (assigneeNames[c.assigned_to] || c.lawyer_name)
+            ? `${assigned} ${Portal.escapeHtml(assigneeNames[c.assigned_to] || c.lawyer_name)}`
             : "";
+        const sectionLine = `القسم: ${Portal.escapeHtml([caseSectionLabel(c), c.subsection_name].filter(Boolean).join(" — "))}`;
         const clientLine = c.client_name ? `الموكل: ${Portal.escapeHtml(c.client_name)}` : "";
-        return `<li class="portal-list-item">
+        const opponentLine = c.opponent_name ? `الخصم: ${Portal.escapeHtml(c.opponent_name)}` : "";
+        const numberLine = c.case_number ? Portal.escapeHtml(c.case_number) : Portal.escapeHtml(c.title);
+        return `<li class="portal-list-item" data-action="show-case" data-id="${Portal.escapeHtml(c.id)}">
           <div class="portal-list-item__row">
             <div class="portal-list-item__content">
               <div class="portal-list-item__head">
-                <strong>${Portal.escapeHtml(c.title)}</strong>
+                <strong>${numberLine}</strong>
                 ${badge(c.status)}
               </div>
+              ${opponentLine ? `<span class="portal-list-item__assignee">${opponentLine}</span>` : ""}
               ${clientLine ? `<span class="portal-list-item__assignee">${clientLine}</span>` : ""}
+              ${sectionLine ? `<span class="portal-list-item__assignee">${sectionLine}</span>` : ""}
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
             </div>
             ${showMoreBtn("show-case", c.id)}
@@ -275,21 +361,25 @@ const PortalDash = (() => {
           tasksSearch?.value ||
           taskStatusFilter?.value ||
           taskAssigneeFilter?.value ||
-          (isAdminUser && taskScopeMode === "mine"));
+          ((isAdminUser || isSectionManager || isSubsectionLead) && taskScopeMode === "mine"));
       const emptyMsg = hasFilters
         ? "لا توجد مهام مطابقة للبحث أو التاريخ المحدد."
         : Portal.t("portal.dashboard.noTasks", "لا توجد مهام بعد.");
       listEl.innerHTML = emptyState(emptyMsg);
       return;
     }
-    const due = Portal.t("portal.dashboard.due", "مستحق:");
-    const assigned = Portal.t("portal.dashboard.assignedTo", "معيّنة إلى:");
+    const due = Portal.t("portal.dashboard.due", "موعد:");
     listEl.innerHTML = rows
       .map((t) => {
         const assignmentLine = taskAssignmentHtml(t);
-        const assigneeLine = assignmentLine ? `${assigned} ${assignmentLine}` : "";
-        const statusClass = t.status === "done" ? "portal-list-item--done" : "portal-list-item--open";
-        return `<li class="portal-list-item ${statusClass}">
+        const assigneeLine = assignmentLine || "";
+        const statusClass =
+          t.status === "done"
+            ? "portal-list-item--done"
+            : t.status === "missed"
+              ? "portal-list-item--missed"
+              : "portal-list-item--open";
+        return `<li class="portal-list-item ${statusClass}" data-action="show-task" data-id="${Portal.escapeHtml(t.id)}">
           <div class="portal-list-item__row">
             <div class="portal-list-item__content">
               <div class="portal-list-item__head">
@@ -299,7 +389,7 @@ const PortalDash = (() => {
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
               <span class="portal-list-item__meta">${Portal.escapeHtml(t.case_title)}${t.due_at ? ` — ${due} ${Portal.formatTaskDue(t.due_at)}` : ""}</span>
             </div>
-            ${showMoreBtn("show-task", t.id)}
+            ${taskQuickActions(t)}
           </div>
         </li>`;
       })
@@ -326,17 +416,96 @@ const PortalDash = (() => {
     fillClientSelectOptions(caseClientSelect);
   }
 
+  function knownSections() {
+    return sections.length
+      ? sections
+      : [
+          { id: "section-1", name: "قسم 1" },
+          { id: "section-2", name: "قسم 2" },
+          { id: "section-3", name: "قسم 3" },
+          { id: "section-4", name: "قسم 4" },
+        ];
+  }
+
+  function subsectionsForSection(sectionId) {
+    const row = knownSections().find((item) => item.id === sectionId);
+    if (row?.subsections?.length) return row.subsections;
+    if (["section-1", "section-2", "section-3", "section-4"].includes(sectionId)) {
+      return [
+        { id: "civil", name: "مدني" },
+        { id: "criminal", name: "جنائي" },
+        { id: "personal_status", name: "أحوال شخصية" },
+        { id: "commercial", name: "تجاري" },
+      ];
+    }
+    return [];
+  }
+
+  function fillSubsectionSelect(select, sectionId, selectedId = "") {
+    if (!select) return;
+    const rows = subsectionsForSection(sectionId);
+    select.innerHTML =
+      `<option value="">اختر القسم الفرعي</option>` +
+      rows
+        .map((item) => {
+          const selected = selectedId === item.id ? " selected" : "";
+          return `<option value="${Portal.escapeHtml(item.id)}"${selected}>${Portal.escapeHtml(item.name)}</option>`;
+        })
+        .join("");
+    if (selectedId) select.value = selectedId;
+  }
+
+  function syncSubsectionField(sectionSelect, field, select, selectedId = "", sectionIdOverride = "") {
+    const sectionId = sectionIdOverride || sectionSelect?.value || "";
+    const rows = subsectionsForSection(sectionId);
+    if (field) field.hidden = !rows.length;
+    if (select) {
+      select.required = Boolean(rows.length);
+      fillSubsectionSelect(select, sectionId, rows.length ? selectedId : "");
+    }
+  }
+
+  function fillSectionSelectOptions(select, selectedId = null, { requireSection = false } = {}) {
+    if (!select) return;
+    const rows = knownSections();
+    const inboxSelected = !requireSection && !selectedId;
+    const placeholder = requireSection
+      ? `<option value="">اختر القسم</option>`
+      : `<option value=""${inboxSelected ? " selected" : ""}>صندوق الوارد</option>`;
+    select.required = requireSection;
+    select.innerHTML =
+      placeholder +
+      rows
+        .map((section) => {
+          const selected = selectedId === section.id ? " selected" : "";
+          const managerName = section.manager?.name ? ` — ${section.manager.name}` : " — بدون مدير";
+          return `<option value="${Portal.escapeHtml(section.id)}"${selected}>${Portal.escapeHtml(section.name)}${Portal.escapeHtml(managerName)}</option>`;
+        })
+        .join("");
+    if (requireSection && selectedId) select.value = selectedId;
+  }
+
+  function isSelfAssignee(id) {
+    return Boolean(id && dashboardUser?.id && String(id) === String(dashboardUser.id));
+  }
+
+  function assigneeOptionText(user) {
+    const role = Portal.roleLabel(user?.role || dashboardUser?.role || "lawyer");
+    if (isSelfAssignee(user?.id)) return `لنفسي — ${role}`;
+    return `${user.name} — ${role}`;
+  }
+
   function fillAssigneeSelectOptions(select, selectedId = null) {
     if (!select) return;
     select.innerHTML = assignees
       .map((u) => {
         const selected = selectedId === u.id ? " selected" : "";
-        return `<option value="${u.id}"${selected}>${Portal.escapeHtml(u.name)} — ${Portal.roleLabel(u.role)}</option>`;
+        return `<option value="${u.id}"${selected}>${Portal.escapeHtml(assigneeOptionText(u))}</option>`;
       })
       .join("");
 
     if (selectedId && ![...select.options].some((option) => option.value === selectedId)) {
-      const name = assigneeNames[selectedId];
+      const name = isSelfAssignee(selectedId) ? "لنفسي" : assigneeNames[selectedId];
       if (name) {
         const option = document.createElement("option");
         option.value = selectedId;
@@ -351,17 +520,29 @@ const PortalDash = (() => {
     fillAssigneeSelectOptions(select);
   }
 
-  function fillTaskAssigneeSelect(select, selectedId = null) {
+  function taskAssigneesForCase(caseId) {
+    if (!isSubsectionLead) return assignees;
+    const caseRow = (dashboardData?.cases || []).find((item) => item.id === caseId);
+    if (!caseRow?.subsection_id) return [];
+    return assignees.filter(
+      (user) =>
+        user.subsection_id === caseRow.subsection_id &&
+        (!user.section_id || user.section_id === caseRow.section_id)
+    );
+  }
+
+  function fillTaskAssigneeSelect(select, selectedId = null, caseId = null) {
     if (!select) return;
-    const selfOption =
-      isAdminUser && dashboardUser?.id
-        ? `<option value="${Portal.escapeHtml(dashboardUser.id)}">لنفسي</option>`
-        : "";
-    const teamOptions = assignees
-      .map(
-        (u) =>
-          `<option value="${u.id}">${Portal.escapeHtml(u.name)} — ${Portal.roleLabel(u.role)}</option>`
-      )
+    const source = isSubsectionLead ? taskAssigneesForCase(caseId || taskCaseSelect?.value) : assignees;
+    const selfId = dashboardUser?.id || "";
+    const selfOption = selfId
+      ? `<option value="${Portal.escapeHtml(selfId)}">${Portal.escapeHtml(
+          assigneeOptionText({ id: selfId, role: dashboardUser.role })
+        )}</option>`
+      : "";
+    const teamOptions = source
+      .filter((u) => u.id !== selfId)
+      .map((u) => `<option value="${u.id}">${Portal.escapeHtml(assigneeOptionText(u))}</option>`)
       .join("");
     select.innerHTML = `<option value="" disabled${selectedId ? "" : " selected"}>اختر المعيّن</option>${selfOption}${teamOptions}`;
 
@@ -369,7 +550,7 @@ const PortalDash = (() => {
     if (!targetId) return;
 
     if (![...select.options].some((option) => option.value === targetId)) {
-      const label = assigneeNames[targetId] || "معيّن سابق";
+      const label = isSelfAssignee(targetId) ? "لنفسي" : assigneeNames[targetId] || "معيّن سابق";
       select.insertAdjacentHTML(
         "beforeend",
         `<option value="${Portal.escapeHtml(targetId)}">${Portal.escapeHtml(label)}</option>`
@@ -378,10 +559,22 @@ const PortalDash = (() => {
     select.value = targetId;
   }
 
+  function syncTaskAssigneeFromCase(caseId) {
+    if ((!isAdminUser && !isSubsectionLead) || !taskAssigneeSelect || !caseId) return;
+    if (isSubsectionLead) {
+      fillTaskAssigneeSelect(taskAssigneeSelect, null, caseId);
+      return;
+    }
+    const caseRow = (dashboardData?.cases || []).find((item) => item.id === caseId);
+    if (!caseRow?.section_id) return;
+    const manager = assignees.find((user) => user.section_id === caseRow.section_id);
+    if (manager) fillTaskAssigneeSelect(taskAssigneeSelect, manager.id);
+  }
+
   function fillTaskAssigneeFilter() {
-    if (!isAdminUser || !taskAssigneeFilter) return;
+    if ((!isAdminUser && !isSectionManager && !isSubsectionLead) || !taskAssigneeFilter) return;
     taskAssigneeFilter.innerHTML =
-      `<option value="">كل المعيّنين</option>` +
+      `<option value="">الكل</option>` +
       assignees
         .map((u) => `<option value="${u.id}">${Portal.escapeHtml(u.name)}</option>`)
         .join("");
@@ -455,8 +648,33 @@ const PortalDash = (() => {
     if (dashboardUser) {
       assigneeNames[dashboardUser.id] = dashboardUser.name;
     }
+    try {
+      if (isAdminUser || isSectionManager) {
+        const sectionData = await Portal.request("/sections");
+        sections = sectionData.sections || [];
+        for (const section of sections) {
+          if (section.manager?.id) assigneeNames[section.manager.id] = section.manager.name;
+          for (const member of section.members || []) {
+            assigneeNames[member.id] = member.name;
+          }
+        }
+      }
+    } catch {
+      sections = [];
+    }
     if (isAdminUser) {
-      fillAssigneeSelect(caseAssigneeSelect);
+      fillSectionSelectOptions(caseSectionSelect);
+      fillSectionSelectOptions(document.getElementById("editCaseSectionSelect"));
+      fillLibrarySectionAccess();
+      fillTaskAssigneeSelect(taskAssigneeSelect);
+      fillTaskAssigneeFilter();
+    }
+    if (isSectionManager) {
+      fillAssigneeSelectOptions(document.getElementById("editCaseAssigneeSelect"));
+      fillTaskAssigneeSelect(taskAssigneeSelect);
+      fillTaskAssigneeFilter();
+    }
+    if (isSubsectionLead) {
       fillTaskAssigneeSelect(taskAssigneeSelect);
       fillTaskAssigneeFilter();
     }
@@ -475,9 +693,16 @@ const PortalDash = (() => {
     return `<div class="portal-detail-row"><span>${label}</span><strong>${value}</strong></div>`;
   }
 
+  function clientDocumentRow(label, doc) {
+    if (!doc?.id || !(doc.filename || doc.url)) {
+      return detailRow(label, "—");
+    }
+    return `<div class="portal-detail-row portal-detail-row--file"><span>${label}</span><strong><ul class="portal-task-attachment-list">${renderTaskAttachmentListItem(doc)}</ul></strong></div>`;
+  }
+
   function taskAssignmentHtml(task) {
     const name =
-      (isAdminUser && task.assigned_to && assigneeNames[task.assigned_to]) ||
+      ((isAdminUser || isSectionManager) && task.assigned_to && assigneeNames[task.assigned_to]) ||
       task.assignee_name ||
       "";
     if (!name) return "";
@@ -577,6 +802,7 @@ const PortalDash = (() => {
 
   async function deleteEntity(type, id) {
     if (!id) return;
+    if (isAdminUser && !isAdminOnly) return;
     const confirmed = await askDeleteConfirm(type);
     if (!confirmed) return;
 
@@ -621,11 +847,20 @@ const PortalDash = (() => {
               <p class="portal-detail-name">${Portal.escapeHtml(client.name)}</p>
             </div>
             <div class="portal-detail-head-actions">
-              ${deleteBtn("delete-client", client.id)}
+              ${isAdminOnly ? deleteBtn("delete-client", client.id) : ""}
               <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
             </div>
           </div>
           ${detailRow("الهاتف", client.phone ? Portal.escapeHtml(client.phone) : "—")}
+          ${detailRow(
+            "البريد الإلكتروني",
+            client.email
+              ? `<a href="mailto:${Portal.escapeHtml(client.email)}" dir="ltr">${Portal.escapeHtml(client.email)}</a>`
+              : "—"
+          )}
+          ${detailRow("العنوان", client.address ? Portal.escapeHtml(client.address) : "—")}
+          ${clientDocumentRow("صورة التوكيل", client.poa_document)}
+          ${clientDocumentRow("صورة البطاقة", client.id_document)}
           <h3 class="portal-detail-subtitle">القضايا المرتبطة</h3>
           ${casesHtml}
           <div id="clientDetailAlert" class="portal-alert portal-alert--error" hidden></div>
@@ -639,10 +874,22 @@ const PortalDash = (() => {
     return Boolean(item?.id && (item.filename || item.url));
   }
 
+  function safeExternalUrl(url) {
+    const value = String(url || "").trim();
+    if (!value) return "";
+    try {
+      const parsed = new URL(value, window.location.origin);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+      return parsed.href;
+    } catch {
+      return "";
+    }
+  }
+
   function attachmentHref(item) {
     const api = typeof Portal.apiRoot === "function" ? Portal.apiRoot() : "/api";
-    if (item?.filename && item?.id) return `${api}/dashboard/attachments/${item.id}`;
-    return item?.url || "";
+    if (item?.filename && item?.id) return `${api}/dashboard/attachments/${encodeURIComponent(item.id)}`;
+    return safeExternalUrl(item?.url);
   }
 
   function attachmentViewHref(item) {
@@ -660,7 +907,28 @@ const PortalDash = (() => {
     if (/\.jpe?g/.test(combined)) return "image/jpeg";
     if (/\.gif/.test(combined)) return "image/gif";
     if (/\.webp/.test(combined)) return "image/webp";
+    if (/\.docx$/.test(combined)) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    if (/\.doc$/.test(combined)) return "application/msword";
+    if (/\.xlsx$/.test(combined)) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    if (/\.xls$/.test(combined)) return "application/vnd.ms-excel";
+    if (/\.txt$/.test(combined)) return "text/plain";
     return mime || "application/octet-stream";
+  }
+
+  function previewFetchCredentials() {
+    return typeof Portal.apiCredentials === "function" ? Portal.apiCredentials() : "same-origin";
+  }
+
+  function isOfficeAttachment(type, ...names) {
+    const mime = String(type || "").toLowerCase();
+    const combined = names.filter(Boolean).join(" ").toLowerCase();
+    return (
+      mime.includes("word") ||
+      mime.includes("msword") ||
+      mime.includes("excel") ||
+      mime.includes("spreadsheet") ||
+      /\.(docx?|xlsx?)$/i.test(combined)
+    );
   }
 
   function revokePreviewObjectUrl() {
@@ -710,12 +978,22 @@ const PortalDash = (() => {
     const guessedType = guessAttachmentMime(mimeType, originalName, filename, label);
 
     try {
-      const res = await fetch(viewUrl, { credentials: "same-origin" });
-      if (!res.ok) throw new Error("تعذر فتح المرفق.");
+      const res = await fetch(viewUrl, { credentials: previewFetchCredentials() });
+      if (!res.ok) {
+        let message = "تعذر فتح المرفق.";
+        try {
+          const data = await res.json();
+          if (data?.error) message = data.error;
+        } catch {
+          /* ignore non-JSON errors */
+        }
+        throw new Error(message);
+      }
 
       const blob = await res.blob();
       const type =
         blob.type && blob.type !== "application/octet-stream" ? blob.type : guessedType;
+      const downloadName = originalName || filename || label || "attachment";
       revokePreviewObjectUrl();
       previewObjectUrl = URL.createObjectURL(new Blob([blob], { type }));
 
@@ -729,8 +1007,19 @@ const PortalDash = (() => {
         return;
       }
 
-      attachmentPreviewDialog.close();
-      window.open(previewObjectUrl, "_blank", "noopener");
+      if (type === "text/plain" || type.startsWith("text/")) {
+        attachmentPreviewBody.innerHTML = `<pre class="portal-preview-text">${Portal.escapeHtml(await blob.text())}</pre>`;
+        return;
+      }
+
+      const downloadHref = Portal.escapeHtml(previewObjectUrl);
+      const officeHint = isOfficeAttachment(type, originalName, filename, label)
+        ? "ملفات Word وExcel لا تُعرض داخل المتصفح."
+        : "هذا النوع من الملفات لا يُعرض داخل المتصفح.";
+      attachmentPreviewBody.innerHTML = `<div class="portal-preview-fallback">
+        <p class="portal-alert">${officeHint} يمكنك تنزيله لفتحه على جهازك.</p>
+        <a class="btn" href="${downloadHref}" download="${Portal.escapeHtml(downloadName)}">تنزيل المرفق</a>
+      </div>`;
     } catch (error) {
       attachmentPreviewBody.innerHTML = `<p class="portal-alert portal-alert--error">${Portal.escapeHtml(error.message)}</p>`;
     }
@@ -803,7 +1092,7 @@ const PortalDash = (() => {
       <div class="portal-attachment-file-wrap">
         <label class="portal-attachment-file-field">
           <span class="portal-attachment-file-btn">اختيار ملف</span>
-          <input type="file" class="portal-attachment-file-input" />
+          <input type="file" class="portal-attachment-file-input" accept="${Portal.UPLOAD_ACCEPT || ".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt"}" />
         </label>
         <span class="portal-attachment-file-name">${displayName ? Portal.escapeHtml(displayName) : "لم يُرفَع ملف بعد"}</span>
       </div>
@@ -823,13 +1112,16 @@ const PortalDash = (() => {
     try {
       const data = await Portal.request(`/dashboard/cases/${caseId}`);
       const c = data.case;
-      const canEdit = isAdminUser || c.assigned_to === dashboardUser?.id;
-      const canDeleteAttachments = isAdminUser;
-      const canEditCaseInfo = isAdminUser && c.status !== "archived";
+      const canEdit = isAdminUser || isSectionManager || c.assigned_to === dashboardUser?.id;
+      const canDeleteAttachments = isAdminOnly;
+      const canManageLibrary = isAdminUser || isSectionManager;
+      const canEditCaseInfo = (isAdminOnly || isSectionManager) && c.status !== "archived";
       const canArchiveCase = isAdminUser && c.status !== "archived";
       const latest = c.latest_task;
       const latestHtml = latest
-        ? `<div class="portal-detail-situation portal-detail-situation--${latest.status === "done" ? "done" : "open"}">
+        ? `<div class="portal-detail-situation portal-detail-situation--${
+            latest.status === "done" ? "done" : latest.status === "missed" ? "missed" : "open"
+          }">
             <strong>الوضع الحالي (آخر مهمة)</strong>
             <p>${Portal.escapeHtml(latest.title)} — ${Portal.statusLabel(latest.status)}</p>
             ${latest.due_at ? `<span class="portal-list-item__meta">مستحق: ${Portal.formatTaskDue(latest.due_at)}</span>` : ""}
@@ -837,25 +1129,29 @@ const PortalDash = (() => {
         : `<p class="portal-detail-empty">لا توجد مهام بعد لهذه القضية.</p>`;
       const attachments = c.attachments || [];
       detailDialogBody.innerHTML = `
-        <div class="portal-detail" data-case-id="${c.id}">
+          <div class="portal-detail" data-case-id="${c.id}" data-section-id="${Portal.escapeHtml(c.section_id || "")}">
           <div class="portal-detail-head">
-            <h2>${Portal.escapeHtml(c.title)}</h2>
+            <h2>${Portal.escapeHtml(c.case_number || c.title)}</h2>
             <div class="portal-detail-head-actions">
               ${canEditCaseInfo ? editBtn("edit-case", c.id) : ""}
               ${canArchiveCase ? archiveBtn("archive-case", c.id) : ""}
               ${!canEdit ? `<button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>` : ""}
             </div>
           </div>
+          ${isStaffInboxCase(c) ? `<div class="portal-detail-cta">${assignSectionBtn(c.id)}</div>` : ""}
           ${detailRow("الموكل", c.client?.name ? Portal.escapeHtml(c.client.name) : "—")}
-          ${detailRow("المحامي المسؤول", c.lawyer?.name ? `${Portal.escapeHtml(c.lawyer.name)} (${Portal.roleLabel(c.lawyer.role)})` : "—")}
+          ${detailRow("الخصم", c.opponent_name ? Portal.escapeHtml(c.opponent_name) : "—")}
+          ${detailRow("القسم", Portal.escapeHtml(caseSectionLabel(c)))}
+          ${c.subsection_name ? detailRow("القسم الفرعي", Portal.escapeHtml(c.subsection_name)) : ""}
+          ${detailRow("المسؤول الحالي", c.lawyer?.name ? `${Portal.escapeHtml(c.lawyer.name)} (${Portal.roleLabel(c.lawyer.role)})` : "—")}
           ${detailRow("الحالة", Portal.statusLabel(c.status))}
           <h3 class="portal-detail-subtitle">الوضع الحالي</h3>
           ${latestHtml}
-          <h3 class="portal-detail-subtitle">ملاحظات القضية</h3>
+          <h3 class="portal-detail-subtitle">مستجدات القضيه</h3>
           ${
             canEdit
-              ? `<textarea id="caseNotesInput" class="portal-detail-notes" rows="4" placeholder="أضف ملاحظات عن القضية...">${Portal.escapeHtml(c.notes || "")}</textarea>`
-              : `<p class="portal-detail-text">${c.notes ? Portal.escapeHtml(c.notes) : "لا توجد ملاحظات."}</p>`
+              ? `<textarea id="caseNotesInput" class="portal-detail-notes" rows="4" placeholder="أضف مستجدات عن القضية...">${Portal.escapeHtml(c.notes || "")}</textarea>`
+              : `<p class="portal-detail-text">${c.notes ? Portal.escapeHtml(c.notes) : "لا توجد مستجدات."}</p>`
           }
           <h3 class="portal-detail-subtitle">مرفقات القضية</h3>
           <div id="caseAttachmentsList" class="portal-attachments">
@@ -868,7 +1164,7 @@ const PortalDash = (() => {
             canEdit
               ? `<div class="portal-detail-actions portal-detail-actions--case">
                   <div class="portal-detail-actions__end">
-                    <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="addAttachmentBtn">إضافة مرفق</button>
+                    ${canManageLibrary ? `<button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="addAttachmentBtn">إضافة مرفق</button>` : ""}
                     <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
                     <button type="button" class="btn" id="saveCaseBtn">حفظ</button>
                   </div>
@@ -889,8 +1185,9 @@ const PortalDash = (() => {
     }
   }
 
-  async function openEditCaseDialog(caseId) {
-    if (!isAdminUser) return;
+  async function openEditCaseDialog(caseId, { assignSection = false } = {}) {
+    if (!isAdminUser && !isSectionManager) return;
+    if (!isAdminOnly && !isSectionManager && !assignSection) return;
     const dialog = document.getElementById("editCaseDialog");
     const form = document.getElementById("editCaseForm");
     if (!dialog || !form) {
@@ -908,19 +1205,124 @@ const PortalDash = (() => {
       }
       syncClientsFromDashboard();
       document.getElementById("editCaseId").value = c.id;
-      document.getElementById("editCaseTitle").value = c.title;
+      form.dataset.sectionId = c.section_id || "";
+      const titleInput = document.getElementById("editCaseTitle");
+      const opponentInput = document.getElementById("editCaseOpponent");
+      const numberInput = document.getElementById("editCaseNumber");
+      const opponentField = document.getElementById("editCaseOpponentField");
+      const numberField = document.getElementById("editCaseNumberField");
+      const titleField = document.getElementById("editCaseTitleField");
+      if (titleInput) titleInput.value = c.title || "";
+      if (opponentInput) opponentInput.value = c.opponent_name || "";
+      if (numberInput) numberInput.value = c.case_number || "";
       fillClientSelectOptions(document.getElementById("editCaseClientSelect"), c.client?.id);
-      fillAssigneeSelectOptions(document.getElementById("editCaseAssigneeSelect"), c.assigned_to);
+      const sectionField = document.getElementById("editCaseSectionField");
+      const lawyerField = document.getElementById("editCaseLawyerField");
+      const clientSelect = document.getElementById("editCaseClientSelect");
       const statusEl = document.getElementById("editCaseStatus");
+      if (isSectionManager && !isAdminUser) {
+        if (sectionField) sectionField.hidden = true;
+        if (lawyerField) lawyerField.hidden = false;
+        fillAssigneeSelectOptions(document.getElementById("editCaseAssigneeSelect"), c.assigned_to);
+        syncSubsectionField(
+          null,
+          document.getElementById("editCaseSubsectionField"),
+          document.getElementById("editCaseSubsectionSelect"),
+          c.subsection_id || "",
+          c.section_id
+        );
+        if (titleField) titleField.hidden = false;
+        if (titleInput) {
+          titleInput.disabled = true;
+          titleInput.required = false;
+        }
+        if (opponentField) opponentField.hidden = true;
+        if (numberField) numberField.hidden = true;
+        if (opponentInput) {
+          opponentInput.required = false;
+          opponentInput.disabled = true;
+        }
+        if (numberInput) {
+          numberInput.required = false;
+          numberInput.disabled = true;
+        }
+        if (clientSelect) clientSelect.disabled = true;
+        if (statusEl) statusEl.disabled = false;
+      } else {
+        const clientField = document.getElementById("editCaseClientField");
+        const statusField = document.getElementById("editCaseStatusField");
+        if (clientField) clientField.hidden = false;
+        if (statusField) statusField.hidden = false;
+        if (sectionField) sectionField.hidden = false;
+        if (lawyerField) lawyerField.hidden = true;
+        fillSectionSelectOptions(document.getElementById("editCaseSectionSelect"), c.section_id);
+        const editSubField = document.getElementById("editCaseSubsectionField");
+        if (editSubField) editSubField.hidden = true;
+        const editSubSelect = document.getElementById("editCaseSubsectionSelect");
+        if (editSubSelect) editSubSelect.required = false;
+        if (titleField) titleField.hidden = true;
+        if (titleInput) {
+          titleInput.disabled = true;
+          titleInput.required = false;
+        }
+        if (opponentField) opponentField.hidden = false;
+        if (numberField) numberField.hidden = false;
+        if (opponentInput) {
+          opponentInput.required = true;
+          opponentInput.disabled = false;
+        }
+        if (numberInput) {
+          numberInput.required = true;
+          numberInput.disabled = false;
+        }
+        if (clientSelect) clientSelect.disabled = false;
+        if (statusEl) statusEl.disabled = false;
+      }
       if (statusEl) statusEl.value = c.status === "finished" ? "finished" : "active";
+
+      const assignSectionOnly = Boolean(assignSection && !isAdminOnly && isStaffInboxCase(c));
+      if (assignSectionOnly) {
+        const clientField = document.getElementById("editCaseClientField");
+        const statusField = document.getElementById("editCaseStatusField");
+        if (clientField) clientField.hidden = true;
+        if (statusField) statusField.hidden = true;
+        if (titleField) titleField.hidden = true;
+        if (opponentField) opponentField.hidden = true;
+        if (numberField) numberField.hidden = true;
+        if (lawyerField) lawyerField.hidden = true;
+        const editSubField = document.getElementById("editCaseSubsectionField");
+        if (editSubField) editSubField.hidden = true;
+        if (sectionField) sectionField.hidden = false;
+        if (clientSelect) {
+          clientSelect.required = false;
+          clientSelect.disabled = true;
+        }
+        if (opponentInput) {
+          opponentInput.required = false;
+          opponentInput.disabled = true;
+        }
+        if (numberInput) {
+          numberInput.required = false;
+          numberInput.disabled = true;
+        }
+        if (statusEl) statusEl.disabled = true;
+        fillSectionSelectOptions(document.getElementById("editCaseSectionSelect"), c.section_id, {
+          requireSection: true,
+        });
+      }
+
+      setEditCaseDialogMode(assignSection && isStaffInboxCase(c));
       dialog.showModal();
+      if (assignSection && isStaffInboxCase(c)) {
+        document.getElementById("editCaseSectionSelect")?.focus();
+      }
     } catch (error) {
       Portal.showToast(error.message, "error");
     }
   }
 
   async function openEditTaskDialog(taskId) {
-    if (!isAdminUser) return;
+    if (!isAdminUser && !isSectionManager && !isSubsectionLead) return;
     const dialog = document.getElementById("editTaskDialog");
     const form = document.getElementById("editTaskForm");
     if (!dialog || !form) {
@@ -932,10 +1334,19 @@ const PortalDash = (() => {
     try {
       const data = await Portal.request(`/dashboard/tasks/${taskId}`);
       const t = data.task;
+      if (isSectionManager && !isAdminUser && t.status !== "open") {
+        Portal.showToast("يمكن إعادة تعيين المهام غير المكتملة فقط.", "error");
+        return;
+      }
       document.getElementById("editTaskId").value = t.id;
       document.getElementById("editTaskCaseTitle").textContent = t.case_title || "—";
       document.getElementById("editTaskTitle").value = t.title;
-      fillTaskAssigneeSelect(document.getElementById("editTaskAssigneeSelect"), t.assigned_to);
+      const assigneeLabel = document.getElementById("editTaskAssigneeLabel");
+      if (assigneeLabel) {
+        assigneeLabel.textContent =
+          (isSectionManager && !isAdminUser) || isSubsectionLead ? "تعيين للمحامي" : "تعيين إلى مدير القسم";
+      }
+      fillTaskAssigneeSelect(document.getElementById("editTaskAssigneeSelect"), t.assigned_to, t.case_id);
       document.getElementById("editTaskDueAt").value = t.due_at ? Portal.formatDateInput(t.due_at) : "";
       document.getElementById("editTaskDueTime").value = Portal.formatTimeInput(t.due_at);
       const selectedIds = (t.attachments || []).filter(isSavedAttachment).map((item) => item.id);
@@ -957,7 +1368,9 @@ const PortalDash = (() => {
     try {
       const data = await Portal.request(`/dashboard/tasks/${taskId}`);
       const t = data.task;
-      const canDeleteTask = isAdminUser || t.assigned_to === dashboardUser?.id;
+      const canDeleteTask = isAdminOnly || (!isAdminUser && t.assigned_to === dashboardUser?.id);
+      const canEditTask = isAdminUser || (isSectionManager && t.status === "open") || (isSubsectionLead && t.status === "open");
+      const canChangeTaskStatus = isAdminUser || isSectionManager || t.assigned_to === dashboardUser?.id;
       const taskAttachments = (t.attachments || []).filter(isSavedAttachment);
       const attachmentsHtml = taskAttachments.length
         ? `<ul class="portal-task-attachment-list">${taskAttachments.map((a) => renderTaskAttachmentListItem(a)).join("")}</ul>`
@@ -967,7 +1380,7 @@ const PortalDash = (() => {
           <div class="portal-detail-head">
             <h2>${Portal.escapeHtml(t.title)}</h2>
             <div class="portal-detail-head-actions">
-              ${isAdminUser ? editBtn("edit-task", t.id) : ""}
+              ${canEditTask ? editBtn("edit-task", t.id) : ""}
               ${canDeleteTask ? deleteBtn("delete-task", t.id) : ""}
               <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
             </div>
@@ -975,13 +1388,22 @@ const PortalDash = (() => {
           ${detailRow("القضية", Portal.escapeHtml(t.case_title || "—"))}
           ${detailRow("معيّنة إلى", taskAssignmentHtml(t) || "—")}
           ${detailRow("الحالة", Portal.statusLabel(t.status))}
+          ${
+            t.incomplete_reason && (t.status === "open" || t.status === "missed")
+              ? detailRow("سبب عدم الاكتمال", Portal.escapeHtml(t.incomplete_reason))
+              : ""
+          }
           ${detailRow("موعد المهمة", t.due_at ? Portal.formatTaskDue(t.due_at) : "—")}
           <h3 class="portal-detail-subtitle">مرفقات المهمة</h3>
           ${attachmentsHtml}
-          <div class="portal-detail-actions portal-detail-actions--status">
+          ${
+            canChangeTaskStatus && t.status !== "missed"
+              ? `<div class="portal-detail-actions portal-detail-actions--status">
             <button type="button" class="portal-status-btn portal-status-btn--done" data-status="done">مكتملة</button>
             <button type="button" class="portal-status-btn portal-status-btn--open" data-status="open">غير مكتملة</button>
-          </div>
+          </div>`
+              : ""
+          }
           <div id="taskDetailAlert" class="portal-alert portal-alert--error" hidden></div>
         </div>`;
       highlightTaskStatus(t.status);
@@ -996,17 +1418,66 @@ const PortalDash = (() => {
     });
   }
 
-  async function updateTaskStatus(taskId, status) {
+  let incompleteReasonTaskId = "";
+  let incompleteReasonOpenDetail = true;
+
+  function setupIncompleteReasonDialog() {
+    const dialog = document.getElementById("incompleteReasonDialog");
+    const form = document.getElementById("incompleteReasonForm");
+    const input = document.getElementById("incompleteReasonInput");
+    const alertEl = document.getElementById("incompleteReasonAlert");
+    const cancelBtn = document.getElementById("incompleteReasonCancel");
+    if (!dialog || !form || dialog.dataset.bound) return;
+    dialog.dataset.bound = "1";
+
+    cancelBtn?.addEventListener("click", () => {
+      incompleteReasonTaskId = "";
+      dialog.close();
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const reason = String(input?.value || "").trim();
+      if (!reason) {
+        Portal.showAlert(alertEl, "السبب مطلوب.");
+        return;
+      }
+      const taskId = incompleteReasonTaskId;
+      incompleteReasonTaskId = "";
+      dialog.close();
+      if (taskId) await updateTaskStatus(taskId, "open", reason, { openDetail: incompleteReasonOpenDetail });
+    });
+  }
+
+  function askIncompleteReason(taskId, { openDetail = true } = {}) {
+    setupIncompleteReasonDialog();
+    const dialog = document.getElementById("incompleteReasonDialog");
+    const form = document.getElementById("incompleteReasonForm");
+    const alertEl = document.getElementById("incompleteReasonAlert");
+    if (!dialog || !form) return;
+    incompleteReasonTaskId = taskId;
+    incompleteReasonOpenDetail = openDetail;
+    Portal.hideAlert(alertEl);
+    form.reset();
+    dialog.showModal();
+  }
+
+  async function updateTaskStatus(taskId, status, incompleteReason = "", { openDetail = true } = {}) {
     const alertEl = document.getElementById("taskDetailAlert");
     Portal.hideAlert(alertEl);
     try {
+      const body = { status };
+      if (status === "open") body.incomplete_reason = incompleteReason;
       await Portal.request(`/dashboard/tasks/${taskId}`, {
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(body),
       });
-      highlightTaskStatus(status);
       dashboardData = await Portal.request("/dashboard/summary");
       renderPage();
+      const openId = detailDialogBody?.querySelector("[data-task-id]")?.dataset.taskId;
+      if (openDetail || (detailDialog?.open && openId === taskId)) {
+        await openTaskDetail(taskId);
+      }
     } catch (error) {
       Portal.showAlert(alertEl, error.message);
     }
@@ -1048,6 +1519,10 @@ const PortalDash = (() => {
 
       if (!pendingFile) {
         throw new Error(`يرجى اختيار ملف للمرفق «${label}».`);
+      }
+
+      if (Portal.isBlockedUploadFile?.(pendingFile)) {
+        throw new Error(Portal.ZIP_REJECT_MESSAGE || "لا يمكن رفع ملفات ZIP.");
       }
 
       if (pendingFile) {
@@ -1129,12 +1604,99 @@ const PortalDash = (() => {
     }
   }
 
+  function askFileAddConfirm(fileName) {
+    const titleEl = confirmDeleteDialog.querySelector("h2");
+    const previousTitle = titleEl?.textContent;
+    const previousOkLabel = confirmDeleteOk.textContent;
+    const previousOkClass = confirmDeleteOk.className;
+
+    if (titleEl) titleEl.textContent = "تأكيد إضافة الملف";
+    confirmDeleteMessage.textContent = `هل أنت متأكد أنك تريد إضافة ${fileName}؟`;
+    confirmDeleteOk.textContent = "إضافة";
+    confirmDeleteOk.className = "btn";
+
+    return new Promise((resolve) => {
+      const keepParentOpen = (event) => event.preventDefault();
+      const onCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+      const onOk = () => {
+        cleanup();
+        resolve(true);
+      };
+      const cleanup = () => {
+        confirmDeleteCancel.removeEventListener("click", onCancel);
+        confirmDeleteOk.removeEventListener("click", onOk);
+        confirmDeleteDialog.removeEventListener("cancel", onCancel);
+        addClientDialog?.removeEventListener("cancel", keepParentOpen);
+        if (titleEl && previousTitle) titleEl.textContent = previousTitle;
+        confirmDeleteOk.textContent = previousOkLabel;
+        confirmDeleteOk.className = previousOkClass;
+        confirmDeleteDialog.close();
+      };
+      confirmDeleteCancel.addEventListener("click", onCancel);
+      confirmDeleteOk.addEventListener("click", onOk);
+      confirmDeleteDialog.addEventListener("cancel", onCancel);
+      addClientDialog?.addEventListener("cancel", keepParentOpen);
+      confirmDeleteDialog.showModal();
+    });
+  }
+
+  function syncClientFilePicker(input) {
+    const wrap = input.closest(".portal-client-file");
+    const nameEl = wrap?.querySelector(".portal-client-file__name");
+    const clearBtn = wrap?.querySelector(".portal-client-file__clear");
+    const file = input.files?.[0];
+    if (nameEl) nameEl.textContent = file?.name || "لم يُختر ملف";
+    wrap?.classList.toggle("has-file", Boolean(file));
+    wrap?.classList.toggle("is-locked", Boolean(file) && !isAdminOnly);
+    if (clearBtn) clearBtn.hidden = !(isAdminOnly && file);
+  }
+
+  function resetClientFileNames() {
+    addClientForm?.querySelectorAll(".portal-client-file__input").forEach((input) => {
+      input.value = "";
+      syncClientFilePicker(input);
+    });
+  }
+
   function setupClientControls() {
+    if (!isAdminUser) return;
     if (addClientBtn) addClientBtn.hidden = false;
+
+    addClientForm?.querySelectorAll(".portal-client-file__input").forEach((input) => {
+      if (input.dataset.bound) return;
+      input.dataset.bound = "1";
+      const wrap = input.closest(".portal-client-file");
+      const clearBtn = wrap?.querySelector(".portal-client-file__clear");
+      input.addEventListener("change", async () => {
+        const file = input.files?.[0];
+        if (!file) {
+          syncClientFilePicker(input);
+          return;
+        }
+        if (!isAdminOnly) {
+          const ok = await askFileAddConfirm(file.name);
+          if (!ok) {
+            input.value = "";
+            syncClientFilePicker(input);
+            return;
+          }
+        }
+        syncClientFilePicker(input);
+      });
+      clearBtn?.addEventListener("click", () => {
+        if (!isAdminOnly) return;
+        input.value = "";
+        syncClientFilePicker(input);
+      });
+    });
 
     addClientBtn?.addEventListener("click", () => {
       Portal.hideAlert(addClientAlert);
       addClientForm.reset();
+      resetClientFileNames();
       addClientDialog.showModal();
     });
 
@@ -1144,16 +1706,246 @@ const PortalDash = (() => {
       event.preventDefault();
       Portal.hideAlert(addClientAlert);
       const fd = new FormData(addClientForm);
+      const submitBtn = addClientForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
       try {
-        await Portal.request("/admin/clients", {
-          method: "POST",
-          body: JSON.stringify({ name: fd.get("name"), phone: fd.get("phone") }),
-        });
+        await Portal.upload("/admin/clients", fd);
         addClientDialog.close();
         await refresh();
       } catch (error) {
         Portal.showAlert(addClientAlert, error.message);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
+    });
+  }
+
+  function sectionDisplayName(id) {
+    const row = knownSections().find((item) => item.id === id);
+    return row?.name || id || "";
+  }
+
+  function fillLibrarySectionAccess() {
+    const field = document.getElementById("librarySectionAccess");
+    if (!field) return;
+    field.hidden = true;
+    field.innerHTML = knownSections()
+      .map(
+        (section) =>
+          `<label class="portal-check"><input type="checkbox" name="section_ids" value="${Portal.escapeHtml(section.id)}" /> <span>${Portal.escapeHtml(section.name)}</span></label>`
+      )
+      .join("");
+  }
+
+  function libraryPickerDialog() {
+    return document.getElementById("libraryPickerDialog");
+  }
+
+  function currentCaseAttachmentIds() {
+    if (!libraryPickerTarget) return [];
+    return [...libraryPickerTarget.querySelectorAll("[data-attachment-id]")].map((row) => row.dataset.attachmentId);
+  }
+
+  function resetLibraryUploadForm(form) {
+    if (!form) return;
+    form.hidden = true;
+    form.reset();
+    const nameEl = document.getElementById("libraryUploadFileName");
+    if (nameEl) nameEl.textContent = "لم يُختر ملف";
+  }
+
+  function setLibraryPickerMode(mode) {
+    const uploading = mode === "upload";
+    const uploadForm = document.getElementById("libraryUploadForm");
+    const scrollEl = document.getElementById("libraryPickerScroll");
+    const footer = document.getElementById("libraryPickerFooter");
+    const addBtn = document.getElementById("libraryAddNewBtn");
+    const title = document.getElementById("libraryPickerTitle");
+    if (uploadForm) uploadForm.hidden = !uploading;
+    if (scrollEl) scrollEl.hidden = uploading;
+    if (footer) footer.hidden = uploading;
+    if (addBtn) addBtn.hidden = uploading;
+    if (title) title.textContent = uploading ? "ملف جديد" : "اختر ملفاً";
+  }
+
+  function attachLibraryItem(item) {
+    if (!libraryPickerTarget || !item?.id) return;
+    if (currentCaseAttachmentIds().includes(item.id)) return;
+    libraryPickerTarget.insertAdjacentHTML("beforeend", savedAttachmentRow(item, true));
+  }
+
+  async function loadLibraryPage({ reset = false } = {}) {
+    if (libraryPickerLoading) return;
+    if (!reset && libraryPickerTotal && libraryPickerOffset >= libraryPickerTotal) return;
+    libraryPickerLoading = true;
+    try {
+      const offset = reset ? 0 : libraryPickerOffset;
+      const data = await Portal.request(
+        `/library-attachments?offset=${encodeURIComponent(offset)}&limit=${LIBRARY_PAGE_SIZE}`
+      );
+      const rows = data.attachments || [];
+      libraryPickerTotal = Number(data.total || 0);
+      if (reset) {
+        libraryPickerItems = rows;
+        libraryPickerOffset = rows.length;
+      } else {
+        const seen = new Set(libraryPickerItems.map((item) => item.id));
+        for (const row of rows) {
+          if (!seen.has(row.id)) libraryPickerItems.push(row);
+        }
+        libraryPickerOffset = libraryPickerItems.length;
+      }
+      const sentinel = document.getElementById("libraryPickerSentinel");
+      if (sentinel) sentinel.hidden = libraryPickerOffset >= libraryPickerTotal;
+    } finally {
+      libraryPickerLoading = false;
+    }
+  }
+
+  function renderLibraryPickerTable() {
+    const body = document.getElementById("libraryPickerBody");
+    if (!body) return;
+    if (!libraryPickerItems.length) {
+      body.innerHTML = `<li class="portal-empty">لا توجد ملفات. اضغط «ملف جديد».</li>`;
+      return;
+    }
+    const onCase = new Set(currentCaseAttachmentIds());
+    body.innerHTML = libraryPickerItems
+      .map((item) => {
+        const added = onCase.has(item.id);
+        return `<li class="portal-list-item${added ? " is-picked" : ""}" data-row-id="${Portal.escapeHtml(item.id)}">
+          <div class="portal-list-item__row">
+            <div class="portal-list-item__content">
+              <strong>${Portal.escapeHtml(item.label || "ملف")}</strong>
+            </div>
+            <span class="portal-link-btn" aria-hidden="true">${added ? "مضاف" : "اختيار"}</span>
+          </div>
+        </li>`;
+      })
+      .join("");
+  }
+
+  async function openLibraryPicker(listEl, sectionId) {
+    const dialog = libraryPickerDialog();
+    const alertEl = document.getElementById("libraryPickerAlert");
+    if (!dialog || !listEl) return;
+    libraryPickerTarget = listEl;
+    Portal.hideAlert(alertEl);
+    resetLibraryUploadForm(document.getElementById("libraryUploadForm"));
+    setLibraryPickerMode("pick");
+    try {
+      await loadLibraryPage({ reset: true });
+      renderLibraryPickerTable();
+      dialog.showModal();
+    } catch (error) {
+      Portal.showAlert(alertEl, error.message || "تعذر تحميل المرفقات.");
+      dialog.showModal();
+    }
+  }
+
+  function setupLibraryPicker() {
+    const dialog = libraryPickerDialog();
+    if (!dialog || dialog.dataset.bound) return;
+    dialog.dataset.bound = "1";
+
+    const uploadForm = document.getElementById("libraryUploadForm");
+    fillLibrarySectionAccess();
+
+    const fileInput = document.getElementById("libraryUploadFile");
+    const fileName = document.getElementById("libraryUploadFileName");
+    fileInput?.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (fileName) fileName.textContent = file?.name || "لم يُختر ملف";
+      const labelInput = uploadForm?.querySelector('input[name="label"]');
+      if (labelInput && !labelInput.value.trim() && file?.name) {
+        labelInput.value = file.name.replace(/\.[^.]+$/, "");
+      }
+    });
+
+    const scrollEl = document.getElementById("libraryPickerScroll");
+    const sentinel = document.getElementById("libraryPickerSentinel");
+    if (scrollEl && sentinel && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        async (entries) => {
+          if (!dialog.open || !entries.some((entry) => entry.isIntersecting)) return;
+          await loadLibraryPage();
+          renderLibraryPickerTable();
+        },
+        { root: scrollEl, rootMargin: "80px" }
+      );
+      observer.observe(sentinel);
+    } else {
+      scrollEl?.addEventListener("scroll", async () => {
+        if (!dialog.open || libraryPickerLoading) return;
+        if (scrollEl.scrollTop + scrollEl.clientHeight < scrollEl.scrollHeight - 80) return;
+        await loadLibraryPage();
+        renderLibraryPickerTable();
+      });
+    }
+
+    document.getElementById("libraryAddNewBtn")?.addEventListener("click", () => {
+      if (!uploadForm) return;
+      uploadForm.reset();
+      if (fileName) fileName.textContent = "لم يُختر ملف";
+      if (isAdminUser) {
+        fillLibrarySectionAccess();
+        const sectionId = caseSectionSelect?.value || libraryPickerTarget?.dataset.sectionId || "";
+        uploadForm.querySelectorAll('input[name="section_ids"]').forEach((input) => {
+          input.checked = !sectionId || input.value === sectionId;
+        });
+      }
+      setLibraryPickerMode("upload");
+    });
+
+    document.getElementById("cancelLibraryUploadBtn")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      resetLibraryUploadForm(uploadForm);
+      setLibraryPickerMode("pick");
+    });
+
+    document.getElementById("cancelLibraryPickerBtn")?.addEventListener("click", () => dialog.close());
+
+    uploadForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const alertEl = document.getElementById("libraryPickerAlert");
+      Portal.hideAlert(alertEl);
+      const fd = new FormData(uploadForm);
+      const label = String(fd.get("label") || "").trim();
+      const file = fd.get("file");
+      if (!label || !file || (file instanceof File && !file.size && !file.name)) {
+        Portal.showAlert(alertEl, "اختر ملفاً.");
+        return;
+      }
+      if (file instanceof File && Portal.isBlockedUploadFile?.(file)) {
+        Portal.showAlert(alertEl, Portal.ZIP_REJECT_MESSAGE || "لا يمكن رفع ملفات ZIP.");
+        return;
+      }
+      const uploadFd = new FormData();
+      uploadFd.append("label", label);
+      uploadFd.append("file", file);
+      if (isAdminUser) {
+        const ids = [...uploadForm.querySelectorAll('input[name="section_ids"]:checked')].map((el) => el.value);
+        uploadFd.append("section_ids", JSON.stringify(ids));
+      }
+      try {
+        const data = await Portal.upload("/library-attachments", uploadFd);
+        if (data.attachment) attachLibraryItem(data.attachment);
+        dialog.close();
+        Portal.showToast("تم رفع الملف.", "success");
+      } catch (error) {
+        Portal.showAlert(alertEl, error.message);
+      }
+    });
+
+    dialog.addEventListener("click", (event) => {
+      if (!event.target.closest("#libraryPickerBody")) return;
+      const row = event.target.closest("[data-row-id]");
+      if (!row) return;
+      const item = libraryPickerItems.find((entry) => entry.id === row.dataset.rowId);
+      if (!item) return;
+      attachLibraryItem(item);
+      dialog.close();
     });
   }
 
@@ -1167,18 +1959,25 @@ const PortalDash = (() => {
       const attachmentsList = document.getElementById("addCaseAttachmentsList");
       if (attachmentsList) attachmentsList.innerHTML = "";
       clients = dashboardData?.clients || [];
-      fillAssigneeSelect(caseAssigneeSelect);
+      fillSectionSelectOptions(caseSectionSelect);
       fillClientSelect();
+      const addSubField = document.getElementById("caseSubsectionField");
+      const addSubSelect = document.getElementById("caseSubsectionSelect");
+      if (addSubField) addSubField.hidden = true;
+      if (addSubSelect) {
+        addSubSelect.required = false;
+        addSubSelect.value = "";
+      }
       addCaseDialog.showModal();
     });
 
-    document.getElementById("cancelCaseBtn")?.addEventListener("click", () => addCaseDialog.close());
+    document.getElementById("cancelCaseBtn")?.addEventListener("click", () => addCaseDialog?.close());
 
     document.getElementById("addCaseAttachmentBtn")?.addEventListener("click", () => {
       const list = document.getElementById("addCaseAttachmentsList");
-      if (!list) return;
-      const index = list.querySelectorAll(".portal-attachment-row").length;
-      list.insertAdjacentHTML("beforeend", draftAttachmentRow({}, index));
+      const sectionId = caseSectionSelect?.value || "";
+      if (list) list.dataset.sectionId = sectionId;
+      openLibraryPicker(list, sectionId);
     });
 
     addCaseForm?.addEventListener("submit", async (event) => {
@@ -1189,6 +1988,7 @@ const PortalDash = (() => {
         Portal.showAlert(addCaseAlert, "أضف موكلاً أولاً.");
         return;
       }
+      const sectionId = String(fd.get("section_id") || "");
 
       const submitBtn = document.getElementById("saveAddCaseBtn");
       const attachmentsRoot = document.getElementById("addCaseAttachmentsList");
@@ -1200,12 +2000,20 @@ const PortalDash = (() => {
       }
 
       try {
+        const opponentName = String(fd.get("opponent_name") || "").trim();
+        const caseNumber = String(fd.get("case_number") || "").trim();
+        if (!opponentName || !caseNumber) {
+          Portal.showAlert(addCaseAlert, "اسم الخصم ورقم القضية مطلوبان.");
+          return;
+        }
         const data = await Portal.request("/admin/cases", {
           method: "POST",
           body: JSON.stringify({
-            title: fd.get("title"),
+            opponent_name: opponentName,
+            case_number: caseNumber,
             client_id: fd.get("client_id"),
-            assigned_to: fd.get("assigned_to"),
+            section_id: sectionId,
+            notes,
           }),
         });
         const caseId = data.case?.id;
@@ -1217,7 +2025,7 @@ const PortalDash = (() => {
           });
         }
         addCaseDialog.close();
-        Portal.showToast("تم إنشاء القضية.", "success");
+        Portal.showToast(data.message || "تم إنشاء القضية.", "success");
         await refresh();
       } catch (error) {
         Portal.showAlert(addCaseAlert, error.message);
@@ -1237,11 +2045,21 @@ const PortalDash = (() => {
       el.textContent = taskScopeMode === "all" ? "كل مهام المكتب" : "مهامي";
       return;
     }
+    if (isSectionManager) {
+      el.textContent = taskScopeMode === "all" ? "مهام القسم" : "مهامي";
+      return;
+    }
+    if (isSubsectionLead) {
+      el.textContent = taskScopeMode === "all" ? "مهام القسم الفرعي" : "مهامي";
+      return;
+    }
     el.textContent = Portal.t("portal.dashboard.tasks", "مهامي");
   }
 
   function setupTaskScopeControls() {
-    if (!isAdminUser || !taskScopeGroup) return;
+    if ((!isAdminUser && !isSectionManager && !isSubsectionLead) || !taskScopeGroup) return;
+    taskScopeGroup.hidden = false;
+    if (taskAssigneeFilterWrap) taskAssigneeFilterWrap.hidden = false;
 
     const setScope = (mode) => {
       taskScopeMode = mode;
@@ -1256,27 +2074,64 @@ const PortalDash = (() => {
     setScope(taskScopeMode);
   }
 
-  function setupTaskControls() {
-    if (addTaskBtn) addTaskBtn.hidden = !isAdminUser;
-    if (taskAssigneeField) {
-      taskAssigneeField.hidden = !isAdminUser;
+  async function openAddTaskDialog(preset = {}) {
+    if (!canCreateTasks || !addTaskDialog || !addTaskForm) return;
+    Portal.hideAlert(addTaskAlert);
+    addTaskForm.reset();
+    const isCalendarEvent = pageType === "calendar";
+    addTaskForm.dataset.dueAt = preset.dueAt || "";
+    const label = document.getElementById("taskAssigneeLabel");
+    if (label) {
+      label.textContent =
+        (isSectionManager && !isAdminUser) || isSubsectionLead ? "تعيين للمحامي" : "تعيين إلى مدير القسم";
     }
-    if (!isAdminUser && taskAssigneeSelect) {
-      taskAssigneeSelect.removeAttribute("required");
+    const hideAssignee = isCalendarEvent || !canAssignTaskToOthers;
+    if (canAssignTaskToOthers && !isCalendarEvent) fillTaskAssigneeSelect(taskAssigneeSelect);
+    if (taskAssigneeField) taskAssigneeField.hidden = hideAssignee;
+    if (taskAssigneeSelect) {
+      taskAssigneeSelect.disabled = hideAssignee;
+      if (!hideAssignee) taskAssigneeSelect.setAttribute("required", "");
+      else taskAssigneeSelect.removeAttribute("required");
+    }
+    const dueDateField = document.getElementById("taskDueDateField");
+    const dueTimeField = document.getElementById("taskDueTimeField");
+    if (dueDateField) dueDateField.hidden = isCalendarEvent;
+    if (dueTimeField) dueTimeField.hidden = false;
+    fillCaseSelect();
+    await renderTaskCaseAttachmentPicks(taskCaseSelect?.value);
+    if (!isCalendarEvent) syncTaskAssigneeFromCase(taskCaseSelect?.value);
+    const dueInput = addTaskForm.querySelector('[name="due_at"]');
+    if (dueInput && preset.dueAt) dueInput.value = preset.dueAt;
+    const heading = addTaskForm.querySelector("h2");
+    if (heading) heading.textContent = isCalendarEvent ? "إضافة حدث" : "إضافة مهمة";
+    const submitBtn = addTaskForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = isCalendarEvent ? "إضافة الحدث" : "إنشاء المهمة";
+    addTaskDialog.showModal();
+  }
+
+  function setupTaskControls() {
+    if (addTaskBtn) addTaskBtn.hidden = !canCreateTasks;
+    if (taskAssigneeField) {
+      taskAssigneeField.hidden = !canAssignTaskToOthers;
+    }
+    if (taskAssigneeSelect) {
+      taskAssigneeSelect.disabled = !canAssignTaskToOthers;
+      if (canAssignTaskToOthers) taskAssigneeSelect.setAttribute("required", "");
+      else taskAssigneeSelect.removeAttribute("required");
     }
 
     addTaskBtn?.addEventListener("click", async () => {
-      if (!isAdminUser) return;
-      Portal.hideAlert(addTaskAlert);
-      addTaskForm.reset();
-      if (isAdminUser) fillTaskAssigneeSelect(taskAssigneeSelect);
-      fillCaseSelect();
-      await renderTaskCaseAttachmentPicks(taskCaseSelect?.value);
-      addTaskDialog.showModal();
+      if (!canCreateTasks) return;
+      const dueAt =
+        pageType === "calendar" && typeof window.CalendarPage?.getSelectedDate === "function"
+          ? window.CalendarPage.getSelectedDate()
+          : "";
+      await openAddTaskDialog({ dueAt });
     });
 
     taskCaseSelect?.addEventListener("change", () => {
       renderTaskCaseAttachmentPicks(taskCaseSelect.value);
+      syncTaskAssigneeFromCase(taskCaseSelect.value);
     });
 
     document.getElementById("cancelTaskBtn")?.addEventListener("click", () => addTaskDialog?.close());
@@ -1289,28 +2144,50 @@ const PortalDash = (() => {
         Portal.showAlert(addTaskAlert, "أنشئ قضية أولاً قبل إضافة مهمة.");
         return;
       }
+      const isCalendarEvent = pageType === "calendar";
+      const title = String(fd.get("title") || "").trim();
+      if (!title) {
+        Portal.showAlert(addTaskAlert, "عنوان المهمة مطلوب.");
+        return;
+      }
+      const dueDate = isCalendarEvent
+        ? addTaskForm.dataset.dueAt ||
+          (typeof window.CalendarPage?.getSelectedDate === "function" ? window.CalendarPage.getSelectedDate() : "")
+        : fd.get("due_at");
+      const dueTime = fd.get("due_time");
       const body = {
         case_id: fd.get("case_id"),
-        title: fd.get("title"),
-        due_at: Portal.buildDueAt(fd.get("due_at"), fd.get("due_time")),
+        title,
+        due_at: Portal.buildDueAt(dueDate, dueTime),
         attachments: [...addTaskForm.querySelectorAll('input[name="task_attachment_ids"]:checked')].map(
           (el) => el.value
         ),
+        assigned_to: dashboardUser?.id || "",
       };
-      if (fd.get("due_time") && !body.due_at) {
+      if (canAssignTaskToOthers && !isCalendarEvent && fd.get("assigned_to")) {
+        body.assigned_to = fd.get("assigned_to");
+      }
+      if (!body.assigned_to) {
+        Portal.showAlert(addTaskAlert, "تعذر تحديد الحساب المعيّن. حدّث الصفحة وحاول مرة أخرى.");
+        return;
+      }
+      if (dueTime && !body.due_at) {
         Portal.showAlert(addTaskAlert, "موعد المهمة غير صالح. تحقق من التاريخ والوقت.");
         return;
       }
-      if (isAdminUser) {
-        body.assigned_to = fd.get("assigned_to");
-      }
+      const submitBtn = addTaskForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
       try {
         const endpoint = isAdminUser ? "/admin/tasks" : "/dashboard/tasks";
         await Portal.request(endpoint, { method: "POST", body: JSON.stringify(body) });
         addTaskDialog.close();
+        Portal.showToast(isCalendarEvent ? "تم إضافة الحدث." : "تم إنشاء المهمة.", "success");
         await refresh();
       } catch (error) {
         Portal.showAlert(addTaskAlert, error.message);
+        Portal.showToast(error.message, "error");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
   }
@@ -1318,11 +2195,12 @@ const PortalDash = (() => {
   let editCaseControlsBound = false;
 
   function setupEditCaseControls() {
-    if (!isAdminUser || editCaseControlsBound) return;
+    if ((!isAdminUser && !isSectionManager) || editCaseControlsBound) return;
     editCaseControlsBound = true;
 
     document.body.addEventListener("click", (event) => {
       if (event.target.closest("#cancelEditCaseBtn")) {
+        setEditCaseDialogMode(false);
         document.getElementById("editCaseDialog")?.close();
       }
     });
@@ -1339,29 +2217,51 @@ const PortalDash = (() => {
 
       const fd = new FormData(form);
       const caseId = fd.get("case_id");
-      const title = String(fd.get("title") || "").trim();
+      const opponentName = String(fd.get("opponent_name") || "").trim();
+      const caseNumber = String(fd.get("case_number") || "").trim();
       const clientId = String(fd.get("client_id") || "");
       const assignedTo = String(fd.get("assigned_to") || "");
+      const sectionId = String(fd.get("section_id") || "");
+      const subsectionId = String(fd.get("subsection_id") || "");
       const status = String(fd.get("status") || "active");
+      const caseSectionId = form.dataset.sectionId || sectionId;
       if (!caseId) return;
-      if (!title) {
-        Portal.showAlert(alertEl, "عنوان القضية مطلوب.");
+      const assignSectionOnly = form.dataset.assignSection === "1" && !isAdminOnly;
+      const validSectionIds = new Set(knownSections().map((item) => item.id));
+      if (assignSectionOnly) {
+        if (!validSectionIds.has(sectionId)) {
+          Portal.showAlert(alertEl, "يجب اختيار القسم.");
+          return;
+        }
+      } else if (isAdminUser && (!opponentName || !caseNumber)) {
+        Portal.showAlert(alertEl, "اسم الخصم ورقم القضية مطلوبان.");
         return;
       }
-      if (!clientId) {
+      if (!assignSectionOnly && isAdminUser && !clientId) {
         Portal.showAlert(alertEl, "يجب اختيار موكل.");
         return;
       }
-      if (!assignedTo) {
-        Portal.showAlert(alertEl, "يجب اختيار محامٍ أو مساعد.");
+      if (!assignSectionOnly && isSectionManager && !isAdminUser && subsectionsForSection(caseSectionId).length && !subsectionId) {
+        Portal.showAlert(alertEl, "يجب اختيار القسم الفرعي.");
         return;
       }
 
-      const body = { title, client_id: clientId, assigned_to: assignedTo, status };
+      const selectedAssignee = assignees.find((user) => user.id === assignedTo);
+      const assignLawyer = isSectionManager && !isAdminUser && selectedAssignee?.role === "lawyer";
+      const body = assignSectionOnly
+        ? { section_id: sectionId }
+        : isSectionManager && !isAdminUser
+          ? {
+              status,
+              ...(assignLawyer ? { assigned_to: assignedTo } : {}),
+              ...(subsectionsForSection(caseSectionId).length ? { subsection_id: subsectionId } : {}),
+            }
+          : { opponent_name: opponentName, case_number: caseNumber, client_id: clientId, section_id: sectionId, status };
 
       if (submitBtn) submitBtn.disabled = true;
       try {
         await Portal.request(`/dashboard/cases/${caseId}`, { method: "PATCH", body: JSON.stringify(body) });
+        setEditCaseDialogMode(false);
         dialog?.close();
         Portal.showToast("تم الحفظ.", "success");
         await refresh();
@@ -1395,7 +2295,7 @@ const PortalDash = (() => {
       return;
     }
     if (!assignedTo) {
-      Portal.showAlert(alertEl, "يجب اختيار محامٍ أو مساعد.");
+      Portal.showAlert(alertEl, isSubsectionLead || (isSectionManager && !isAdminUser) ? "يجب اختيار محامٍ من القسم." : "يجب اختيار مدير القسم.");
       return;
     }
 
@@ -1422,7 +2322,7 @@ const PortalDash = (() => {
   }
 
   function setupEditTaskControls() {
-    if (!isAdminUser || editTaskControlsBound) return;
+    if ((!isAdminUser && !isSectionManager && !isSubsectionLead) || editTaskControlsBound) return;
     editTaskControlsBound = true;
 
     document.body.addEventListener("click", (event) => {
@@ -1533,8 +2433,9 @@ const PortalDash = (() => {
 
       if (event.target.closest("#addAttachmentBtn")) {
         const list = document.getElementById("caseAttachmentsList");
-        const index = list.querySelectorAll(".portal-attachment-row").length;
-        list.insertAdjacentHTML("beforeend", draftAttachmentRow({}, index));
+        const sectionId = detailDialogBody.querySelector("[data-case-id]")?.dataset.sectionId || "";
+        if (list) list.dataset.sectionId = sectionId;
+        openLibraryPicker(list, sectionId);
         return;
       }
 
@@ -1542,6 +2443,7 @@ const PortalDash = (() => {
       if (attachmentRemove) {
         const row = attachmentRemove.closest(".portal-attachment-row");
         const isSaved = row?.classList.contains("portal-attachment-row--saved");
+        if (isSaved && !isAdminOnly) return;
         row?.remove();
         if (isSaved) {
           const caseId = detailDialogBody.querySelector("[data-case-id]")?.dataset.caseId;
@@ -1553,7 +2455,9 @@ const PortalDash = (() => {
       const statusBtn = event.target.closest(".portal-status-btn");
       if (statusBtn) {
         const taskId = detailDialogBody.querySelector("[data-task-id]")?.dataset.taskId;
-        if (taskId) updateTaskStatus(taskId, statusBtn.dataset.status);
+        if (!taskId) return;
+        if (statusBtn.dataset.status === "open") askIncompleteReason(taskId);
+        else updateTaskStatus(taskId, statusBtn.dataset.status);
         return;
       }
 
@@ -1583,11 +2487,12 @@ const PortalDash = (() => {
         return;
       }
 
-      if (action === "edit-case") {
+      if (action === "edit-case" || action === "assign-case-section") {
         event.preventDefault();
         event.stopPropagation();
+        if (action === "edit-case" && !isAdminOnly && !isSectionManager) return;
         detailDialog.close();
-        await openEditCaseDialog(id);
+        await openEditCaseDialog(id, { assignSection: action === "assign-case-section" });
         return;
       }
 
@@ -1602,8 +2507,20 @@ const PortalDash = (() => {
       if (action === "delete-client" || action === "delete-task") {
         event.preventDefault();
         event.stopPropagation();
+        if (isAdminUser && !isAdminOnly) return;
         const type = action.replace("delete-", "");
         await deleteEntity(type, id);
+        return;
+      }
+
+      if (action === "task-done") {
+        event.preventDefault();
+        await updateTaskStatus(id, "done", "", { openDetail: false });
+        return;
+      }
+      if (action === "task-incomplete") {
+        event.preventDefault();
+        askIncompleteReason(id, { openDetail: false });
         return;
       }
 
@@ -1630,9 +2547,37 @@ const PortalDash = (() => {
   function updateCasesPanelTitle() {
     const el = document.getElementById("casesPanelTitle");
     if (!el) return;
+    if (isAdminUser && caseInboxMode === "inbox") {
+      el.textContent = "صندوق الوارد";
+      return;
+    }
     el.textContent = isAdminUser
       ? Portal.t("portal.dashboard.officeCases", "قضايا المكتب")
-      : Portal.t("portal.dashboard.cases", "قضاياي");
+      : isSectionManager
+        ? "قضايا القسم"
+        : Portal.t("portal.dashboard.cases", "قضاياي");
+  }
+
+  function setupCaseInboxFilter() {
+    const group = document.getElementById("casesInboxGroup");
+    if (!isAdminUser || pageType !== "cases" || !group) return;
+    group.hidden = false;
+    const setMode = (mode) => {
+      caseInboxMode = mode === "inbox" ? "inbox" : "all";
+      group.querySelectorAll("[data-inbox]").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.inbox === caseInboxMode);
+      });
+      const url = new URL(window.location.href);
+      if (caseInboxMode === "inbox") url.searchParams.set("inbox", "1");
+      else url.searchParams.delete("inbox");
+      history.replaceState({}, "", url.pathname + url.search);
+      updateCasesPanelTitle();
+      renderPage();
+    };
+    group.querySelectorAll("[data-inbox]").forEach((btn) => {
+      btn.addEventListener("click", () => setMode(btn.dataset.inbox));
+    });
+    setMode(caseInboxMode);
   }
 
   function renderHome() {
@@ -1642,7 +2587,7 @@ const PortalDash = (() => {
 
     const homeCasesTitle = document.getElementById("homeCasesTitle");
     if (homeCasesTitle) {
-      homeCasesTitle.textContent = isAdminUser ? "أحدث القضايا" : "أحدث قضاياي";
+      homeCasesTitle.textContent = isAdminUser ? "أحدث القضايا" : isSectionManager ? "أحدث قضايا القسم" : "أحدث قضاياي";
     }
 
     const homeClientsPanel = document.getElementById("homeClientsPanel");
@@ -1653,6 +2598,50 @@ const PortalDash = (() => {
 
     renderCases(dashboardData.cases.slice(0, PREVIEW_LIMIT), document.getElementById("homeCasesList"));
     renderTasks(dashboardData.tasks.slice(0, PREVIEW_LIMIT), document.getElementById("homeTasksList"));
+
+    const inboxPanel = document.getElementById("homeInboxPanel");
+    const inboxText = document.getElementById("homeInboxText");
+    const inboxLink = document.getElementById("homeInboxLink");
+    const inboxTitle = inboxPanel?.querySelector("h2");
+    const inbox = dashboardData.inbox;
+    if (inboxPanel) {
+      const showAdminInbox = Boolean(isAdminUser && inbox?.kind === "admin");
+      const showSectionInbox = Boolean(isSectionManager && inbox?.section_id);
+      inboxPanel.hidden = !showAdminInbox && !showSectionInbox;
+      if (showAdminInbox) {
+        const inboxCases = (dashboardData.cases || []).filter((item) => isStaffInboxCase(item));
+        const count = Number(inbox.count || inboxCases.length || 0);
+        if (inboxTitle) inboxTitle.textContent = "صندوق الوارد";
+        if (inboxText) {
+          inboxText.textContent = count
+            ? `${Portal.formatNumber(count)} قضية بانتظار التوزيع.`
+            : "لا قضايا جديدة.";
+        }
+        if (inboxLink) inboxLink.href = "cases.html?inbox=1";
+        const inboxList = document.getElementById("homeInboxList");
+        if (inboxList) {
+          inboxList.hidden = !inboxCases.length;
+          if (inboxCases.length) renderCases(inboxCases.slice(0, PREVIEW_LIMIT), inboxList);
+          else inboxList.innerHTML = "";
+        }
+      } else if (showSectionInbox) {
+        const inboxList = document.getElementById("homeInboxList");
+        if (inboxList) {
+          inboxList.hidden = true;
+          inboxList.innerHTML = "";
+        }
+        const count = Number(inbox.count || 0);
+        if (inboxTitle) inboxTitle.textContent = "صندوق القضايا الجديدة";
+        if (inboxText) {
+          inboxText.textContent = count
+            ? `${Portal.formatNumber(count)} قضية جديدة.`
+            : "لا قضايا جديدة.";
+        }
+        if (inboxLink) {
+          inboxLink.href = `/portal/section?id=${encodeURIComponent(inbox.section_id)}&ss=uncategorized`;
+        }
+      }
+    }
   }
 
   function renderPage() {
@@ -1691,6 +2680,11 @@ const PortalDash = (() => {
     if (pageType === "tasks") {
       updateTasksPanelTitle();
       renderTasks(dashboardData.tasks);
+      return;
+    }
+
+    if (pageType === "calendar") {
+      window.CalendarPage?.sync?.(dashboardData);
     }
   }
 
@@ -1720,11 +2714,13 @@ const PortalDash = (() => {
     editCaseAlert = document.getElementById("editCaseAlert");
     addClientAlert = document.getElementById("addClientAlert");
     caseAssigneeSelect = document.getElementById("caseAssigneeSelect");
+    caseSectionSelect = document.getElementById("caseSectionSelect");
     caseClientSelect = document.getElementById("caseClientSelect");
     taskAssigneeSelect = document.getElementById("taskAssigneeSelect");
     editTaskAssigneeSelect = document.getElementById("editTaskAssigneeSelect");
     taskAssigneeField = document.getElementById("taskAssigneeField");
     taskCaseSelect = document.getElementById("taskCaseSelect");
+    setupIncompleteReasonDialog();
   }
 
   async function ensureDialogs() {
@@ -1733,7 +2729,7 @@ const PortalDash = (() => {
       return;
     }
     try {
-      const res = await fetch("dialogs.fragment.html");
+      const res = await fetch("dialogs.fragment.html?v=30");
       if (res.ok) {
         document.body.insertAdjacentHTML("beforeend", await res.text());
         bindDialogRefs();
@@ -1747,7 +2743,7 @@ const PortalDash = (() => {
     if (window.PortalPush) return;
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "portal-push.js";
+      script.src = "portal-push.js?v=2";
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load push module"));
       document.head.appendChild(script);
@@ -1787,6 +2783,11 @@ const PortalDash = (() => {
 
     dashboardUser = user;
     isAdminUser = user.role === "admin" || user.role === "assistant";
+    isAdminOnly = user.role === "admin";
+    isSectionManager = user.role === "section_manager";
+    isSubsectionLead = user.role === "lawyer" && Array.isArray(user.led_subsections) && user.led_subsections.length > 0;
+    canCreateTasks = isAdminUser || isSectionManager || user.role === "lawyer";
+    canAssignTaskToOthers = isSectionManager || isSubsectionLead;
 
     if (pageType === "clients" && !isAdminUser) {
       window.location.href = "home.html";
@@ -1800,20 +2801,31 @@ const PortalDash = (() => {
 
     PortalNav.init(user);
 
+    if (isAdminUser || isSectionManager) setupLibraryPicker();
+
     if (isAdminUser) {
       if (adminNavLinks) adminNavLinks.hidden = false;
       await loadAssignees();
 
       if (pageType === "clients") setupClientControls();
-      if (pageType === "cases") setupCaseControls();
+      if (pageType === "cases") {
+        setupCaseControls();
+        setupCaseInboxFilter();
+      }
+    } else if (isSectionManager) {
+      await loadAssignees();
+    } else if (isSubsectionLead) {
+      await loadAssignees();
     } else if (user.role === "lawyer") {
       assigneeNames = { [user.id]: user.name };
     }
 
-    if (pageType === "tasks") setupTaskControls();
-    if (pageType === "tasks" && isAdminUser) setupTaskScopeControls();
-    if (isAdminUser) {
+    if (pageType === "tasks" || pageType === "calendar") setupTaskControls();
+    if (pageType === "tasks" && (isAdminUser || isSectionManager || isSubsectionLead)) setupTaskScopeControls();
+    if (isAdminUser || isSectionManager) {
       setupEditCaseControls();
+    }
+    if (isAdminUser || isSectionManager || isSubsectionLead) {
       setupEditTaskControls();
     }
     if (pageType === "tasks") setupSearchControls();
@@ -1837,9 +2849,16 @@ const PortalDash = (() => {
     } catch {
       /* push optional */
     }
+
+    return dashboardUser;
   }
 
   window.addEventListener("gz:languagechange", renderPage);
 
-  return { boot, refresh, renderPage };
+  return {
+    boot,
+    refresh,
+    renderPage,
+    getState: () => ({ user: dashboardUser, data: dashboardData }),
+  };
 })();

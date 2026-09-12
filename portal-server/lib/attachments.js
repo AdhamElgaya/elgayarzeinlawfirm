@@ -1,5 +1,6 @@
 import path from "path";
 import db from "../db.js";
+import { isOfficeStaff, isSectionManager, getManagedSection } from "./sections.js";
 import { deleteFile as deleteStorageFile } from "./storage.js";
 
 export { ensureUploadDir, objectKey as storedFilename, getLocalFilePath as getFilePath, UPLOAD_DIR } from "./storage.js";
@@ -92,6 +93,19 @@ export function mergeAttachment(incoming, existing) {
   return normalizeAttachment(next);
 }
 
+export function safeAttachmentUrl(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+    if (!parsed.hostname) return "";
+    return parsed.href;
+  } catch {
+    return "";
+  }
+}
+
 export function normalizeAttachment(item) {
   const normalized = {
     id: String(item?.id || "").trim(),
@@ -105,13 +119,14 @@ export function normalizeAttachment(item) {
   if (item?.originalName) normalized.originalName = String(item.originalName).trim();
   if (item?.mimeType) normalized.mimeType = String(item.mimeType).trim();
   if (item?.size != null && !Number.isNaN(Number(item.size))) normalized.size = Number(item.size);
-  if (item?.url) normalized.url = String(item.url).trim();
+  const safeUrl = safeAttachmentUrl(item?.url);
+  if (safeUrl) normalized.url = safeUrl;
 
   return normalized;
 }
 
 export function isValidAttachment(item) {
-  return Boolean(item.label && (item.filename || item.url));
+  return Boolean(item.label && (item.filename || safeAttachmentUrl(item.url)));
 }
 
 export function pickCaseAttachments(caseRow, requested = []) {
@@ -127,6 +142,14 @@ export function pickCaseAttachments(caseRow, requested = []) {
 
 export async function deleteOrphanedFiles(previous = [], next = []) {
   const keepFilenames = new Set(next.map((item) => item.filename).filter(Boolean));
+  const libraryRows = await db
+    .prepare(
+      `SELECT id, label, filename, original_name, mime_type, size, section_ids, created_by, created_at FROM library_attachments ORDER BY created_at DESC`
+    )
+    .all();
+  for (const row of libraryRows || []) {
+    if (row.filename) keepFilenames.add(row.filename);
+  }
   for (const item of previous) {
     if (item.filename && !keepFilenames.has(item.filename)) {
       await deleteStoredFile(item.filename);
@@ -165,9 +188,58 @@ export async function findAttachmentRecord(attachmentId) {
     if (caseRow) return { caseRow, attachment, taskRow };
   }
 
+  const library = await db
+    .prepare(
+      `SELECT id, label, filename, original_name, mime_type, size, section_ids, created_by, created_at FROM library_attachments WHERE id = ?`
+    )
+    .get(attachmentId);
+  if (library?.filename) {
+    return {
+      caseRow: { id: library.id, title: library.label, attachments: [] },
+      attachment: {
+        id: library.id,
+        label: library.label,
+        filename: library.filename,
+        originalName: library.original_name,
+        mimeType: library.mime_type,
+        size: library.size,
+      },
+      library: true,
+    };
+  }
+
+  const clients = await db
+    .prepare(
+      `SELECT id, name, poa_document, id_document FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`
+    )
+    .all();
+  for (const client of clients || []) {
+    for (const key of ["poa_document", "id_document"]) {
+      let raw = client[key];
+      if (typeof raw === "string") {
+        try {
+          raw = JSON.parse(raw);
+        } catch {
+          raw = null;
+        }
+      }
+      const attachment = raw ? normalizeAttachment(raw) : null;
+      if (attachment?.id === attachmentId && attachment.filename) {
+        return { client, attachment };
+      }
+    }
+  }
+
   return null;
 }
 
-export function canEditCase(user, caseRow) {
-  return user.role === "admin" || caseRow.assigned_to === user.id;
+export async function canEditCase(user, caseRow) {
+  if (!user || !caseRow) return false;
+  if (isOfficeStaff(user)) return true;
+  if (caseRow.assigned_to === user.id) return true;
+  if (isSectionManager(user)) {
+    const managed = await getManagedSection(user.id);
+    return Boolean(managed && caseRow.section_id === managed.id);
+  }
+  return false;
 }

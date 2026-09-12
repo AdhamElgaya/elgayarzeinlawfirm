@@ -6,21 +6,49 @@
     <script src="../i18n-boot.js"></script>
     <title>مكتب الجيار و زين | إدارة البوابة</title>
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="الجيار و زين" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="../assets/sign_trans.png?v=2" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" /></noscript>
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css" />
+    <link rel="stylesheet" href="portal.css?v=72" />
   </head>
-  <body class="portal-page" data-page="portal-admin">
+  <body class="portal-page" data-page="portal-admin" data-portal-page="admin">
     <header class="portal-header">
-      <div class="container">
+      <div class="container portal-header__bar">
         <a class="portal-brand" href="home.html">
-          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
-          <span class="portal-brand-tag" data-i18n="portal.brand.admin">الحسابات</span>
+          <img class="portal-brand-logo" src="../assets/gztholothfont.png" alt="مكتب الجيار و زين" />
         </a>
+        <div class="portal-header__end">
+          <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
+            <svg class="portal-nav-toggle__open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+            <svg class="portal-nav-toggle__close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+          <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
+            <div class="portal-header-nav__links" id="adminNavLinks">
+              <a class="portal-nav-link" href="home.html" data-nav="home">الرئيسيه</a>
+              <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
+              <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
+              <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
+              <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="calendar.html" data-nav="calendar">الأجنده</a>
+              <a class="portal-nav-link" href="attachments.html" data-nav="attachments" data-attachments-nav hidden>المرفقات</a>
+              <a class="portal-nav-link" href="sections.html" data-nav="sections" data-sections-nav hidden>الأقسام</a>
+              <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
+              <a class="portal-nav-link" href="profile.html" data-nav="profile" id="profileNavLink" hidden>الملف الشخصي</a>
+            </div>
+          </nav>
+          <button id="logoutBtn" class="portal-btn-sm portal-header-cta" type="button" data-i18n="portal.logout">تسجيل الخروج</button>
+        </div>
       </div>
+      <div class="portal-nav-backdrop" id="portalNavBackdrop" hidden></div>
     </header>
     <main class="portal-main">
       <div class="container portal-dashboard">
@@ -32,82 +60,127 @@
               </svg>
               <span data-i18n="portal.back">الرجوع</span>
             </a>
-            <h1>إدارة المستخدمين</h1>
-            <p>أنشئ حساباً للمحامي أو المساعد، أو عدّل أي حساب من زر «تعديل» لتغيير الاسم أو اسم المستخدم. لتغيير كلمة المرور الخاصة بك، استخدم القسم أدناه.</p>
+            <h1>الحسابات</h1>
           </div>
         </div>
 
-        <div class="portal-card portal-card--wide">
-          <h2 class="portal-section-title">إنشاء حساب جديد</h2>
-          <div id="adminAlert" class="portal-alert portal-alert--error" hidden></div>
-          <div id="adminSuccess" class="portal-alert portal-alert--success" hidden></div>
-          <form id="createUserForm" class="portal-form">
-            <label>
-              <span>الاسم</span>
-              <input type="text" name="name" required />
-            </label>
-            <label>
-              <span>اسم المستخدم</span>
-              <input
-                type="text"
-                name="username"
-                placeholder="أحمد محمد"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck="false"
-                required
-              />
-              <span class="portal-field-hint">الاسم الأول والأخير بالعربية، بمسافة واحدة فقط.</span>
-            </label>
-            <label>
-              <span>الدور</span>
-              <select name="role">
-                <option value="lawyer">محامي</option>
-                <option value="assistant">مساعد</option>
-                <option value="admin">مدير</option>
-              </select>
-            </label>
-            <label>
-              <span>كلمة المرور</span>
-              <input type="password" name="password" autocomplete="new-password" minlength="8" required />
-            </label>
-            <label>
-              <span>تأكيد كلمة المرور</span>
-              <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
-            </label>
-            <div class="portal-actions">
-              <button class="btn" type="submit">إنشاء الحساب</button>
-            </div>
-          </form>
-        </div>
+        <div id="adminAlert" class="portal-alert portal-alert--error" hidden></div>
 
         <section class="portal-panel portal-panel--users">
-          <h2 class="portal-section-title">المستخدمون</h2>
+          <div class="portal-panel-head">
+            <h2 class="portal-section-title">المستخدمون</h2>
+            <button type="button" class="portal-add-btn" id="addUserBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              حساب جديد
+            </button>
+          </div>
           <ul class="portal-list" id="usersList"></ul>
         </section>
 
-        <div class="portal-card portal-card--wide">
-          <h2 class="portal-section-title">تغيير كلمة المرور الخاصة بك</h2>
-          <div id="changePasswordAlert" class="portal-alert portal-alert--error" hidden></div>
-          <div id="changePasswordSuccess" class="portal-alert portal-alert--success" hidden></div>
-          <form id="changePasswordForm" class="portal-form">
-            <label>
-              <span>كلمة المرور الحالية</span>
-              <input type="password" name="currentPassword" autocomplete="current-password" required />
-            </label>
-            <label>
-              <span>كلمة المرور الجديدة</span>
-              <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
-            </label>
-            <label>
-              <span>تأكيد كلمة المرور الجديدة</span>
-              <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
-            </label>
-            <button type="submit" class="btn">تغيير كلمة المرور</button>
-          </form>
-        </div>
+        <section class="portal-panel portal-account-panel">
+          <div class="portal-panel-head">
+            <h2 class="portal-section-title">حسابك</h2>
+          </div>
+          <div class="portal-account-layout">
+            <div class="portal-account-col">
+              <div class="portal-account-facts">
+                <div class="portal-detail-row">
+                  <span>الاسم</span>
+                  <strong id="profileName">—</strong>
+                </div>
+                <div class="portal-detail-row">
+                  <span>اسم المستخدم</span>
+                  <strong id="profileUsername">—</strong>
+                </div>
+                <div class="portal-detail-row">
+                  <span>الدور</span>
+                  <strong id="profileRole">—</strong>
+                </div>
+              </div>
+              <div class="portal-account-theme">
+                <h3 class="portal-account-subtitle">المظهر</h3>
+                <div class="portal-mode-toggle" data-theme-toggle role="group" aria-label="المظهر">
+                  <button type="button" class="portal-mode-toggle-btn" data-theme="dark" aria-pressed="true">داكن</button>
+                  <button type="button" class="portal-mode-toggle-btn" data-theme="light" aria-pressed="false">فاتح</button>
+                </div>
+              </div>
+            </div>
+            <div class="portal-account-col">
+              <h3 class="portal-account-subtitle">تغيير كلمة المرور</h3>
+              <div id="changePasswordAlert" class="portal-alert portal-alert--error" hidden></div>
+              <div id="changePasswordSuccess" class="portal-alert portal-alert--success" hidden></div>
+              <form id="changePasswordForm" class="portal-form">
+                <label>
+                  <span>كلمة المرور الحالية</span>
+                  <input type="password" name="currentPassword" autocomplete="current-password" required />
+                </label>
+                <label>
+                  <span>كلمة المرور الجديدة</span>
+                  <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
+                </label>
+                <label>
+                  <span>تأكيد كلمة المرور الجديدة</span>
+                  <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+                </label>
+                <button type="submit" class="btn">تغيير كلمة المرور</button>
+              </form>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
+
+    <dialog id="createUserDialog" class="portal-dialog portal-dialog--wide">
+      <form id="createUserForm" class="portal-dialog-form portal-form" novalidate>
+        <h2>إنشاء حساب جديد</h2>
+        <div id="createUserAlert" class="portal-alert portal-alert--error" hidden></div>
+        <label>
+          <span>الاسم</span>
+          <input type="text" name="name" required />
+        </label>
+        <label>
+          <span>اسم المستخدم</span>
+          <input
+            type="text"
+            name="username"
+            placeholder="أحمد محمد / John Smith"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          />
+          <span class="portal-field-hint">اسمان فقط بمسافة واحدة: أحمد محمد أو John Smith.</span>
+        </label>
+        <label>
+          <span>الدور</span>
+          <select name="role" id="createUserRole">
+            <option value="lawyer">محامي</option>
+            <option value="section_manager">مدير قسم</option>
+            <option value="assistant">مساعد</option>
+            <option value="admin">مدير</option>
+          </select>
+        </label>
+        <label id="createUserSectionField">
+          <span>القسم الرئيسي</span>
+          <select name="section_id" id="createUserSectionSelect" required>
+            <option value="">اختر القسم</option>
+          </select>
+          <span class="portal-field-hint">يُعيَّن المحامي إلى القسم الرئيسي الآن، ثم يضعه مدير ذلك القسم في قسم فرعي.</span>
+        </label>
+        <label>
+          <span>كلمة المرور</span>
+          <input type="password" name="password" autocomplete="new-password" minlength="8" required />
+        </label>
+        <label>
+          <span>تأكيد كلمة المرور</span>
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required />
+        </label>
+        <div class="portal-dialog-actions">
+          <button type="button" class="portal-btn-ghost" id="cancelCreateUserBtn">إلغاء</button>
+          <button class="btn" type="submit" id="saveCreateUserBtn">إنشاء الحساب</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="confirmDeleteUserDialog" class="portal-dialog">
       <div class="portal-dialog-form">
@@ -144,8 +217,24 @@
             spellcheck="false"
             required
           />
-          <span class="portal-field-hint">الاسم الأول والأخير بالعربية، بمسافة واحدة فقط.</span>
+          <span class="portal-field-hint">اسمان فقط بمسافة واحدة: أحمد محمد أو John Smith.</span>
         </label>
+        <label id="editUserSectionField" hidden>
+          <span>القسم الرئيسي</span>
+          <select name="section_id" id="editUserSectionSelect"></select>
+          <span class="portal-field-hint">نقل المحامي إلى قسم آخر يلغى تعيينه من الأقسام الفرعية لمديره السابق.</span>
+        </label>
+        <div id="editUserPasswordFields">
+          <label>
+            <span>كلمة المرور الجديدة (اختياري)</span>
+            <input type="password" name="password" id="editUserPassword" autocomplete="new-password" minlength="8" />
+            <span class="portal-field-hint">إن نسي المحامي أو مدير القسم كلمة مروره، عيّن واحدة جديدة هنا دون الحاجة للكلمة القديمة. اتركها فارغة إن لم ترد التغيير.</span>
+          </label>
+          <label>
+            <span>تأكيد كلمة المرور الجديدة</span>
+            <input type="password" name="confirmPassword" id="editUserConfirmPassword" autocomplete="new-password" minlength="8" />
+          </label>
+        </div>
         <div class="portal-dialog-actions">
           <button type="button" class="portal-btn-ghost" id="cancelEditUserBtn">إلغاء</button>
           <button class="btn" type="submit" id="saveEditUserBtn">حفظ التعديلات</button>
@@ -155,11 +244,18 @@
 
     <script src="../i18n.js"></script>
     <script src="api-config.js"></script>
-    <script src="portal.js"></script>
+    <script src="portal.js?v=22"></script>
+    <script src="portal-nav.js?v=27"></script>
     <script>
       const createUserForm = document.getElementById("createUserForm");
+      const createUserRole = document.getElementById("createUserRole");
+      const createUserSectionField = document.getElementById("createUserSectionField");
+      const createUserSectionSelect = document.getElementById("createUserSectionSelect");
+      const editUserSectionField = document.getElementById("editUserSectionField");
+      const editUserSectionSelect = document.getElementById("editUserSectionSelect");
+      const createUserDialog = document.getElementById("createUserDialog");
+      const createUserAlert = document.getElementById("createUserAlert");
       const adminAlert = document.getElementById("adminAlert");
-      const adminSuccess = document.getElementById("adminSuccess");
       const usersList = document.getElementById("usersList");
       const confirmDeleteUserDialog = document.getElementById("confirmDeleteUserDialog");
       const confirmDeleteUserMessage = document.getElementById("confirmDeleteUserMessage");
@@ -169,7 +265,32 @@
       const editUserForm = document.getElementById("editUserForm");
       const editUserAlert = document.getElementById("editUserAlert");
       let currentAdminId = null;
+      let currentUserRole = null;
       let usersCache = [];
+      let sectionsCache = [];
+
+      function sectionOptionsHtml(selectedId = "") {
+        return (
+          '<option value="">اختر القسم</option>' +
+          sectionsCache
+            .map((section) => {
+              const selected = section.id === selectedId ? " selected" : "";
+              return `<option value="${Portal.escapeHtml(section.id)}"${selected}>${Portal.escapeHtml(section.name)}</option>`;
+            })
+            .join("")
+        );
+      }
+
+      function userPlaceHtml(user) {
+        if (user?.role === "admin" || user?.role === "assistant") {
+          return `<span class="portal-user-item__place">بدون قسم</span>`;
+        }
+        if (user?.role === "section_manager") {
+          return `<span class="portal-user-item__place">القسم: ${Portal.escapeHtml(user.section_name || "غير معيّن")}</span>`;
+        }
+        return `<span class="portal-user-item__place">القسم: ${Portal.escapeHtml(user.section_name || "غير معيّن")}</span>
+                <span class="portal-user-item__place">القسم الفرعي: ${Portal.escapeHtml(user.subsection_name || "غير معيّن")}</span>`;
+      }
 
       function askDeleteUserConfirm(name) {
         confirmDeleteUserMessage.textContent = `سيتم حذف حساب «${name}» نهائياً وإنهاء جميع جلساته. هل تريد المتابعة؟`;
@@ -194,17 +315,39 @@
       }
 
       async function deleteUserAccount(userId, name) {
+        if (currentUserRole !== "admin") return;
         const confirmed = await askDeleteUserConfirm(name);
         if (!confirmed) return;
 
         Portal.hideAlert(adminAlert);
-        adminSuccess.hidden = true;
         try {
           const data = await Portal.request(`/admin/users/${userId}`, { method: "DELETE" });
           Portal.showToast(data.message || "تم حذف الحساب.", "success");
           await loadUsers();
         } catch (error) {
           Portal.showAlert(adminAlert, error.message);
+        }
+      }
+
+      function syncCreateUserSection() {
+        const isLawyer = createUserRole?.value === "lawyer";
+        if (createUserSectionField) createUserSectionField.hidden = !isLawyer;
+        if (createUserSectionSelect) createUserSectionSelect.required = Boolean(isLawyer);
+      }
+
+      async function loadSectionOptions() {
+        try {
+          const data = await Portal.request("/sections");
+          sectionsCache = data.sections || [];
+        } catch {
+          sectionsCache = [];
+        }
+        const html = sectionOptionsHtml();
+        if (createUserSectionSelect) {
+          createUserSectionSelect.innerHTML = sectionsCache.length ? html : '<option value="">تعذر تحميل الأقسام</option>';
+        }
+        if (editUserSectionSelect) {
+          editUserSectionSelect.innerHTML = sectionsCache.length ? html : '<option value="">تعذر تحميل الأقسام</option>';
         }
       }
 
@@ -226,12 +369,13 @@
                   ${u.id === currentAdminId ? '<span class="portal-role-chip portal-role-chip--self">حسابك</span>' : ""}
                 </div>
                 <span class="portal-user-item__meta">${Portal.escapeHtml(u.username)} · ${Portal.accountStatusLabel(u.status)}</span>
+                ${userPlaceHtml(u)}
               </div>
               <div class="portal-user-item__actions">
                 <button type="button" class="portal-btn-sm" data-edit-user="${u.id}">تعديل</button>
                 ${
-                  u.id !== currentAdminId
-                    ? `<button type="button" class="portal-btn-danger portal-btn-danger--sm" data-delete-user="${u.id}" data-user-name="${Portal.escapeHtml(u.name)}">حذف</button>`
+                  u.id !== currentAdminId && currentUserRole === "admin"
+                    ? `<button type="button" class="portal-btn-danger" data-delete-user="${u.id}" data-user-name="${Portal.escapeHtml(u.name)}">حذف</button>`
                     : ""
                 }
               </div>
@@ -249,17 +393,34 @@
         document.getElementById("editUserName").value = user.name;
         document.getElementById("editUserUsername").value = user.username;
         document.getElementById("editUserRole").textContent = Portal.roleLabel(user.role);
+        const isLawyer = user.role === "lawyer";
+        if (editUserSectionField) editUserSectionField.hidden = !isLawyer;
+        if (editUserSectionSelect) {
+          editUserSectionSelect.innerHTML = sectionOptionsHtml(user.section_id || "");
+          editUserSectionSelect.required = isLawyer;
+        }
         const isSelf = user.id === currentAdminId;
         document.querySelector("#editUserDialog h2").textContent = isSelf
           ? "تعديل حسابك"
           : "تعديل الحساب";
+        const passwordFields = document.getElementById("editUserPasswordFields");
+        const passwordInput = document.getElementById("editUserPassword");
+        const confirmInput = document.getElementById("editUserConfirmPassword");
+        if (passwordInput) {
+          passwordInput.value = "";
+          passwordInput.disabled = isSelf;
+        }
+        if (confirmInput) {
+          confirmInput.value = "";
+          confirmInput.disabled = isSelf;
+        }
+        if (passwordFields) passwordFields.hidden = isSelf;
         editUserDialog.showModal();
       }
 
       async function saveEditUserForm(event) {
         event.preventDefault();
         Portal.hideAlert(editUserAlert);
-        adminSuccess.hidden = true;
 
         const fd = new FormData(editUserForm);
         const userId = fd.get("user_id");
@@ -271,6 +432,16 @@
             name: fd.get("name"),
             username: fd.get("username"),
           };
+          const user = usersCache.find((item) => item.id === userId);
+          if (user?.role === "lawyer") {
+            body.section_id = fd.get("section_id");
+          }
+          const password = String(fd.get("password") || "");
+          const confirmPassword = String(fd.get("confirmPassword") || "");
+          if (password || confirmPassword) {
+            body.password = password;
+            body.confirmPassword = confirmPassword;
+          }
 
           const data = await Portal.request(`/admin/users/${userId}`, {
             method: "PATCH",
@@ -290,12 +461,32 @@
       async function boot() {
         const user = await Portal.requireAuth();
         if (!user) return;
-        if (user.role !== "admin") {
+        if (user.role !== "admin" && user.role !== "assistant") {
           window.location.href = "home.html";
           return;
         }
         currentAdminId = user.id;
+        currentUserRole = user.role;
+        const profileName = document.getElementById("profileName");
+        const profileUsername = document.getElementById("profileUsername");
+        const profileRole = document.getElementById("profileRole");
+        if (profileName) profileName.textContent = user.name;
+        if (profileUsername) profileUsername.textContent = user.username;
+        if (profileRole) profileRole.textContent = Portal.roleLabel(user.role);
+        if (typeof PortalNav !== "undefined") PortalNav.init(user);
+        Portal.initThemeToggle();
         Portal.initPasswordToggles(createUserForm);
+        Portal.initPasswordToggles(editUserForm);
+        createUserRole?.addEventListener("change", syncCreateUserSection);
+        document.getElementById("addUserBtn")?.addEventListener("click", () => {
+          Portal.hideAlert(createUserAlert);
+          createUserForm.reset();
+          syncCreateUserSection();
+          createUserDialog?.showModal();
+        });
+        document.getElementById("cancelCreateUserBtn")?.addEventListener("click", () => createUserDialog?.close());
+        syncCreateUserSection();
+        await loadSectionOptions();
         document.getElementById("cancelEditUserBtn")?.addEventListener("click", () => editUserDialog.close());
         editUserForm?.addEventListener("submit", saveEditUserForm);
         usersList.addEventListener("click", async (event) => {
@@ -306,6 +497,7 @@
           }
           const btn = event.target.closest("[data-delete-user]");
           if (!btn) return;
+          if (currentUserRole !== "admin") return;
           await deleteUserAccount(btn.dataset.deleteUser, btn.dataset.userName);
         });
         await loadUsers();
@@ -313,9 +505,10 @@
 
       createUserForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        Portal.hideAlert(adminAlert);
-        adminSuccess.hidden = true;
+        Portal.hideAlert(createUserAlert);
         const fd = new FormData(createUserForm);
+        const submitBtn = document.getElementById("saveCreateUserBtn");
+        if (submitBtn) submitBtn.disabled = true;
         try {
           const data = await Portal.request("/admin/users", {
             method: "POST",
@@ -325,14 +518,22 @@
               role: fd.get("role"),
               password: fd.get("password"),
               confirmPassword: fd.get("confirmPassword"),
+              section_id: fd.get("role") === "lawyer" ? fd.get("section_id") : "",
             }),
           });
-          adminSuccess.hidden = false;
-          adminSuccess.textContent = data.message;
+          createUserDialog?.close();
           createUserForm.reset();
+          syncCreateUserSection();
+          Portal.showToast(
+            data.message || "تم إنشاء الحساب. شارك اسم المستخدم وكلمة المرور مع صاحب الحساب بشكل آمن.",
+            "success",
+            4000
+          );
           await loadUsers();
         } catch (error) {
-          Portal.showAlert(adminAlert, error.message);
+          Portal.showAlert(createUserAlert, error.message);
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
 

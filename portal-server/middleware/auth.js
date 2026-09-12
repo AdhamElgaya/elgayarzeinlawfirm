@@ -3,8 +3,8 @@ import { isExpired, sessionExpiry } from "../lib/crypto-utils.js";
 import { isProductionEnv } from "../lib/env.js";
 
 const SESSION_COOKIE = "gz_portal_session";
-const SESSION_DAYS = Number(process.env.SESSION_DAYS || 30);
-const SESSION_REMEMBER_DAYS = Number(process.env.SESSION_REMEMBER_DAYS || 365);
+const SESSION_DAYS = Number(process.env.SESSION_DAYS || 7);
+const SESSION_REMEMBER_DAYS = Number(process.env.SESSION_REMEMBER_DAYS || 30);
 
 export { SESSION_COOKIE, SESSION_DAYS, SESSION_REMEMBER_DAYS };
 
@@ -116,6 +116,13 @@ export function requireAdminOrAssistant(req, res, next) {
 export function requireAdminOnly(req, res, next) {
   if (req.user?.role !== "admin") {
     return res.status(403).json({ error: "Admin-only access required." });
+  }
+  next();
+}
+
+export function requireCanDelete(req, res, next) {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ error: "الحذف متاح للمدير فقط." });
   }
   next();
 }

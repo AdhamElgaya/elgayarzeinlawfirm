@@ -95,6 +95,21 @@ export function formatTaskDueDateTime(dueAtIso, locale = "ar-EG") {
   });
 }
 
+export function portalTodayDate(now = Date.now(), timeZone = PORTAL_TIMEZONE) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(now));
+}
+
+export function isDueDatePassed(dueAt, now = Date.now()) {
+  const due = taskDueDatePart(dueAt);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) return false;
+  return due < portalTodayDate(now);
+}
+
 export function formatReminderDueLabel(dueAt, locale = "ar-EG") {
   if (!dueAt) return "";
 

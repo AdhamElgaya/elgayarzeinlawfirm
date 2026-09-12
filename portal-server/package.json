@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "local": "node run.js local",
+    "railway": "node run.js railway",
     "dev": "node --watch server.js",
+    "dev:local": "node --watch run.js local",
+    "dev:railway": "node --watch run.js railway",
     "db:migrate": "node scripts/migrate-json-to-supabase.js",
     "db:reset": "node scripts/reset-portal-data.js",
     "vapid:generate": "node scripts/generate-vapid-keys.js"

@@ -15,7 +15,8 @@ const Portal = (() => {
   async function request(path, options = {}) {
     const headers = { ...(options.headers || {}) };
     const hasBody = options.body !== undefined && options.body !== null;
-    if (hasBody && !headers["Content-Type"]) {
+    const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+    if (hasBody && !isFormData && !headers["Content-Type"] && !headers["content-type"]) {
       headers["Content-Type"] = "application/json";
     }
 
@@ -130,12 +131,36 @@ const Portal = (() => {
     return request("/auth/me");
   }
 
+  function safePortalNext(raw) {
+    const value = String(raw || "").trim();
+    if (!value.startsWith("/portal/")) return "";
+    if (value.includes("\\") || value.includes("//") || value.includes("://")) return "";
+    const [pathname, query = ""] = value.split("?");
+    if (!/^\/portal\/[a-z0-9.-]+\.html$/i.test(pathname)) return "";
+    if (pathname.toLowerCase() === "/portal/login.html") return "";
+    if (query && !/^[a-zA-Z0-9_=&%.-]+$/.test(query)) return "";
+    return query ? `${pathname}?${query}` : pathname;
+  }
+
+  function currentPortalNext() {
+    return safePortalNext(`${window.location.pathname}${window.location.search || ""}`);
+  }
+
+  function loginUrlWithNext(redirectTo = "/portal/login.html") {
+    const next = currentPortalNext();
+    const login = new URL(redirectTo, window.location.origin);
+    login.search = "";
+    if (next) login.searchParams.set("next", next);
+    return `${login.pathname}${login.search}`;
+  }
+
   async function requireAuth(redirectTo = "/portal/login.html") {
     const data = await getMe();
     if (!data.authenticated) {
-      window.location.href = redirectTo;
+      window.location.replace(loginUrlWithNext(redirectTo));
       return null;
     }
+    document.body.classList.add("is-authed");
     return data.user;
   }
 
@@ -165,7 +190,8 @@ const Portal = (() => {
     try {
       const data = await getMe();
       if (data.authenticated) {
-        window.location.href = target;
+        const params = new URLSearchParams(window.location.search);
+        window.location.replace(safePortalNext(params.get("next")) || target);
       }
     } catch {
       /* not logged in or API unavailable — stay on login page */
@@ -216,7 +242,7 @@ const Portal = (() => {
   }
 
   function formatNumber(value) {
-    return Number(value).toLocaleString(locale(), { useGrouping: false });
+    return Number(value).toLocaleString("en-US", { useGrouping: false });
   }
 
   function formatDate(iso) {
@@ -289,17 +315,19 @@ const Portal = (() => {
       admin: "مدير",
       lawyer: "محامي",
       assistant: "مساعد",
+      section_manager: "مدير قسم",
     };
     return t(`portal.role.${role}`, labels[role] || role);
   }
 
   function statusLabel(status) {
     const labels = {
-      active: "نشطة",
-      finished: "منتهية",
+      active: "متداوله",
+      finished: "موقوفه",
       open: "مفتوحة",
       done: "منجزة",
-      archived: "مؤرشفة",
+      missed: "فائتة",
+      archived: "محفوظه",
     };
     return t(`portal.status.${status}`, labels[status] || status);
   }
@@ -318,7 +346,8 @@ const Portal = (() => {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function displayId(id) {
@@ -345,17 +374,205 @@ const Portal = (() => {
     );
   }
 
+  function isBlockedUploadFile(file) {
+    if (!file) return false;
+    const name = String(file.name || "").toLowerCase();
+    const type = String(file.type || "").toLowerCase();
+    return (
+      name.endsWith(".zip") ||
+      name.endsWith(".zipx") ||
+      name.includes(".zip.") ||
+      type.includes("zip")
+    );
+  }
+
+  const UPLOAD_ACCEPT =
+    ".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,application/pdf,image/png,image/jpeg,image/gif,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain";
+  const ZIP_REJECT_MESSAGE = "لا يمكن رفع ملفات ZIP.";
+
+  document.addEventListener("change", (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== "file") return;
+    const file = input.files?.[0];
+    if (!file || !isBlockedUploadFile(file)) return;
+    input.value = "";
+    const nameEl = document.getElementById("libraryUploadFileName");
+    if (nameEl && input.id === "libraryUploadFile") nameEl.textContent = "لم يُختر ملف";
+    const draftName = input.closest(".portal-attachment-file-wrap")?.querySelector(".portal-attachment-file-name");
+    if (draftName) draftName.textContent = "لم يُرفَع ملف بعد";
+    showToast(ZIP_REJECT_MESSAGE, "error");
+  });
+
+  const THEME_KEY = "gz-portal-theme";
+  const THEME_COLOR_DARK = "#0f172a";
+  const THEME_COLOR_LIGHT = "#f3eee6";
+
+  function isPortalPath() {
+    return /(?:^|\/)portal(?:\/|$)/.test(location.pathname) || document.body?.classList.contains("portal-page");
+  }
+
+  function getTheme() {
+    try {
+      return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
+  }
+
+  function applyTheme(theme) {
+    if (!isPortalPath()) return;
+    const next = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", next === "light" ? THEME_COLOR_LIGHT : THEME_COLOR_DARK);
+  }
+
+  function setTheme(theme) {
+    const next = theme === "light" ? "light" : "dark";
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {
+      /* ignore */
+    }
+    applyTheme(next);
+  }
+
+  function syncThemeToggle(group, theme) {
+    if (!group) return;
+    group.querySelectorAll("[data-theme]").forEach((btn) => {
+      const on = btn.dataset.theme === theme;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function initThemeToggle(root = document) {
+    const groups = root?.matches?.("[data-theme-toggle]")
+      ? [root]
+      : Array.from((root || document).querySelectorAll("[data-theme-toggle]"));
+    const theme = getTheme();
+    applyTheme(theme);
+    groups.forEach((group) => {
+      syncThemeToggle(group, theme);
+      if (group.dataset.bound) return;
+      group.dataset.bound = "1";
+      group.addEventListener("click", (event) => {
+        const btn = event.target.closest("[data-theme]");
+        if (!btn || !group.contains(btn)) return;
+        setTheme(btn.dataset.theme);
+        syncThemeToggle(group, getTheme());
+      });
+    });
+  }
+
+  initThemeToggle();
+
+  function isStandaloneDisplay() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function ensurePwaMeta() {
+    if (!document.querySelector('link[rel="manifest"]')) {
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = "/portal/manifest.json";
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('meta[name="theme-color"]')) {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = getTheme() === "light" ? THEME_COLOR_LIGHT : THEME_COLOR_DARK;
+      document.head.appendChild(meta);
+    }
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+      const icon = document.createElement("link");
+      icon.rel = "apple-touch-icon";
+      icon.href = "/assets/sign_trans.png?v=2";
+      document.head.appendChild(icon);
+    }
+  }
+
+  function registerPortalServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/portal/sw.js", { scope: "/portal/" }).catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  }
+
+  function bindStandaloneLinks() {
+    if (!isStandaloneDisplay()) return;
+    document.documentElement.classList.add("portal-standalone");
+    document.querySelectorAll('.portal-brand[href*="index.html"]').forEach((el) => {
+      el.setAttribute("href", "/portal/home.html");
+    });
+    document.querySelectorAll(".portal-muted-link").forEach((el) => {
+      el.hidden = true;
+    });
+  }
+
+  function unlockScreenOrientation() {
+    try {
+      if (screen.orientation && typeof screen.orientation.unlock === "function") {
+        screen.orientation.unlock();
+      }
+    } catch {
+      /* iOS / unsupported browsers ignore unlock */
+    }
+  }
+
+  function syncViewportOrientation() {
+    const landscape =
+      window.matchMedia("(orientation: landscape)").matches || window.innerWidth > window.innerHeight;
+    const touchUi = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    const compactNav = landscape && touchUi;
+    document.documentElement.classList.toggle("portal-landscape", landscape);
+    document.documentElement.classList.toggle("portal-compact-nav", compactNav);
+    document.body?.classList.toggle("portal-landscape", landscape);
+    document.body?.classList.toggle("portal-compact-nav", compactNav);
+    document.documentElement.dataset.orientation = landscape ? "landscape" : "portrait";
+    if (!compactNav) {
+      document.body?.classList.remove("portal-nav-open");
+    }
+  }
+
+  function initOrientationSupport() {
+    unlockScreenOrientation();
+    syncViewportOrientation();
+    const refresh = () => {
+      unlockScreenOrientation();
+      syncViewportOrientation();
+    };
+    window.addEventListener("orientationchange", () => setTimeout(refresh, 120));
+    window.addEventListener("resize", syncViewportOrientation);
+    window.matchMedia("(orientation: landscape)").addEventListener?.("change", syncViewportOrientation);
+  }
+
+  function initPwa() {
+    ensurePwaMeta();
+    bindStandaloneLinks();
+    registerPortalServiceWorker();
+    initOrientationSupport();
+  }
+
+  initPwa();
+
   return {
     request,
     upload,
     apiRoot,
+    apiCredentials,
     showAlert,
     hideAlert,
     showToast,
     getMe,
     requireAuth,
     redirectIfAuthed,
+    safePortalNext,
     initPasswordToggles,
+    getTheme,
+    setTheme,
+    applyTheme,
+    initThemeToggle,
     t,
     formatNumber,
     formatDate,
@@ -372,5 +589,8 @@ const Portal = (() => {
     displayId,
     formatDateInput,
     sameCalendarDay,
+    isBlockedUploadFile,
+    UPLOAD_ACCEPT,
+    ZIP_REJECT_MESSAGE,
   };
 })();

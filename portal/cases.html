@@ -6,21 +6,25 @@
     <script src="../i18n-boot.js"></script>
     <title>مكتب الجيار و زين | القضايا</title>
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="الجيار و زين" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="../assets/sign_trans.png?v=2" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" /></noscript>
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="portal.css?v=72" />
   </head>
   <body class="portal-page" data-page="portal-cases" data-portal-page="cases">
     <header class="portal-header">
       <div class="container portal-header__bar">
         <a class="portal-brand" href="../index.html">
-          <span class="portal-brand-title" data-i18n="portal.brand.title">الجيار و زين</span>
-          <span class="portal-brand-tag" data-i18n="portal.brand.portal">بوابة المحامين</span>
+          <img class="portal-brand-logo" src="../assets/gztholothfont.png" alt="مكتب الجيار و زين" />
         </a>
         <div class="portal-header__end">
           <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
@@ -29,11 +33,14 @@
           </button>
           <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
             <div class="portal-header-nav__links" id="adminNavLinks">
-              <a class="portal-nav-link" href="home.html" data-nav="home">المنزل</a>
+              <a class="portal-nav-link" href="home.html" data-nav="home">الرئيسيه</a>
               <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
               <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
               <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
               <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="calendar.html" data-nav="calendar">الأجنده</a>
+              <a class="portal-nav-link" href="attachments.html" data-nav="attachments" data-attachments-nav hidden>المرفقات</a>
+              <a class="portal-nav-link" href="sections.html" data-nav="sections" data-sections-nav hidden>الأقسام</a>
               <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
               <a class="portal-nav-link" href="profile.html" data-nav="profile" id="profileNavLink" hidden>الملف الشخصي</a>
             </div>
@@ -49,12 +56,17 @@
         <section class="portal-panel" id="casesPanel">
           <div class="portal-panel-head">
             <h2 id="casesPanelTitle">قضاياي</h2>
-            <button type="button" class="portal-icon-btn" id="addCaseBtn" hidden aria-label="إضافة قضية">
+            <button type="button" class="portal-add-btn" id="addCaseBtn" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              إضافة
             </button>
           </div>
+          <div class="portal-mode-toggle portal-mode-toggle--compact" id="casesInboxGroup" hidden role="group" aria-label="تصفية القضايا">
+            <button type="button" class="portal-mode-toggle-btn is-active" data-inbox="all">الكل</button>
+            <button type="button" class="portal-mode-toggle-btn" data-inbox="inbox">صندوق الوارد</button>
+          </div>
           <div class="portal-search-bar">
-            <input type="search" id="casesSearch" placeholder="بحث بالعنوان، الموكل، أو المحامي..." autocomplete="off" />
+            <input type="search" id="casesSearch" placeholder="بحث..." autocomplete="off" />
           </div>
           <ul class="portal-list" id="casesList"></ul>
         </section>
@@ -63,9 +75,9 @@
 
     <script src="../i18n.js"></script>
     <script src="api-config.js"></script>
-    <script src="portal.js"></script>
-    <script src="portal-nav.js"></script>
-    <script src="portal-shared.js"></script>
+    <script src="portal.js?v=22"></script>
+    <script src="portal-nav.js?v=27"></script>
+    <script src="portal-shared.js?v=47"></script>
     <script>PortalDash.boot("cases");</script>
   </body>
 </html>

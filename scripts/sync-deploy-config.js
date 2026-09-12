@@ -115,7 +115,15 @@ const functionDir = path.join(root, "functions", "api");
 fs.mkdirSync(functionDir, { recursive: true });
 fs.writeFileSync(path.join(functionDir, "[[path]].js"), pagesFunctionSource(railwayOrigin));
 
-const headersBody = `/assets/*
+const headersBody = `/portal/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /portal/
+
+/portal/manifest.json
+  Cache-Control: no-cache
+  Content-Type: application/manifest+json
+
+/assets/*
   Cache-Control: public, max-age=2592000, stale-while-revalidate=31536000
 
 /*.js

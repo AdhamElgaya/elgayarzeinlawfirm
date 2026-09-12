@@ -4,6 +4,7 @@ import { sendPushToUser, isPushConfigured, getNotificationRecipient } from "./pu
 import {
   formatReminderDueLabel,
   getReminderTriggerMs,
+  isDueDatePassed,
   shouldAbandonReminder,
 } from "./task-datetime.js";
 
@@ -13,6 +14,19 @@ const TICK_MS = 60 * 1000;
 
 let running = false;
 
+async function markMissedOverdueTasks() {
+  const rows = await db
+    .prepare(
+      `SELECT id, due_at FROM tasks WHERE deleted_at IS NULL AND status = 'open' AND due_at IS NOT NULL`
+    )
+    .all();
+
+  for (const task of rows || []) {
+    if (!isDueDatePassed(task.due_at)) continue;
+    await db.prepare(`UPDATE tasks SET status = ? WHERE id = ?`).run("missed", task.id);
+  }
+}
+
 async function markReminderSent(taskId) {
   await db
     .prepare(`UPDATE tasks SET reminder_sent_at = ? WHERE id = ?`)
@@ -20,10 +34,12 @@ async function markReminderSent(taskId) {
 }
 
 async function processReminders() {
-  if (running || !isPushConfigured()) return;
+  if (running) return;
   running = true;
 
   try {
+    await markMissedOverdueTasks();
+    if (!isPushConfigured()) return;
     const rows = await db
       .prepare(
         `SELECT t.id, t.title, t.due_at, t.assigned_to, c.title AS case_title

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script src="../i18n-boot.js"></script>
+    <title>مكتب الجيار و زين | المرفقات</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="الجيار و زين" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="../assets/sign_trans.png?v=2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" /></noscript>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css?v=72" />
+  </head>
+  <body class="portal-page" data-page="portal-attachments" data-portal-page="attachments">
+    <header class="portal-header">
+      <div class="container portal-header__bar">
+        <a class="portal-brand" href="../index.html">
+          <img class="portal-brand-logo" src="../assets/gztholothfont.png" alt="مكتب الجيار و زين" />
+        </a>
+        <div class="portal-header__end">
+          <button type="button" class="portal-nav-toggle" id="portalNavToggle" hidden aria-controls="portalHeaderNav" aria-expanded="false" aria-label="فتح القائمة">
+            <svg class="portal-nav-toggle__open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+            <svg class="portal-nav-toggle__close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+          <nav class="portal-header-nav" id="portalHeaderNav" aria-label="تنقل لوحة التحكم">
+            <div class="portal-header-nav__links" id="adminNavLinks">
+              <a class="portal-nav-link" href="home.html" data-nav="home">الرئيسيه</a>
+              <a class="portal-nav-link" href="clients.html" data-nav="clients" data-admin-only hidden>الموكلين</a>
+              <a class="portal-nav-link" href="cases.html" data-nav="cases">القضايا</a>
+              <a class="portal-nav-link" href="archived.html" data-nav="archived" data-admin-only hidden>المؤرشفه</a>
+              <a class="portal-nav-link" href="tasks.html" data-nav="tasks">المهام</a>
+              <a class="portal-nav-link" href="calendar.html" data-nav="calendar">الأجنده</a>
+              <a class="portal-nav-link" href="attachments.html" data-nav="attachments" data-attachments-nav hidden>المرفقات</a>
+              <a class="portal-nav-link" href="sections.html" data-nav="sections" data-sections-nav hidden>الأقسام</a>
+              <a class="portal-nav-link" href="admin.html" data-nav="admin" data-admin-only hidden data-i18n="portal.admin.link">الحسابات</a>
+              <a class="portal-nav-link" href="profile.html" data-nav="profile" id="profileNavLink" hidden>الملف الشخصي</a>
+            </div>
+          </nav>
+          <button id="logoutBtn" class="portal-btn-sm portal-header-cta" type="button" data-i18n="portal.logout">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="portal-nav-backdrop" id="portalNavBackdrop" hidden></div>
+    </header>
+    <main class="portal-main">
+      <div class="container portal-dashboard">
+        <div class="portal-dashboard-head">
+          <div>
+            <h1>المرفقات</h1>
+            <p id="attachmentsLead">ملفات المكتب</p>
+          </div>
+        </div>
+        <div id="attachmentsAlert" class="portal-alert portal-alert--error" hidden></div>
+        <section class="portal-panel">
+          <div class="portal-search-bar">
+            <input type="search" id="attachmentsSearch" placeholder="بحث..." autocomplete="off" />
+          </div>
+          <div class="portal-attachments-scroll" id="attachmentsScroll">
+            <table class="portal-section-table portal-attachments-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>القسم</th>
+                  <th>القضية</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="attachmentsBody"></tbody>
+            </table>
+            <div id="attachmentsSentinel" class="portal-library-sentinel" hidden></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="attachmentPreviewDialog" class="portal-dialog portal-dialog--preview">
+      <div class="portal-preview-dialog">
+        <div class="portal-preview-head">
+          <h2 id="attachmentPreviewTitle">معاينة المرفق</h2>
+          <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeAttachmentPreviewBtn">إغلاق</button>
+        </div>
+        <div id="attachmentPreviewBody" class="portal-preview-body"></div>
+      </div>
+    </dialog>
+
+    <script src="../i18n.js"></script>
+    <script src="api-config.js"></script>
+    <script src="portal.js?v=22"></script>
+    <script src="portal-nav.js?v=27"></script>
+    <script src="attachments-app.js?v=19"></script>
+  </body>
+</html>
