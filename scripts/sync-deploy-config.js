@@ -152,7 +152,9 @@ function copyPublicSite() {
   fs.rmSync(distDir, { recursive: true, force: true });
   fs.mkdirSync(distDir, { recursive: true });
 
+  const skipRoot = new Set(["_worker.js", "wrangler.toml"]);
   for (const name of fs.readdirSync(root)) {
+    if (skipRoot.has(name)) continue;
     if (!/\.(html|css|js|txt|xml|ico|webmanifest)$/i.test(name)) continue;
     fs.copyFileSync(path.join(root, name), path.join(distDir, name));
   }
@@ -171,6 +173,7 @@ function copyPublicSite() {
   }
 
   fs.writeFileSync(path.join(distDir, "_headers"), headersBody);
+  fs.writeFileSync(path.join(distDir, ".assetsignore"), "_worker.js\n_routes.json\n");
 }
 
 copyPublicSite();
