@@ -847,6 +847,7 @@ const PortalDash = (() => {
               <p class="portal-detail-name">${Portal.escapeHtml(client.name)}</p>
             </div>
             <div class="portal-detail-head-actions">
+              ${isAdminOnly ? editBtn("edit-client", client.id) : ""}
               ${isAdminOnly ? deleteBtn("delete-client", client.id) : ""}
               <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeDetailBtn">إغلاق</button>
             </div>
@@ -1694,10 +1695,7 @@ const PortalDash = (() => {
     });
 
     addClientBtn?.addEventListener("click", () => {
-      Portal.hideAlert(addClientAlert);
-      addClientForm.reset();
-      resetClientFileNames();
-      addClientDialog.showModal();
+      openAddClientDialog();
     });
 
     document.getElementById("cancelClientBtn")?.addEventListener("click", () => addClientDialog.close());
@@ -1706,10 +1704,17 @@ const PortalDash = (() => {
       event.preventDefault();
       Portal.hideAlert(addClientAlert);
       const fd = new FormData(addClientForm);
+      const clientId = String(fd.get("client_id") || "").trim();
+      fd.delete("client_id");
       const submitBtn = addClientForm.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
       try {
-        await Portal.upload("/admin/clients", fd);
+        if (clientId) {
+          if (!isAdminOnly) throw new Error("تعديل الموكل متاح للمدير فقط.");
+          await Portal.upload(`/admin/clients/${clientId}`, fd, { method: "PATCH" });
+        } else {
+          await Portal.upload("/admin/clients", fd);
+        }
         addClientDialog.close();
         await refresh();
       } catch (error) {
@@ -1718,6 +1723,48 @@ const PortalDash = (() => {
         if (submitBtn) submitBtn.disabled = false;
       }
     });
+  }
+
+  function setClientFormMode(mode, client = null) {
+    const titleEl = document.getElementById("addClientTitle");
+    const submitBtn = document.getElementById("saveClientBtn");
+    const idInput = document.getElementById("addClientId");
+    if (titleEl) titleEl.textContent = mode === "edit" ? "تعديل الموكل" : "إضافة موكل";
+    if (submitBtn) submitBtn.textContent = mode === "edit" ? "حفظ التعديلات" : "إضافة الموكل";
+    if (idInput) idInput.value = client?.id || "";
+    if (!addClientForm) return;
+    addClientForm.elements.name.value = client?.name || "";
+    addClientForm.elements.phone.value = client?.phone || "";
+    addClientForm.elements.email.value = client?.email || "";
+    addClientForm.elements.address.value = client?.address || "";
+    const poaName = addClientForm.querySelector('[name="poa"]')?.closest(".portal-client-file")?.querySelector(".portal-client-file__name");
+    const idName = addClientForm.querySelector('[name="id_card"]')?.closest(".portal-client-file")?.querySelector(".portal-client-file__name");
+    if (poaName) poaName.textContent = client?.poa_document?.originalName || client?.poa_document?.filename || "لم يُختر ملف";
+    if (idName) idName.textContent = client?.id_document?.originalName || client?.id_document?.filename || "لم يُختر ملف";
+  }
+
+  function openAddClientDialog() {
+    Portal.hideAlert(addClientAlert);
+    addClientForm.reset();
+    resetClientFileNames();
+    setClientFormMode("add");
+    addClientDialog.showModal();
+  }
+
+  async function openEditClientDialog(clientId) {
+    if (!isAdminOnly || !clientId) return;
+    Portal.hideAlert(addClientAlert);
+    addClientForm.reset();
+    resetClientFileNames();
+    setClientFormMode("add");
+    addClientDialog.showModal();
+    try {
+      const data = await Portal.request(`/dashboard/clients/${clientId}`);
+      setClientFormMode("edit", data.client);
+    } catch (error) {
+      addClientDialog.close();
+      Portal.showToast(error.message || "تعذر فتح بيانات الموكل.", "error");
+    }
   }
 
   function sectionDisplayName(id) {
@@ -2496,6 +2543,15 @@ const PortalDash = (() => {
         return;
       }
 
+      if (action === "edit-client") {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!isAdminOnly) return;
+        detailDialog.close();
+        await openEditClientDialog(id);
+        return;
+      }
+
       if (action === "edit-task") {
         event.preventDefault();
         event.stopPropagation();
@@ -2729,7 +2785,7 @@ const PortalDash = (() => {
       return;
     }
     try {
-      const res = await fetch("dialogs.fragment.html?v=30");
+      const res = await fetch("dialogs.fragment.html?v=31");
       if (res.ok) {
         document.body.insertAdjacentHTML("beforeend", await res.text());
         bindDialogRefs();

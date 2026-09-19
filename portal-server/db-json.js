@@ -1335,6 +1335,20 @@ function runQuery(dbRef, sql, params, mutate) {
     return [];
   }
 
+  if (lower.startsWith("update clients set name = ?")) {
+    const client = (dbRef.data.clients || []).find((c) => c.id === params[6] && !c.deleted_at);
+    if (client && mutate) {
+      client.name = params[0];
+      client.phone = params[1] || null;
+      client.email = params[2] || null;
+      client.address = params[3] || null;
+      client.poa_document = parseMaybeJson(params[4]);
+      client.id_document = parseMaybeJson(params[5]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
   if (lower.startsWith("update clients set deleted_at")) {
     const client = (dbRef.data.clients || []).find((c) => c.id === params[1] && !c.deleted_at);
     if (client && mutate) {

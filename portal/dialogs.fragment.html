@@ -164,8 +164,9 @@
 
 <dialog id="addClientDialog" class="portal-dialog portal-dialog--wide">
   <form id="addClientForm" class="portal-dialog-form portal-form" method="dialog">
-    <h2>إضافة موكل</h2>
+    <h2 id="addClientTitle">إضافة موكل</h2>
     <div id="addClientAlert" class="portal-alert portal-alert--error" hidden></div>
+    <input type="hidden" name="client_id" id="addClientId" value="" />
     <label>
       <span>اسم الموكل</span>
       <input type="text" name="name" required autocomplete="name" />
@@ -183,22 +184,22 @@
       <textarea name="address" class="portal-detail-notes" rows="2" required placeholder="العنوان"></textarea>
     </label>
     <label>
-      <span>صورة التوكيل</span>
+      <span>صورة التوكيل (اختياري)</span>
       <span class="portal-client-file">
         <span class="portal-client-file__pick">
           <span class="portal-client-file__btn">اختيار ملف</span>
-          <input type="file" name="poa" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" required />
+          <input type="file" name="poa" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" />
         </span>
         <span class="portal-client-file__name">لم يُختر ملف</span>
         <button type="button" class="portal-btn-ghost portal-btn-ghost--sm portal-client-file__clear" hidden>إزالة</button>
       </span>
     </label>
     <label>
-      <span>صورة البطاقة</span>
+      <span>صورة البطاقة (اختياري)</span>
       <span class="portal-client-file">
         <span class="portal-client-file__pick">
           <span class="portal-client-file__btn">اختيار ملف</span>
-          <input type="file" name="id_card" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" required />
+          <input type="file" name="id_card" class="portal-client-file__input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,application/pdf,image/png,image/jpeg,image/gif,image/webp" />
         </span>
         <span class="portal-client-file__name">لم يُختر ملف</span>
         <button type="button" class="portal-btn-ghost portal-btn-ghost--sm portal-client-file__clear" hidden>إزالة</button>
@@ -206,7 +207,7 @@
     </label>
     <div class="portal-dialog-actions">
       <button type="button" class="portal-btn-ghost" id="cancelClientBtn">إلغاء</button>
-      <button class="btn" type="submit">إضافة الموكل</button>
+      <button class="btn" type="submit" id="saveClientBtn">إضافة الموكل</button>
     </div>
   </form>
 </dialog>

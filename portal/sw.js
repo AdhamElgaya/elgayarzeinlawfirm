@@ -6,7 +6,7 @@ const PRECACHE_URLS = [
   "/portal/login.html",
   "/portal/home.html",
   "/portal/portal.css?v=72",
-  "/portal/portal.js?v=22",
+  "/portal/portal.js?v=23",
   "/styles.css",
   "/i18n-boot.js",
   "/i18n.js",

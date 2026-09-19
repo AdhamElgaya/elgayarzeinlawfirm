@@ -16,13 +16,13 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { CLIENT_SELECT_COLUMNS, publicClient } from "../lib/client-docs.js";
+import { CLIENT_SELECT_COLUMNS, clientDocumentFilenames, publicClient } from "../lib/client-docs.js";
 import { putFile } from "../lib/storage.js";
 import { assertClientDocumentUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { normalizeDueAt } from "../lib/task-due.js";
 import { sendTaskAssignedPush } from "../lib/push.js";
 import { composeCaseTitle } from "../lib/case-fields.js";
-import { requireAuth, requireAdminOrAssistant, requireCanDelete } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrAssistant, requireCanDelete } from "../middleware/auth.js";
 import { passwordActionLimiter } from "../lib/rate-limits.js";
 import {
   VALID_SECTION_IDS,
@@ -417,14 +417,6 @@ router.post(
       await cleanup();
       return res.status(400).json({ error: "العنوان مطلوب." });
     }
-    if (!poaFile) {
-      await cleanup();
-      return res.status(400).json({ error: "صورة التوكيل مطلوبة." });
-    }
-    if (!idFile) {
-      await cleanup();
-      return res.status(400).json({ error: "صورة البطاقة مطلوبة." });
-    }
 
     let email;
     try {
@@ -476,6 +468,122 @@ router.post(
       const status = error.statusCode || 500;
       res.status(status).json({
         error: status === 500 ? "تعذر إضافة الموكل." : error.message,
+      });
+    }
+  }
+);
+
+router.patch(
+  "/clients/:id",
+  requireAdmin,
+  (req, res, next) => {
+    clientUpload.fields([
+      { name: "poa", maxCount: 1 },
+      { name: "id_card", maxCount: 1 },
+    ])(req, res, (err) => {
+      if (err) {
+        return res.status(err.statusCode || 400).json({ error: err.message || "تعذر رفع الملف." });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    const storedKeys = [];
+    const cleanup = async () => {
+      for (const key of storedKeys) {
+        await deleteStoredFile(key);
+      }
+    };
+
+    const existing = await db
+      .prepare(`SELECT ${CLIENT_SELECT_COLUMNS} FROM clients WHERE id = ? AND deleted_at IS NULL`)
+      .get(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: "الموكل غير موجود." });
+    }
+
+    const name = String(req.body?.name || "").trim();
+    const phone = String(req.body?.phone || "").trim() || null;
+    const address = String(req.body?.address || "").trim() || null;
+    const poaFile = firstUploadedFile(req.files, "poa");
+    const idFile = firstUploadedFile(req.files, "id_card");
+    if (storageMode !== "r2") {
+      if (poaFile?.filename) storedKeys.push(poaFile.filename);
+      if (idFile?.filename) storedKeys.push(idFile.filename);
+    }
+
+    if (!name) {
+      await cleanup();
+      return res.status(400).json({ error: "اسم الموكل مطلوب." });
+    }
+    if (!address) {
+      await cleanup();
+      return res.status(400).json({ error: "العنوان مطلوب." });
+    }
+
+    let email;
+    try {
+      email = normalizeOptionalEmail(req.body?.email);
+    } catch (error) {
+      await cleanup();
+      return res.status(error.statusCode || 400).json({ error: error.message });
+    }
+
+    try {
+      const poaDocument = poaFile
+        ? await saveClientDocument(poaFile, "صورة التوكيل")
+        : existing.poa_document || null;
+      const idDocument = idFile
+        ? await saveClientDocument(idFile, "صورة البطاقة")
+        : existing.id_document || null;
+      if (storageMode === "r2") {
+        if (poaFile && poaDocument?.filename) storedKeys.push(poaDocument.filename);
+        if (idFile && idDocument?.filename) storedKeys.push(idDocument.filename);
+      }
+
+      await db
+        .prepare(
+          `UPDATE clients SET name = ?, phone = ?, email = ?, address = ?, poa_document = ?, id_document = ? WHERE id = ? AND deleted_at IS NULL`
+        )
+        .run(name, phone, email, address, poaDocument, idDocument, existing.id);
+
+      if (poaFile) {
+        for (const key of clientDocumentFilenames({ poa_document: existing.poa_document })) {
+          await deleteStoredFile(key);
+        }
+      }
+      if (idFile) {
+        for (const key of clientDocumentFilenames({ id_document: existing.id_document })) {
+          await deleteStoredFile(key);
+        }
+      }
+
+      await writeAudit({
+        userId: req.user.id,
+        action: "client_updated",
+        entityType: "client",
+        entityId: existing.id,
+        metadata: { name },
+        ip: req.ip,
+      });
+
+      res.json({
+        client: publicClient({
+          id: existing.id,
+          name,
+          phone,
+          email,
+          address,
+          poa_document: poaDocument,
+          id_document: idDocument,
+        }),
+        message: "تم تحديث بيانات الموكل.",
+      });
+    } catch (error) {
+      await cleanup();
+      const status = error.statusCode || 500;
+      res.status(status).json({
+        error: status === 500 ? "تعذر تحديث الموكل." : error.message,
       });
     }
   }

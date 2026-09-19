@@ -164,10 +164,10 @@ const Portal = (() => {
     return data.user;
   }
 
-  async function upload(path, formData) {
+  async function upload(path, formData, options = {}) {
     const res = await fetch(`${apiRoot()}${path}`, {
       credentials: apiCredentials(),
-      method: "POST",
+      method: options.method || "POST",
       body: formData,
     });
 
