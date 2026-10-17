@@ -520,9 +520,12 @@ html[data-theme="light"] .portal-btn-sm--muted:focus-visible {
 .portal-password-field {
   position: relative;
   display: block;
+  direction: ltr;
 }
 
 .portal-password-field input {
+  direction: ltr;
+  text-align: left;
   padding-inline-end: 2.65rem;
 }
 

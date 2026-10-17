@@ -331,7 +331,12 @@
     }
     taskCaseSelect.disabled = false;
     taskCaseSelect.innerHTML = cases
-      .map((c) => `<option value="${c.id}">${Portal.escapeHtml(c.title)}</option>`)
+      .map((c) => {
+        const number = String(c.case_number || "").trim();
+        const client = String(c.client_name || "").trim();
+        const label = number && client ? `${number} — ${client}` : client || c.title || number;
+        return `<option value="${c.id}">${Portal.escapeHtml(label)}</option>`;
+      })
       .join("");
   }
 

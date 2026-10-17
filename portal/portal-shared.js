@@ -580,6 +580,13 @@ const PortalDash = (() => {
         .join("");
   }
 
+  function casePickerLabel(c) {
+    const number = String(c.case_number || "").trim();
+    const client = String(c.client_name || "").trim();
+    if (number && client) return `${number} — ${client}`;
+    return client || c.title || number;
+  }
+
   function fillCaseSelect() {
     if (!taskCaseSelect) return;
     const cases = dashboardData?.cases || [];
@@ -590,7 +597,7 @@ const PortalDash = (() => {
     }
     taskCaseSelect.disabled = false;
     taskCaseSelect.innerHTML = cases
-      .map((c) => `<option value="${c.id}">${Portal.escapeHtml(c.title)}</option>`)
+      .map((c) => `<option value="${c.id}">${Portal.escapeHtml(casePickerLabel(c))}</option>`)
       .join("");
   }
 
