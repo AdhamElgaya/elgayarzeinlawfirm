@@ -22,7 +22,7 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { openFile, putFile, signedGetUrl, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
+import { openFile, putFile, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
 import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { CLIENT_SELECT_COLUMNS, publicClient } from "../lib/client-docs.js";
 import {
@@ -765,22 +765,6 @@ router.get("/attachments/:attachmentId", async (req, res) => {
     : attachmentContentDisposition(downloadName);
   const mimeType = attachmentMimeType(attachment);
 
-  if (storageMode === "r2") {
-    try {
-      const url = await signedGetUrl(attachment.filename, {
-        contentType: mimeType,
-        contentDisposition: disposition,
-        expiresInSeconds: 120,
-      });
-      if (!url) {
-        return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
-      }
-      return res.redirect(302, url);
-    } catch {
-      return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
-    }
-  }
-
   const opened = await openFile(attachment.filename);
   if (!opened?.body) {
     return res.status(404).json({ error: "ملف المرفق غير موجود على الخادم." });
@@ -790,11 +774,21 @@ router.get("/attachments/:attachmentId", async (req, res) => {
   if (opened.contentLength != null) {
     res.setHeader("Content-Length", String(opened.contentLength));
   }
-  opened.body.on("error", () => {
-    if (!res.headersSent) res.status(500).end();
-    else res.end();
-  });
-  opened.body.pipe(res);
+  const body = opened.body;
+  if (typeof body.pipe === "function") {
+    body.on("error", () => {
+      if (!res.headersSent) res.status(500).end();
+      else res.destroy();
+    });
+    body.pipe(res);
+    return;
+  }
+  if (typeof body.transformToByteArray === "function") {
+    const bytes = await body.transformToByteArray();
+    res.end(Buffer.from(bytes));
+    return;
+  }
+  res.status(500).json({ error: "تعذر قراءة الملف." });
 });
 
 router.get("/tasks/:id", async (req, res) => {
