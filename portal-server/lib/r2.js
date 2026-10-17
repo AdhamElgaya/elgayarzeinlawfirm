@@ -4,15 +4,21 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
+  PutBucketCorsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+function r2Value(name) {
+  return String(process.env[name] || "").trim();
+}
+
 export function r2Configured() {
   return Boolean(
-    process.env.R2_ACCOUNT_ID &&
-      process.env.R2_ACCESS_KEY_ID &&
-      process.env.R2_SECRET_ACCESS_KEY &&
-      process.env.R2_BUCKET_NAME
+    r2Value("R2_ACCOUNT_ID") &&
+      r2Value("R2_ACCESS_KEY_ID") &&
+      r2Value("R2_SECRET_ACCESS_KEY") &&
+      r2Value("R2_BUCKET_NAME")
   );
 }
 
@@ -25,18 +31,64 @@ function getClient() {
   if (!client) {
     client = new S3Client({
       region: "auto",
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      endpoint: `https://${r2Value("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        accessKeyId: r2Value("R2_ACCESS_KEY_ID"),
+        secretAccessKey: r2Value("R2_SECRET_ACCESS_KEY"),
       },
+      // Newer AWS SDK checksums are rejected by R2 unless they are optional.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
   return client;
 }
 
 function bucket() {
-  return process.env.R2_BUCKET_NAME;
+  return r2Value("R2_BUCKET_NAME");
+}
+
+function corsOrigins() {
+  const fromEnv = String(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return [
+    ...new Set([
+      ...fromEnv,
+      String(process.env.PUBLIC_BASE_URL || "").trim(),
+      "https://www.gzlawfirm.net",
+      "https://gzlawfirm.net",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ].filter(Boolean)),
+  ];
+}
+
+export async function r2Prepare() {
+  if (!r2Configured()) return { ok: false, reason: "missing R2 env" };
+  await getClient().send(new ListObjectsV2Command({ Bucket: bucket(), MaxKeys: 1 }));
+  try {
+    await getClient().send(
+      new PutBucketCorsCommand({
+        Bucket: bucket(),
+        CORSConfiguration: {
+          CORSRules: [
+            {
+              AllowedOrigins: corsOrigins(),
+              AllowedMethods: ["GET", "PUT", "HEAD"],
+              AllowedHeaders: ["*"],
+              ExposeHeaders: ["ETag"],
+              MaxAgeSeconds: 3600,
+            },
+          ],
+        },
+      })
+    );
+  } catch (error) {
+    console.warn("[portal] R2 CORS was not updated:", error.name || error.message);
+  }
+  return { ok: true, bucket: bucket() };
 }
 
 export async function r2PutObject(key, body, contentType) {
