@@ -547,11 +547,117 @@ const Portal = (() => {
     window.matchMedia("(orientation: landscape)").addEventListener?.("change", syncViewportOrientation);
   }
 
+  function dialogCanScroll(el, deltaY) {
+    if (!(el instanceof Element)) return false;
+    const overflowY = getComputedStyle(el).overflowY;
+    if (overflowY !== "auto" && overflowY !== "scroll" && overflowY !== "overlay") return false;
+    if (el.scrollHeight <= el.clientHeight + 1) return false;
+    if (deltaY < 0 && el.scrollTop <= 0) return false;
+    if (deltaY > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 1) return false;
+    return true;
+  }
+
+  function openDialogUnder(target) {
+    const open = document.querySelectorAll("dialog[open]");
+    if (!open.length) return null;
+    if (target instanceof Element) {
+      const owner = target.closest("dialog[open]");
+      if (owner) return owner;
+    }
+    return open[open.length - 1];
+  }
+
+  function initDialogScrollLock() {
+    let locked = false;
+    let lockedY = 0;
+
+    function sync() {
+      const open = document.querySelector("dialog[open]");
+      if (open && !locked) {
+        locked = true;
+        lockedY = window.scrollY || document.documentElement.scrollTop || 0;
+        document.documentElement.classList.add("portal-dialog-open");
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${lockedY}px`;
+        document.body.style.insetInline = "0";
+        document.body.style.width = "100%";
+      } else if (!open && locked) {
+        locked = false;
+        document.documentElement.classList.remove("portal-dialog-open");
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.insetInline = "";
+        document.body.style.width = "";
+        window.scrollTo(0, lockedY);
+      }
+    }
+
+    const nativeShowModal = HTMLDialogElement.prototype.showModal;
+    const nativeShow = HTMLDialogElement.prototype.show;
+    const nativeClose = HTMLDialogElement.prototype.close;
+    HTMLDialogElement.prototype.showModal = function showModalLocked(...args) {
+      const result = nativeShowModal.apply(this, args);
+      sync();
+      return result;
+    };
+    HTMLDialogElement.prototype.show = function showLocked(...args) {
+      const result = nativeShow.apply(this, args);
+      sync();
+      return result;
+    };
+    HTMLDialogElement.prototype.close = function closeLocked(...args) {
+      const result = nativeClose.apply(this, args);
+      sync();
+      return result;
+    };
+
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["open"],
+    });
+    document.addEventListener("close", sync, true);
+
+    document.addEventListener(
+      "wheel",
+      (event) => {
+        const dialog = openDialogUnder(event.target);
+        if (!dialog) return;
+        if (!(event.target instanceof Element) || !dialog.contains(event.target)) {
+          event.preventDefault();
+          return;
+        }
+        let el = event.target;
+        while (el) {
+          if (dialogCanScroll(el, event.deltaY)) return;
+          if (el === dialog) break;
+          el = el.parentElement;
+        }
+        event.preventDefault();
+      },
+      { passive: false, capture: true }
+    );
+
+    document.addEventListener(
+      "touchmove",
+      (event) => {
+        const dialog = document.querySelector("dialog[open]");
+        if (!dialog) return;
+        if (!(event.target instanceof Element) || !dialog.contains(event.target)) {
+          event.preventDefault();
+        }
+      },
+      { passive: false, capture: true }
+    );
+  }
+
   function initPwa() {
     ensurePwaMeta();
     bindStandaloneLinks();
     registerPortalServiceWorker();
     initOrientationSupport();
+    initDialogScrollLock();
   }
 
   initPwa();

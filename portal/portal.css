@@ -1045,6 +1045,23 @@ html[data-theme="light"] .portal-btn-sm--muted:focus-visible {
   background: rgba(0, 0, 0, 0.62);
 }
 
+html.portal-dialog-open,
+html.portal-dialog-open body {
+  overflow: hidden;
+}
+
+html.portal-dialog-open {
+  scrollbar-gutter: stable;
+}
+
+.portal-dialog,
+.portal-dialog-form,
+.portal-detail-wrap,
+.portal-preview-body,
+.portal-preview-text {
+  overscroll-behavior: contain;
+}
+
 .portal-dialog-form {
   padding: 1.2rem 1.15rem 1.15rem;
   max-height: min(90vh, 42rem);
@@ -4401,7 +4418,7 @@ html[data-theme="light"] .portal-pwa-banner__card {
   .portal-dialog {
     width: min(40rem, calc(100vw - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
     max-height: calc(100dvh - 1rem);
-    overflow: auto;
+    overflow: hidden;
   }
 
   .portal-dialog-form {
