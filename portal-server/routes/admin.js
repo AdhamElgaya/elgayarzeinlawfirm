@@ -417,6 +417,14 @@ router.post(
       await cleanup();
       return res.status(400).json({ error: "العنوان مطلوب." });
     }
+    if (!poaFile) {
+      await cleanup();
+      return res.status(400).json({ error: "صورة التوكيل مطلوبة." });
+    }
+    if (!idFile) {
+      await cleanup();
+      return res.status(400).json({ error: "صورة البطاقة مطلوبة." });
+    }
 
     let email;
     try {

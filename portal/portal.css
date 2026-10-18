@@ -3230,8 +3230,10 @@ html[data-theme="light"] .portal-btn-sm--muted:focus-visible {
   transform: translate(-50%, -60%) rotate(45deg);
 }
 
-.portal-library-sentinel {
+.portal-library-sentinel,
+.portal-list-sentinel {
   height: 1px;
+  list-style: none;
 }
 
 .portal-file-picker {
@@ -3502,8 +3504,10 @@ button.portal-back-link {
   gap: 0.35rem;
 }
 
-.portal-library-sentinel {
+.portal-library-sentinel,
+.portal-list-sentinel {
   height: 1px;
+  list-style: none;
 }
 
 .portal-calendar-layout {

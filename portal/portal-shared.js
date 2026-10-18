@@ -1,5 +1,7 @@
 const PortalDash = (() => {
   const PREVIEW_LIMIT = 5;
+  const LIST_PAGE_SIZE = 30;
+  let listObserver = null;
   let pageType = "home";
   const welcomeText = document.getElementById("welcomeText");
   const statsGrid = document.getElementById("statsGrid");
@@ -272,17 +274,57 @@ const PortalDash = (() => {
     return filtered;
   }
 
+  function clearListObserver() {
+    listObserver?.disconnect();
+    listObserver = null;
+  }
+
+  function paintLazyList(listEl, itemHtml) {
+    clearListObserver();
+    if (!listEl) return;
+    let shown = 0;
+
+    const paint = () => {
+      listObserver?.disconnect();
+      listObserver = null;
+      const slice = itemHtml.slice(shown, shown + LIST_PAGE_SIZE);
+      listEl.querySelector(":scope > .portal-list-sentinel")?.remove();
+      if (shown === 0) listEl.innerHTML = "";
+      if (slice.length) listEl.insertAdjacentHTML("beforeend", slice.join(""));
+      shown += slice.length;
+      if (shown >= itemHtml.length) return;
+      listEl.insertAdjacentHTML("beforeend", `<li class="portal-list-sentinel" aria-hidden="true"></li>`);
+      const sentinel = listEl.querySelector(":scope > .portal-list-sentinel");
+      if (!sentinel || !("IntersectionObserver" in window)) {
+        listEl.insertAdjacentHTML("beforeend", itemHtml.slice(shown).join(""));
+        sentinel?.remove();
+        return;
+      }
+      listObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) paint();
+        },
+        { rootMargin: "280px" }
+      );
+      listObserver.observe(sentinel);
+    };
+
+    paint();
+  }
+
   function renderClients(clientRows, listEl = clientsList) {
     if (!listEl) return;
     const rows = pageType === "clients" ? filterClients(clientRows) : clientRows;
     if (!rows.length) {
+      clearListObserver();
       listEl.innerHTML = emptyState(
         clientRows.length ? "لا توجد نتائج مطابقة للبحث." : "لا يوجد موكلون بعد. أضف موكلاً أولاً."
       );
       return;
     }
-    listEl.innerHTML = rows
-      .map(
+    paintLazyList(
+      listEl,
+      rows.map(
         (client) => `<li class="portal-list-item" data-action="show-client" data-id="${Portal.escapeHtml(client.id)}">
           <div class="portal-list-item__row">
             <div class="portal-list-item__content">
@@ -300,7 +342,7 @@ const PortalDash = (() => {
           </div>
         </li>`
       )
-      .join("");
+    );
   }
 
   function renderCases(cases, listEl = casesList) {
@@ -318,12 +360,14 @@ const PortalDash = (() => {
             : caseInboxMode === "inbox"
               ? "لا توجد قضايا في صندوق الوارد."
               : Portal.t("portal.dashboard.noCases", "لا توجد قضايا معينة بعد.");
+      clearListObserver();
       listEl.innerHTML = emptyState(emptyMsg);
       return;
     }
     const assigned = Portal.t("portal.dashboard.assignedTo", "معيّنة إلى:");
-    listEl.innerHTML = rows
-      .map((c) => {
+    paintLazyList(
+      listEl,
+      rows.map((c) => {
         const assigneeLine =
           (isAdminUser || isSectionManager) && c.assigned_to && (assigneeNames[c.assigned_to] || c.lawyer_name)
             ? `${assigned} ${Portal.escapeHtml(assigneeNames[c.assigned_to] || c.lawyer_name)}`
@@ -348,7 +392,7 @@ const PortalDash = (() => {
           </div>
         </li>`;
       })
-      .join("");
+    );
   }
 
   function renderTasks(tasks, listEl = tasksList) {
@@ -365,12 +409,14 @@ const PortalDash = (() => {
       const emptyMsg = hasFilters
         ? "لا توجد مهام مطابقة للبحث أو التاريخ المحدد."
         : Portal.t("portal.dashboard.noTasks", "لا توجد مهام بعد.");
+      clearListObserver();
       listEl.innerHTML = emptyState(emptyMsg);
       return;
     }
     const due = Portal.t("portal.dashboard.due", "موعد:");
-    listEl.innerHTML = rows
-      .map((t) => {
+    paintLazyList(
+      listEl,
+      rows.map((t) => {
         const assignmentLine = taskAssignmentHtml(t);
         const assigneeLine = assignmentLine || "";
         const statusClass =
@@ -393,7 +439,7 @@ const PortalDash = (() => {
           </div>
         </li>`;
       })
-      .join("");
+    );
   }
 
   function fillClientSelectOptions(select, selectedId = null) {
@@ -1713,6 +1759,16 @@ const PortalDash = (() => {
       const fd = new FormData(addClientForm);
       const clientId = String(fd.get("client_id") || "").trim();
       fd.delete("client_id");
+      if (!clientId) {
+        if (!fd.get("poa") || !(fd.get("poa") instanceof File) || !fd.get("poa").size) {
+          Portal.showAlert(addClientAlert, "صورة التوكيل مطلوبة.");
+          return;
+        }
+        if (!fd.get("id_card") || !(fd.get("id_card") instanceof File) || !fd.get("id_card").size) {
+          Portal.showAlert(addClientAlert, "صورة البطاقة مطلوبة.");
+          return;
+        }
+      }
       const submitBtn = addClientForm.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
       try {
@@ -1740,6 +1796,10 @@ const PortalDash = (() => {
     if (submitBtn) submitBtn.textContent = mode === "edit" ? "حفظ التعديلات" : "إضافة الموكل";
     if (idInput) idInput.value = client?.id || "";
     if (!addClientForm) return;
+    const filesRequired = mode !== "edit";
+    addClientForm.querySelectorAll('[name="poa"], [name="id_card"]').forEach((input) => {
+      input.required = filesRequired;
+    });
     addClientForm.elements.name.value = client?.name || "";
     addClientForm.elements.phone.value = client?.phone || "";
     addClientForm.elements.email.value = client?.email || "";
@@ -2792,7 +2852,7 @@ const PortalDash = (() => {
       return;
     }
     try {
-      const res = await fetch("dialogs.fragment.html?v=31");
+      const res = await fetch("dialogs.fragment.html?v=32");
       if (res.ok) {
         document.body.insertAdjacentHTML("beforeend", await res.text());
         bindDialogRefs();
