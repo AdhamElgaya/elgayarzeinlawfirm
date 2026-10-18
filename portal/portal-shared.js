@@ -809,7 +809,7 @@ const PortalDash = (() => {
 
     titleEl.textContent = "تأكيد الأرشفة";
     confirmDeleteMessage.textContent =
-      "سيتم أرشفة القضية وإخفاؤها من القوائم النشطة. يمكنك الاطلاع على القضايا المؤرشفة من الإحصائيات لاحقاً. هل تريد المتابعة؟";
+      "سيتم أرشفة القضية وإخفاؤها من القوائم النشطة. ستجدها في صفحة المؤرشفة. هل تريد المتابعة؟";
     confirmDeleteOk.textContent = "أرشفة";
     confirmDeleteOk.className = "btn";
 
@@ -2655,7 +2655,13 @@ const PortalDash = (() => {
   async function refresh() {
     if (pageType === "archived") {
       const data = await Portal.request("/dashboard/archived");
-      archivedCases = data.cases;
+      archivedCases = data.cases || [];
+      dashboardData = {
+        cases: archivedCases,
+        tasks: [],
+        clients: [],
+        stats: {},
+      };
       renderPage();
       return;
     }
@@ -2767,7 +2773,18 @@ const PortalDash = (() => {
   }
 
   function renderPage() {
-    if (!dashboardUser || !dashboardData) return;
+    if (!dashboardUser) return;
+
+    if (pageType === "archived") {
+      const titleEl = document.getElementById("casesPanelTitle");
+      if (titleEl) {
+        titleEl.textContent = isAdminUser ? "القضايا المؤرشفة" : "قضاياي المؤرشفة";
+      }
+      renderCases(archivedCases);
+      return;
+    }
+
+    if (!dashboardData) return;
 
     if (pageType === "home") {
       renderHome();
@@ -2787,15 +2804,6 @@ const PortalDash = (() => {
     if (pageType === "cases") {
       updateCasesPanelTitle();
       renderCases(dashboardData.cases);
-      return;
-    }
-
-    if (pageType === "archived") {
-      const titleEl = document.getElementById("casesPanelTitle");
-      if (titleEl) {
-        titleEl.textContent = isAdminUser ? "القضايا المؤرشفة" : "قضاياي المؤرشفة";
-      }
-      renderCases(archivedCases);
       return;
     }
 
