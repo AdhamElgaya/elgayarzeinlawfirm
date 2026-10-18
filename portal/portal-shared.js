@@ -332,10 +332,9 @@ const PortalDash = (() => {
                 <strong>${Portal.escapeHtml(client.name)}</strong>
               </div>
               ${
-                [client.phone, client.email]
-                  .filter(Boolean)
-                  .map((value) => `<span class="portal-list-item__meta">${Portal.escapeHtml(value)}</span>`)
-                  .join("")
+                client.email
+                  ? `<span class="portal-list-item__meta">${Portal.escapeHtml(client.email)}</span>`
+                  : ""
               }
             </div>
             ${showMoreBtn("show-client", client.id)}
