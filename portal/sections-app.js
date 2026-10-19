@@ -16,6 +16,13 @@ const SectionsApp = (() => {
     </td>`;
   }
 
+  function casePreviewLabel(item) {
+    const client = String(item?.client_name || "").trim();
+    const number = String(item?.case_number || "").trim() || String(item?.title || "").split(" — ")[0].trim();
+    if (number && client && number !== client) return `${number} — ${client}`;
+    return client || number || "قضية";
+  }
+
   function casePreviewRows(section, rows = section.preview_cases || []) {
     if (!rows.length) {
       return `<tr class="portal-section-board__empty"><td colspan="3">لا توجد قضايا هنا بعد.</td></tr>`;
@@ -24,8 +31,7 @@ const SectionsApp = (() => {
       .map(
         (item) => `<tr class="portal-section-board__case" data-open-case="${Portal.escapeHtml(item.id)}" data-section="${Portal.escapeHtml(section.id)}" tabindex="0">
           <td>
-            <strong>${Portal.escapeHtml(item.title)}</strong>
-            <span>${Portal.escapeHtml(item.client_name || "بدون موكل")}</span>
+            <strong>${Portal.escapeHtml(casePreviewLabel(item))}</strong>
           </td>
           <td>${Portal.escapeHtml(item.lawyer_name || "مدير القسم")}</td>
           <td>${Portal.statusLabel(item.status)}</td>

@@ -335,6 +335,7 @@ export async function getSectionStats(sectionId) {
     previewCases.push({
       id: caseRow.id,
       title: caseRow.title,
+      case_number: caseRow.case_number || null,
       status: caseRow.status,
       assigned_to: caseRow.assigned_to,
       subsection_id: caseRow.subsection_id || null,
