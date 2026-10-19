@@ -382,8 +382,8 @@ const PortalDash = (() => {
                 <strong>${numberLine}</strong>
                 ${badge(c.status)}
               </div>
-              ${opponentLine ? `<span class="portal-list-item__assignee">${opponentLine}</span>` : ""}
               ${clientLine ? `<span class="portal-list-item__assignee">${clientLine}</span>` : ""}
+              ${opponentLine ? `<span class="portal-list-item__assignee">${opponentLine}</span>` : ""}
               ${sectionLine ? `<span class="portal-list-item__assignee">${sectionLine}</span>` : ""}
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
             </div>
