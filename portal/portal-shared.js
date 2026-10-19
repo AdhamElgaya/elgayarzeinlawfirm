@@ -432,7 +432,7 @@ const PortalDash = (() => {
                 ${badge(t.status)}
               </div>
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
-              <span class="portal-list-item__meta">${Portal.escapeHtml(t.case_title)}${t.due_at ? ` — ${due} ${Portal.formatTaskDue(t.due_at)}` : ""}</span>
+              <span class="portal-list-item__meta">${Portal.escapeHtml(taskCaseLabel(t))}${t.due_at ? ` — ${due} ${Portal.formatTaskDue(t.due_at)}` : ""}</span>
             </div>
             ${taskQuickActions(t)}
           </div>
@@ -626,10 +626,19 @@ const PortalDash = (() => {
   }
 
   function casePickerLabel(c) {
-    const number = String(c.case_number || "").trim();
-    const client = String(c.client_name || "").trim();
+    const number = String(c?.case_number || "").trim();
+    let client = String(c?.client_name || "").trim();
+    if (!client && c?.client_id) {
+      client = String(clients.find((row) => row.id === c.client_id)?.name || "").trim();
+    }
     if (number && client) return `${number} — ${client}`;
-    return client || c.title || number;
+    return client || number || "قضية";
+  }
+
+  function taskCaseLabel(task) {
+    const match = (dashboardData?.cases || []).find((item) => item.id === task?.case_id);
+    if (match) return casePickerLabel(match);
+    return task?.case_title || "—";
   }
 
   function fillCaseSelect() {
@@ -1392,7 +1401,7 @@ const PortalDash = (() => {
         return;
       }
       document.getElementById("editTaskId").value = t.id;
-      document.getElementById("editTaskCaseTitle").textContent = t.case_title || "—";
+      document.getElementById("editTaskCaseTitle").textContent = taskCaseLabel(t);
       document.getElementById("editTaskTitle").value = t.title;
       const assigneeLabel = document.getElementById("editTaskAssigneeLabel");
       if (assigneeLabel) {

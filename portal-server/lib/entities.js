@@ -30,8 +30,17 @@ async function getUserById(userId) {
 async function getCaseById(caseId) {
   if (!caseId) return null;
   return await db
-    .prepare(`SELECT id, title, status FROM cases WHERE id = ? AND deleted_at IS NULL`)
+    .prepare(
+      `SELECT id, title, status, case_number, client_id, client_ref FROM cases WHERE id = ? AND deleted_at IS NULL`
+    )
     .get(caseId);
+}
+
+function taskCaseDisplay(caseRow, client) {
+  const number = String(caseRow?.case_number || "").trim();
+  const clientName = String(client?.name || "").trim();
+  if (number && clientName) return `${number} — ${clientName}`;
+  return clientName || number || caseRow?.title || "";
 }
 
 export async function enrichCase(caseRow) {
@@ -63,14 +72,15 @@ export async function enrichCase(caseRow) {
 
 export async function enrichTask(taskRow) {
   if (!taskRow) return null;
-  const caseRow = taskRow.case_title
-    ? { id: taskRow.case_id, title: taskRow.case_title }
-    : await getCaseById(taskRow.case_id);
+  const caseRow = await getCaseById(taskRow.case_id);
+  const client = await getClientById(caseRow?.client_id);
   const assignee = await getUserById(taskRow.assigned_to);
   return {
     ...taskRow,
     display_id: displayId(taskRow.id),
-    case_title: caseRow?.title || taskRow.case_title || "",
+    case_title: taskCaseDisplay(caseRow, client) || taskRow.case_title || "",
+    case_number: caseRow?.case_number || null,
+    client_name: client?.name || null,
     case_display_id: caseRow ? displayId(caseRow.id) : "",
     assignee_name: assignee?.name || null,
     assignee_role: assignee?.role || null,

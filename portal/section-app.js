@@ -301,6 +301,13 @@ const SectionPage = (() => {
     return person.role ? `${person.name} (${Portal.roleLabel(person.role)})` : person.name;
   }
 
+  function caseChoiceLabel(item) {
+    const number = String(item?.case_number || "").trim();
+    const client = String(item?.client_name || "").trim();
+    if (number && client) return `${number} — ${client}`;
+    return client || number || item?.title || "قضية";
+  }
+
   function caseRowHtml(item) {
     const active = item.id === selectedId ? " is-active" : "";
     const classifyCell =
@@ -308,7 +315,7 @@ const SectionPage = (() => {
         ? `<td class="portal-ss-assign" data-ss-assign-wrap>${subsectionAssignSelect(item.id)}</td>`
         : "";
     return `<tr class="portal-section-board__case${active}" data-case-id="${Portal.escapeHtml(item.id)}" tabindex="0">
-      <td><strong>${Portal.escapeHtml(item.title)}</strong></td>
+      <td><strong>${Portal.escapeHtml(caseChoiceLabel(item))}</strong></td>
       <td>${Portal.escapeHtml(item.client_name || "—")}</td>
       <td>${Portal.escapeHtml(caseResponsible(item).name || "غير معيّن")}</td>
       <td>${Portal.statusLabel(item.status)}</td>
@@ -544,7 +551,7 @@ const SectionPage = (() => {
     const tasks = [];
     for (const item of rows) {
       for (const task of item.tasks || []) {
-        tasks.push({ ...task, case_id: item.id, case_title: item.title });
+        tasks.push({ ...task, case_id: item.id, case_title: caseChoiceLabel(item) });
       }
     }
     if (!tasks.length) return '<p class="portal-detail-empty">لا توجد مهام في هذا القسم الفرعي بعد.</p>';
@@ -607,7 +614,7 @@ const SectionPage = (() => {
     const attachments = (item.attachments || []).filter((file) => file && (file.id || file.filename));
     casePanel.innerHTML = `
       <div class="portal-detail-head">
-        <h2>${Portal.escapeHtml(item.title)}</h2>
+        <h2>${Portal.escapeHtml(caseChoiceLabel(item))}</h2>
         <div class="portal-detail-head-actions">
           <button type="button" class="portal-btn-ghost portal-btn-ghost--sm" id="closeCasePreviewBtn">إغلاق</button>
         </div>

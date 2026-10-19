@@ -34,7 +34,11 @@ const CalendarPage = (() => {
     if (!user) return [];
     let rows = tasks.slice();
     if (scope === "mine") rows = rows.filter((task) => task.assigned_to === user.id);
-    else if (scope === "team") rows = rows.filter((task) => task.assigned_to && task.assigned_to !== user.id);
+    else if (scope === "team") {
+      rows = rows.filter(
+        (task) => task.assigned_to && task.assigned_to !== user.id && task.assignee_role === "lawyer"
+      );
+    }
     rows.sort((a, b) => String(a.due_at || "9999").localeCompare(String(b.due_at || "9999")));
     return rows;
   }
@@ -136,15 +140,17 @@ const CalendarPage = (() => {
     const isManager = user.role === "section_manager";
     const isLead = user.role === "lawyer" && Array.isArray(user.led_subsections) && user.led_subsections.length > 0;
     canScope = isStaff || isManager || isLead;
+    const teamBtn = document.getElementById("calendarTeamBtn");
+    if (teamBtn) {
+      teamBtn.hidden = !isManager;
+      teamBtn.textContent = "مهام الفريق";
+    }
+    if (!isManager && scope === "team") scope = "mine";
     if (!scopeGroup) return;
     scopeGroup.hidden = !canScope;
     if (!canScope) {
       scope = "mine";
       return;
-    }
-    const teamBtn = document.getElementById("calendarTeamBtn");
-    if (teamBtn) {
-      teamBtn.textContent = isManager ? "مهام المحامين" : isLead ? "مهام القسم الفرعي" : "مهام الفريق";
     }
     if (leadEl) {
       leadEl.textContent = "أجنده المكتب";
