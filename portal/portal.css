@@ -2178,14 +2178,14 @@ html.portal-dialog-open {
   top: 50%;
   width: 0.45rem;
   height: 0.45rem;
-  border-inline-end: 2px solid rgba(200, 146, 46, 0.75);
+  border-right: 2px solid rgba(200, 146, 46, 0.75);
   border-bottom: 2px solid rgba(200, 146, 46, 0.75);
-  transform: translateY(-65%) rotate(45deg);
+  transform: translateY(-65%) rotate(-45deg);
   transition: transform 0.18s ease;
 }
 
 .portal-select-wrap.is-open .portal-select-trigger::after {
-  transform: translateY(-20%) rotate(225deg);
+  transform: translateY(-30%) rotate(45deg);
 }
 
 .portal-select-trigger:hover,
