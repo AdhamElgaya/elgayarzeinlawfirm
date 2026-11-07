@@ -652,12 +652,131 @@ const Portal = (() => {
     );
   }
 
+  function closePortalSelect(wrap) {
+    wrap.classList.remove("is-open");
+    const trigger = wrap.querySelector(".portal-select-trigger");
+    const menu = wrap.querySelector(".portal-select-menu");
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
+    if (menu) menu.hidden = true;
+  }
+
+  function enhancePortalSelect(select) {
+    if (!(select instanceof HTMLSelectElement) || select.dataset.portalSelect === "1") return;
+    const wrap = select.closest(".portal-select-wrap");
+    if (!wrap) return;
+    select.dataset.portalSelect = "1";
+    wrap.classList.add("portal-select-wrap--custom");
+    select.classList.add("portal-select-native");
+    select.tabIndex = -1;
+    select.setAttribute("aria-hidden", "true");
+    const blockNativePopup = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    select.addEventListener("pointerdown", blockNativePopup, true);
+    select.addEventListener("mousedown", blockNativePopup, true);
+    select.addEventListener("keydown", (event) => {
+      if ([" ", "Enter", "ArrowDown", "ArrowUp"].includes(event.key)) blockNativePopup(event);
+    });
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "portal-select-trigger";
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+
+    const menu = document.createElement("div");
+    menu.className = "portal-select-menu";
+    menu.hidden = true;
+    menu.setAttribute("role", "listbox");
+    if (select.id) {
+      trigger.id = `${select.id}Trigger`;
+      menu.id = `${select.id}Menu`;
+      trigger.setAttribute("aria-controls", menu.id);
+      const label = document.querySelector(`label[for="${CSS.escape(select.id)}"]`);
+      if (label) label.setAttribute("for", trigger.id);
+    }
+
+    const render = () => {
+      const current = select.value;
+      const selected = select.selectedOptions[0];
+      trigger.textContent = selected ? selected.textContent : "";
+      trigger.disabled = select.disabled;
+      menu.replaceChildren();
+      Array.from(select.options).forEach((option) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "portal-select-option";
+        item.setAttribute("role", "option");
+        item.textContent = option.textContent;
+        const chosen = option.value === current && option === selected;
+        item.classList.toggle("is-selected", chosen);
+        item.setAttribute("aria-selected", chosen ? "true" : "false");
+        item.disabled = option.disabled;
+        item.addEventListener("click", () => {
+          if (option.disabled) return;
+          select.value = option.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          render();
+          closePortalSelect(wrap);
+          trigger.focus();
+        });
+        menu.append(item);
+      });
+    };
+
+    const open = () => {
+      if (trigger.disabled) return;
+      document.querySelectorAll(".portal-select-wrap.is-open").forEach((openWrap) => {
+        if (openWrap !== wrap) closePortalSelect(openWrap);
+      });
+      wrap.classList.add("is-open");
+      trigger.setAttribute("aria-expanded", "true");
+      menu.hidden = false;
+      menu.querySelector(".portal-select-option.is-selected")?.focus();
+    };
+
+    trigger.addEventListener("click", () => {
+      if (wrap.classList.contains("is-open")) closePortalSelect(wrap);
+      else open();
+    });
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        if (!wrap.classList.contains("is-open")) open();
+      } else if (event.key === "Escape") {
+        closePortalSelect(wrap);
+      }
+    });
+    select.addEventListener("change", render);
+    new MutationObserver(render).observe(select, { childList: true, subtree: true });
+    wrap.append(trigger, menu);
+    render();
+  }
+
+  function initPortalSelects() {
+    document.querySelectorAll(".portal-select-wrap select").forEach(enhancePortalSelect);
+    if (document.documentElement.dataset.portalSelectBound === "1") return;
+    document.documentElement.dataset.portalSelectBound = "1";
+    document.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      document.querySelectorAll(".portal-select-wrap.is-open").forEach((wrap) => {
+        if (!target || !wrap.contains(target)) closePortalSelect(wrap);
+      });
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      document.querySelectorAll(".portal-select-wrap.is-open").forEach(closePortalSelect);
+    });
+  }
+
   function initPwa() {
     ensurePwaMeta();
     bindStandaloneLinks();
     registerPortalServiceWorker();
     initOrientationSupport();
     initDialogScrollLock();
+    initPortalSelects();
   }
 
   initPwa();
