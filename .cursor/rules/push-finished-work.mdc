@@ -1,0 +1,13 @@
+---
+description: Commit and push finished work to the current branch
+alwaysApply: true
+---
+
+# Push finished work
+
+When a task is finished, commit the files for that task and push to the current branch's remote. Do not wait for a separate push request.
+
+- Leave unrelated unfinished edits unstaged.
+- Do not commit secrets, `.env`, `portal-server/data`, uploads, or `booking-firebase.js`.
+- Do not force-push unless the user explicitly asks.
+- On PowerShell, pass the commit message with a here-string.

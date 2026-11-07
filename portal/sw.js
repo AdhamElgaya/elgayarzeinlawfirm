@@ -1,12 +1,12 @@
-const CACHE_NAME = "gz-portal-v20";
+const CACHE_NAME = "gz-portal-v21";
 const OFFLINE_URL = "/portal/offline.html";
 const PRECACHE_URLS = [
   OFFLINE_URL,
   "/portal/manifest.json",
   "/portal/login.html",
   "/portal/home.html",
-  "/portal/portal.css?v=78",
-  "/portal/portal.js?v=26",
+  "/portal/portal.css?v=79",
+  "/portal/portal.js?v=27",
   "/styles.css",
   "/i18n-boot.js",
   "/i18n.js",

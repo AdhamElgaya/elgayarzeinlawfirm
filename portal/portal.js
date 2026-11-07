@@ -660,6 +660,16 @@ const Portal = (() => {
     if (menu) menu.hidden = true;
   }
 
+  function portalSelectOwner(node) {
+    if (!(node instanceof Element)) return null;
+    const wrap = node.closest(".portal-select-wrap");
+    if (wrap) return wrap;
+    const label = node.closest("label[for]");
+    const forId = label?.getAttribute("for");
+    if (!forId) return null;
+    return document.getElementById(forId)?.closest(".portal-select-wrap") || null;
+  }
+
   function enhancePortalSelect(select) {
     if (!(select instanceof HTMLSelectElement) || select.dataset.portalSelect === "1") return;
     const wrap = select.closest(".portal-select-wrap");
@@ -713,13 +723,19 @@ const Portal = (() => {
         item.classList.toggle("is-selected", chosen);
         item.setAttribute("aria-selected", chosen ? "true" : "false");
         item.disabled = option.disabled;
-        item.addEventListener("click", () => {
+        item.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
           if (option.disabled) return;
-          select.value = option.value;
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-          render();
-          closePortalSelect(wrap);
-          trigger.focus();
+          try {
+            if (select.value !== option.value) {
+              select.value = option.value;
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          } finally {
+            closePortalSelect(wrap);
+            trigger.focus();
+          }
         });
         menu.append(item);
       });
@@ -733,12 +749,19 @@ const Portal = (() => {
       wrap.classList.add("is-open");
       trigger.setAttribute("aria-expanded", "true");
       menu.hidden = false;
-      menu.querySelector(".portal-select-option.is-selected")?.focus();
+      menu.querySelector(".portal-select-option.is-selected")?.focus({ preventScroll: true });
     };
 
-    trigger.addEventListener("click", () => {
+    trigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       if (wrap.classList.contains("is-open")) closePortalSelect(wrap);
       else open();
+    });
+    wrap.addEventListener("focusout", (event) => {
+      const next = event.relatedTarget;
+      if (!(next instanceof Element) || wrap.contains(next)) return;
+      closePortalSelect(wrap);
     });
     trigger.addEventListener("keydown", (event) => {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -758,12 +781,16 @@ const Portal = (() => {
     document.querySelectorAll(".portal-select-wrap select").forEach(enhancePortalSelect);
     if (document.documentElement.dataset.portalSelectBound === "1") return;
     document.documentElement.dataset.portalSelectBound = "1";
-    document.addEventListener("click", (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      document.querySelectorAll(".portal-select-wrap.is-open").forEach((wrap) => {
-        if (!target || !wrap.contains(target)) closePortalSelect(wrap);
-      });
-    });
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        const owner = portalSelectOwner(event.target instanceof Element ? event.target : null);
+        document.querySelectorAll(".portal-select-wrap.is-open").forEach((wrap) => {
+          if (wrap !== owner) closePortalSelect(wrap);
+        });
+      },
+      true
+    );
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       document.querySelectorAll(".portal-select-wrap.is-open").forEach(closePortalSelect);

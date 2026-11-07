@@ -2206,7 +2206,7 @@ html.portal-dialog-open {
   z-index: 40;
   inset-inline: 0;
   top: calc(100% + 0.35rem);
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 0.15rem;
   max-height: 16rem;
@@ -2218,6 +2218,10 @@ html.portal-dialog-open {
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.48),
     inset 0 1px 0 rgba(200, 146, 46, 0.12);
+}
+
+.portal-select-wrap.is-open > .portal-select-menu {
+  display: flex;
 }
 
 .portal-select-option {
