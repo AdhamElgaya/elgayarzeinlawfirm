@@ -10,6 +10,9 @@ const AttachmentsPage = (() => {
   const previewTitle = document.getElementById("attachmentPreviewTitle");
   const previewBody = document.getElementById("attachmentPreviewBody");
 
+  const deleteDialog = document.getElementById("deleteAttachmentDialog");
+  const deleteMessage = document.getElementById("deleteAttachmentMessage");
+
   let items = [];
   let total = 0;
   let offset = 0;
@@ -17,6 +20,8 @@ const AttachmentsPage = (() => {
   let query = "";
   let previewObjectUrl = null;
   let searchTimer = 0;
+  let canAdmin = false;
+  let pendingDeleteId = "";
 
   function apiRoot() {
     return typeof Portal.apiRoot === "function" ? Portal.apiRoot() : "/api";
@@ -45,8 +50,11 @@ const AttachmentsPage = (() => {
           ? `${Portal.escapeHtml(item.case_title)}${item.subsection_name ? ` · ${Portal.escapeHtml(item.subsection_name)}` : ""}`
           : "—";
         const label = item.label || item.originalName || item.filename || "مرفق";
-        return `<tr>
-          <td><strong>${Portal.escapeHtml(label)}</strong></td>
+        const nameCell = canAdmin
+          ? `<input class="portal-library-rename" data-id="${Portal.escapeHtml(item.id || "")}" data-label="${Portal.escapeHtml(label)}" value="${Portal.escapeHtml(label)}" aria-label="اسم المرفق" />`
+          : `<strong>${Portal.escapeHtml(label)}</strong>`;
+        return `<tr data-attachment-id="${Portal.escapeHtml(item.id || "")}">
+          <td>${nameCell}</td>
           <td>${Portal.escapeHtml(sections)}</td>
           <td>${caseTitle}</td>
           <td>
@@ -63,6 +71,13 @@ const AttachmentsPage = (() => {
                   ? `<a class="portal-attachment-download-link" href="${Portal.escapeHtml(href)}" title="تنزيل" aria-label="تنزيل ${Portal.escapeHtml(label)}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </a>`
+                  : ""
+              }
+              ${
+                canAdmin && item.id
+                  ? `<button type="button" class="portal-attachment-delete-btn" data-action="delete-attachment" data-id="${Portal.escapeHtml(item.id)}" data-label="${Portal.escapeHtml(label)}" title="حذف نهائي" aria-label="حذف نهائي ${Portal.escapeHtml(label)}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>`
                   : ""
               }
             </div>
@@ -173,11 +188,58 @@ const AttachmentsPage = (() => {
     }
   }
 
+  async function renameAttachment(input) {
+    if (!canAdmin || input.dataset.saving === "1") return;
+    const id = input.dataset.id || "";
+    const previous = input.dataset.label || "";
+    const next = input.value.trim();
+    if (!id || !next || next === previous) {
+      input.value = previous;
+      return;
+    }
+    input.dataset.saving = "1";
+    input.disabled = true;
+    try {
+      await Portal.request(`/library-attachments/catalog/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ label: next }),
+      });
+      input.dataset.label = next;
+      input.value = next;
+      const item = items.find((row) => row.id === id);
+      if (item) item.label = next;
+      Portal.showToast("تم تغيير اسم المرفق.", "success");
+    } catch (error) {
+      input.value = previous;
+      Portal.showAlert(alertEl, error.message || "تعذر تغيير اسم المرفق.");
+    } finally {
+      input.disabled = false;
+      delete input.dataset.saving;
+    }
+  }
+
+  async function deleteAttachment(id) {
+    if (!canAdmin || !id) return;
+    try {
+      await Portal.request(`/library-attachments/catalog/${encodeURIComponent(id)}`, { method: "DELETE" });
+      items = items.filter((item) => item.id !== id);
+      total = Math.max(0, total - 1);
+      offset = items.length;
+      bodyEl?.querySelector(`tr[data-attachment-id="${CSS.escape(id)}"]`)?.remove();
+      if (!items.length) renderRows([], true);
+      Portal.showToast("تم حذف المرفق نهائياً.", "success");
+    } catch (error) {
+      Portal.showAlert(alertEl, error.message || "تعذر حذف المرفق.");
+    }
+  }
+
   async function boot() {
     const user = await Portal.requireAuth();
     if (!user) return;
+    canAdmin = user.role === "admin";
+    document.body.classList.toggle("portal-attachments-admin", canAdmin);
     const canView =
-      user.role === "admin" ||
+      canAdmin ||
       user.role === "assistant" ||
       user.role === "section_manager" ||
       (user.role === "lawyer" && Array.isArray(user.led_subsections) && user.led_subsections.length > 0);
@@ -193,16 +255,56 @@ const AttachmentsPage = (() => {
       if (previewBody) previewBody.innerHTML = "";
     });
     document.body.addEventListener("click", (event) => {
-      const btn = event.target.closest("[data-action='view-attachment']");
-      if (!btn) return;
+      const viewBtn = event.target.closest("[data-action='view-attachment']");
+      if (viewBtn) {
+        event.preventDefault();
+        openPreview(
+          viewBtn.dataset.viewUrl,
+          viewBtn.dataset.mimeType,
+          viewBtn.dataset.label,
+          viewBtn.dataset.originalName,
+          viewBtn.dataset.filename
+        );
+        return;
+      }
+      const deleteBtn = event.target.closest("[data-action='delete-attachment']");
+      if (!deleteBtn || !canAdmin) return;
       event.preventDefault();
-      openPreview(
-        btn.dataset.viewUrl,
-        btn.dataset.mimeType,
-        btn.dataset.label,
-        btn.dataset.originalName,
-        btn.dataset.filename
-      );
+      pendingDeleteId = deleteBtn.dataset.id || "";
+      if (deleteMessage) {
+        const name = deleteBtn.dataset.label || "هذا المرفق";
+        deleteMessage.textContent = `سيتم حذف «${name}» نهائياً من المكتب وكل القضايا. لا يمكن التراجع.`;
+      }
+      deleteDialog?.showModal();
+    });
+    bodyEl?.addEventListener("keydown", (event) => {
+      const input = event.target.closest(".portal-library-rename");
+      if (!input) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        renameAttachment(input);
+      } else if (event.key === "Escape") {
+        input.value = input.dataset.label || "";
+        input.blur();
+      }
+    });
+    bodyEl?.addEventListener("change", (event) => {
+      const input = event.target.closest(".portal-library-rename");
+      if (input) renameAttachment(input);
+    });
+    bodyEl?.addEventListener("focusout", (event) => {
+      const input = event.target.closest(".portal-library-rename");
+      if (input) renameAttachment(input);
+    });
+    document.getElementById("cancelDeleteAttachmentBtn")?.addEventListener("click", () => {
+      pendingDeleteId = "";
+      deleteDialog?.close();
+    });
+    document.getElementById("confirmDeleteAttachmentBtn")?.addEventListener("click", () => {
+      const id = pendingDeleteId;
+      pendingDeleteId = "";
+      deleteDialog?.close();
+      if (id) deleteAttachment(id);
     });
     searchEl?.addEventListener("input", () => {
       window.clearTimeout(searchTimer);

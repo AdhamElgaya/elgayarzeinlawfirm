@@ -3685,6 +3685,36 @@ button.portal-back-link {
   width: 6.2rem;
 }
 
+body.portal-attachments-admin .portal-attachments-table th:nth-child(4),
+body.portal-attachments-admin .portal-attachments-table td:nth-child(4) {
+  width: 9.2rem;
+}
+
+.portal-attachment-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  border: 1px solid var(--portal-red-line);
+  background: var(--portal-red-fill);
+  color: var(--portal-red-ink);
+  cursor: pointer;
+}
+
+.portal-attachment-delete-btn svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.portal-attachment-delete-btn:hover,
+.portal-attachment-delete-btn:focus-visible {
+  background: var(--portal-red-fill-strong);
+  border-color: var(--portal-red-line-strong);
+  color: var(--portal-red-ink-hover);
+}
+
 .portal-attachment-actions {
   display: flex;
   flex-wrap: nowrap;

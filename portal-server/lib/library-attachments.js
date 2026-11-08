@@ -10,7 +10,7 @@ import {
   listSectionCases,
   subsectionName,
 } from "./sections.js";
-import { normalizeAttachment } from "./attachments.js";
+import { deleteStoredFile, normalizeAttachment } from "./attachments.js";
 
 export function parseSectionIds(value) {
   let ids = value;
@@ -240,6 +240,105 @@ export async function propagateLibraryLabel(attachmentId, label) {
     if (changed) {
       await db.prepare(`UPDATE tasks SET attachments = ? WHERE id = ?`).run(next, row.id);
     }
+  }
+}
+
+export async function deleteLibraryAttachment(id) {
+  await db.prepare(`DELETE FROM library_attachments WHERE id = ?`).run(id);
+}
+
+async function listLiveAttachmentRows(table) {
+  const sql =
+    table === "tasks"
+      ? `SELECT id, attachments FROM tasks WHERE deleted_at IS NULL`
+      : `SELECT id, attachments FROM cases WHERE deleted_at IS NULL`;
+  return await db.prepare(sql).all();
+}
+
+export async function catalogAttachmentExists(attachmentId) {
+  if (!attachmentId) return false;
+  if (await getLibraryAttachment(attachmentId)) return true;
+  for (const table of ["cases", "tasks"]) {
+    for (const row of await listLiveAttachmentRows(table)) {
+      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      if (attachments.some((item) => item?.id === attachmentId)) return true;
+    }
+  }
+  return false;
+}
+
+async function filenamesForAttachment(attachmentId) {
+  const names = new Set();
+  const library = await getLibraryAttachment(attachmentId);
+  if (library?.filename) names.add(library.filename);
+  for (const table of ["cases", "tasks"]) {
+    for (const row of await listLiveAttachmentRows(table)) {
+      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      for (const item of attachments) {
+        if (item?.id === attachmentId && item.filename) names.add(item.filename);
+      }
+    }
+  }
+  return [...names];
+}
+
+async function filenameStillUsed(filename) {
+  if (!filename) return false;
+  if ((await listLibraryAttachments()).some((row) => row.filename === filename)) return true;
+  for (const table of ["cases", "tasks"]) {
+    for (const row of await listLiveAttachmentRows(table)) {
+      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      if (attachments.some((item) => item?.filename === filename)) return true;
+    }
+  }
+  const clients = await db
+    .prepare(
+      `SELECT id, name, poa_document, id_document FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`
+    )
+    .all();
+  for (const client of clients || []) {
+    for (const key of ["poa_document", "id_document"]) {
+      let raw = client[key];
+      if (typeof raw === "string") {
+        try {
+          raw = JSON.parse(raw);
+        } catch {
+          raw = null;
+        }
+      }
+      if (raw?.filename === filename) return true;
+    }
+  }
+  return false;
+}
+
+export async function renameCatalogAttachment(attachmentId, label) {
+  if (await getLibraryAttachment(attachmentId)) {
+    await updateLibraryAttachment(attachmentId, { label });
+  }
+  await propagateLibraryLabel(attachmentId, label);
+}
+
+export async function permanentlyDeleteCatalogAttachment(attachmentId) {
+  const filenames = await filenamesForAttachment(attachmentId);
+  if (await getLibraryAttachment(attachmentId)) {
+    await deleteLibraryAttachment(attachmentId);
+  }
+  for (const table of ["cases", "tasks"]) {
+    const rows = await listLiveAttachmentRows(table);
+    for (const row of rows) {
+      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      const next = attachments.filter((item) => item?.id !== attachmentId);
+      if (next.length === attachments.length) continue;
+      const sql =
+        table === "tasks"
+          ? `UPDATE tasks SET attachments = ? WHERE id = ?`
+          : `UPDATE cases SET attachments = ? WHERE id = ?`;
+      await db.prepare(sql).run(next, row.id);
+    }
+  }
+  for (const filename of filenames) {
+    if (!(await filenameStillUsed(filename))) await deleteStoredFile(filename);
   }
 }
 

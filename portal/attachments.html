@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" /></noscript>
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css?v=80" />
+    <link rel="stylesheet" href="portal.css?v=81" />
   </head>
   <body class="portal-page" data-page="portal-attachments" data-portal-page="attachments">
     <header class="portal-header">
@@ -81,6 +81,17 @@
       </div>
     </main>
 
+    <dialog id="deleteAttachmentDialog" class="portal-dialog">
+      <div class="portal-dialog-form">
+        <h2>حذف نهائي</h2>
+        <p id="deleteAttachmentMessage" class="portal-confirm-text">سيتم حذف المرفق نهائياً من المكتب وكل القضايا. لا يمكن التراجع.</p>
+        <div class="portal-dialog-actions">
+          <button type="button" class="portal-btn-ghost" id="cancelDeleteAttachmentBtn">إلغاء</button>
+          <button type="button" class="portal-btn-danger" id="confirmDeleteAttachmentBtn">حذف نهائي</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog id="attachmentPreviewDialog" class="portal-dialog portal-dialog--preview">
       <div class="portal-preview-dialog">
         <div class="portal-preview-head">
@@ -95,6 +106,6 @@
     <script src="api-config.js?v=4"></script>
     <script src="portal.js?v=27"></script>
     <script src="portal-nav.js?v=27"></script>
-    <script src="attachments-app.js?v=19"></script>
+    <script src="attachments-app.js?v=21"></script>
   </body>
 </html>

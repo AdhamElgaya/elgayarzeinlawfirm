@@ -18,6 +18,7 @@ import {
   SECTION_DEFS,
   getActiveUser,
   getManagedSection,
+  isAdminOnly,
   isOfficeStaff,
   isSectionManager,
   listLedSubsections,
@@ -25,13 +26,16 @@ import {
 import {
   canRenameLibraryAttachment,
   canViewLibraryAttachment,
+  catalogAttachmentExists,
   getLibraryAttachment,
   insertLibraryAttachment,
   listCatalogAttachments,
   listLibraryAttachments,
   parseSectionIds,
+  permanentlyDeleteCatalogAttachment,
   propagateLibraryLabel,
   publicLibraryRow,
+  renameCatalogAttachment,
   sectionIdsForCreate,
   updateLibraryAttachment,
 } from "../lib/library-attachments.js";
@@ -65,6 +69,13 @@ const upload = multer({
     }
   },
 });
+
+function requireAdminOnly(req, res, next) {
+  if (!isAdminOnly(req.user)) {
+    return res.status(403).json({ error: "هذا الإجراء متاح للمدير فقط." });
+  }
+  next();
+}
 
 function requireLibraryEditor(req, res, next) {
   const role = req.user?.role;
@@ -127,6 +138,52 @@ router.get("/catalog", requireCatalogViewer, async (req, res) => {
   } catch (error) {
     console.error("[portal] catalog attachments:", error);
     res.status(500).json({ error: "تعذر تحميل المرفقات." });
+  }
+});
+
+router.patch("/catalog/:id", requireAdminOnly, async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    const label = String(req.body?.label || "").trim();
+    if (!label) return res.status(400).json({ error: "اسم المرفق مطلوب." });
+    if (!(await catalogAttachmentExists(id))) {
+      return res.status(404).json({ error: "المرفق غير موجود." });
+    }
+    await renameCatalogAttachment(id, label);
+    await writeAudit({
+      userId: req.user.id,
+      action: "attachment_renamed",
+      entityType: "attachment",
+      entityId: id,
+      metadata: { label },
+      ip: req.ip,
+    });
+    res.json({ id, label, message: "تم تغيير اسم المرفق." });
+  } catch (error) {
+    console.error("[portal] catalog rename:", error);
+    res.status(500).json({ error: "تعذر تغيير اسم المرفق." });
+  }
+});
+
+router.delete("/catalog/:id", requireAdminOnly, async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!(await catalogAttachmentExists(id))) {
+      return res.status(404).json({ error: "المرفق غير موجود." });
+    }
+    await permanentlyDeleteCatalogAttachment(id);
+    await writeAudit({
+      userId: req.user.id,
+      action: "attachment_deleted",
+      entityType: "attachment",
+      entityId: id,
+      metadata: { permanent: true },
+      ip: req.ip,
+    });
+    res.json({ ok: true, message: "تم حذف المرفق نهائياً." });
+  } catch (error) {
+    console.error("[portal] catalog delete:", error);
+    res.status(500).json({ error: "تعذر حذف المرفق." });
   }
 });
 

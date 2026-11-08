@@ -436,6 +436,14 @@ function runQuery(dbRef, sql, params, mutate) {
     return [];
   }
 
+  if (lower.startsWith("delete from library_attachments where id = ?")) {
+    if (mutate) {
+      dbRef.data.library_attachments = (dbRef.data.library_attachments || []).filter((item) => item.id !== params[0]);
+      save(dbRef.data);
+    }
+    return [];
+  }
+
   if (lower.includes("from library_attachments where id = ?")) {
     const row = (dbRef.data.library_attachments || []).find((item) => item.id === params[0]);
     return row ? [row] : [];
