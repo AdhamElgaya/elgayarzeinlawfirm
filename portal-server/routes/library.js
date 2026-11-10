@@ -13,6 +13,7 @@ import {
 } from "../lib/attachments.js";
 import { putFile } from "../lib/storage.js";
 import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
+import { matchesSearch } from "../lib/search-text.js";
 import { requireAuth } from "../middleware/auth.js";
 import {
   SECTION_DEFS,
@@ -105,25 +106,26 @@ async function enrichLibrary(row) {
 
 router.get("/catalog", requireCatalogViewer, async (req, res) => {
   try {
-    const query = String(req.query.q || "").trim().toLowerCase();
+    const query = String(req.query.q || "").trim();
     const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 30));
     const offset = Math.max(0, Number(req.query.offset) || 0);
     let items = await listCatalogAttachments(req.user);
     if (query) {
-      items = items.filter((item) => {
-        const haystack = [
-          item.label,
-          item.originalName,
-          item.case_title,
-          item.created_by_name,
-          item.subsection_name,
-          ...(item.section_names || []),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return haystack.includes(query);
-      });
+      items = items.filter((item) =>
+        matchesSearch(
+          [
+            item.label,
+            item.originalName,
+            item.case_title,
+            item.case_number,
+            item.opponent_name,
+            item.created_by_name,
+            item.subsection_name,
+            ...(item.section_names || []),
+          ],
+          query
+        )
+      );
     }
     res.json({
       attachments: items.slice(offset, offset + limit),

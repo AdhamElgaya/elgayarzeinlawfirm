@@ -183,11 +183,16 @@ const PortalDash = (() => {
     if (!q) return rows;
     return rows.filter((client) => {
       const relatedCases = (dashboardData?.cases || []).filter((c) => c.client_id === client.id);
-      const caseTitles = relatedCases.map((c) => c.title).join(" ");
-      const haystack = [client.name, client.phone || "", client.email || "", client.address || "", caseTitles]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
+      return Portal.matchesSearch(
+        [
+          client.name,
+          client.phone,
+          client.email,
+          client.address,
+          ...relatedCases.flatMap((c) => [c.title, c.case_number, c.opponent_name, c.notes]),
+        ],
+        q
+      );
     });
   }
 
@@ -223,19 +228,27 @@ const PortalDash = (() => {
     const q = normalizeSearch(casesSearch?.value);
     if (!q) return filtered;
     return filtered.filter((c) => {
-      const lawyer = assigneeNames[c.assigned_to] || "";
-      const haystack = [
-        c.case_number,
-        c.opponent_name,
-        c.title,
-        c.client_name || "",
-        caseSectionLabel(c),
-        lawyer,
-        Portal.statusLabel(c.status),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
+      const attachmentText = (Array.isArray(c.attachments) ? c.attachments : []).flatMap((item) => [
+        item?.label,
+        item?.originalName,
+      ]);
+      return Portal.matchesSearch(
+        [
+          c.case_number,
+          c.opponent_name,
+          c.title,
+          c.client_name,
+          c.client_phone,
+          caseSectionLabel(c),
+          c.subsection_name,
+          c.lawyer_name,
+          assigneeNames[c.assigned_to],
+          c.notes,
+          Portal.statusLabel(c.status),
+          ...attachmentText,
+        ],
+        q
+      );
     });
   }
 
@@ -267,17 +280,10 @@ const PortalDash = (() => {
     if (q) {
       filtered = filtered.filter((t) => {
         const assigneeName = assigneeNames[t.assigned_to] || t.assignee_name || "";
-        const haystack = [
-          t.title,
-          t.case_title || "",
-          assigneeName,
-          Portal.formatAssignmentStamp(t.assigned_at || t.created_at),
-          Portal.statusLabel(t.status),
-          t.due_at ? Portal.formatDateInput(t.due_at) : "",
-        ]
-          .join(" ")
-          .toLowerCase();
-        return haystack.includes(q);
+        return Portal.matchesSearch(
+          [t.title, t.case_title, t.case_number, t.client_name, t.incomplete_reason, assigneeName, Portal.statusLabel(t.status)],
+          q
+        );
       });
     }
 

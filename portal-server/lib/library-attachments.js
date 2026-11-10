@@ -131,6 +131,8 @@ function catalogFromCase(caseRow) {
         subsection_name: subsectionName(caseRow.section_id, caseRow.subsection_id),
         case_id: caseRow.id,
         case_title: caseRow.title || null,
+        case_number: caseRow.case_number || null,
+        opponent_name: caseRow.opponent_name || null,
         created_by: null,
         created_by_name: null,
         created_at: null,
@@ -139,26 +141,55 @@ function catalogFromCase(caseRow) {
     });
 }
 
-export async function listCatalogAttachments(user) {
-  const seen = new Set();
-  const items = [];
-
-  const push = (item) => {
-    const key = item?.id || item?.filename;
-    if (!key || seen.has(key)) return;
-    seen.add(key);
+function rememberCatalogItem(items, seen, item) {
+  const key = item?.id || item?.filename;
+  if (!key) return;
+  const existing = seen.get(key);
+  if (!existing) {
+    seen.set(key, item);
     items.push(item);
-  };
+    return;
+  }
+  if (!existing.case_id && item.case_id) {
+    existing.case_id = item.case_id;
+    existing.case_title = item.case_title;
+    existing.case_number = item.case_number;
+    existing.opponent_name = item.opponent_name;
+    existing.subsection_id = item.subsection_id;
+    existing.subsection_name = item.subsection_name;
+  }
+  for (const field of ["case_number", "opponent_name"]) {
+    const extra = item[field];
+    if (!extra) continue;
+    const current = String(existing[field] || "");
+    if (current.includes(String(extra))) continue;
+    existing[field] = current ? `${current} ${extra}` : extra;
+  }
+}
+
+async function listOfficeCases() {
+  return db
+    .prepare(
+      `SELECT id, title, attachments, section_id, subsection_id, opponent_name, case_number
+       FROM cases
+       WHERE status != 'archived' AND deleted_at IS NULL
+         AND (assigned_to = ? OR ? = 1 OR section_id = ?)`
+    )
+    .all("", 1, "");
+}
+
+export async function listCatalogAttachments(user) {
+  const seen = new Map();
+  const items = [];
+  const push = (item) => rememberCatalogItem(items, seen, item);
 
   if (isOfficeStaff(user)) {
     for (const row of await listLibraryAttachments()) {
       const creator = row.created_by ? await getActiveUser(row.created_by) : null;
       push(catalogFromLibrary(row, creator));
     }
-    for (const section of SECTION_DEFS) {
-      for (const caseRow of await listSectionCases(section.id)) {
-        for (const item of catalogFromCase(caseRow)) push(item);
-      }
+    for (const caseRow of await listOfficeCases()) {
+      for (const item of catalogFromCase(caseRow)) push(item);
     }
     return items;
   }
