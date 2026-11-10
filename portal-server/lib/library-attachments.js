@@ -98,8 +98,26 @@ function catalogFromLibrary(row, creator = null) {
   };
 }
 
+function attachmentList(value) {
+  let list = value;
+  if (typeof list === "string") {
+    try {
+      list = JSON.parse(list);
+    } catch {
+      return [];
+    }
+  }
+  return Array.isArray(list) ? list : [];
+}
+
+function matchesRemovedAttachment(item, attachmentId, filenames) {
+  if (!item) return false;
+  if (item.id === attachmentId) return true;
+  return Boolean(item.filename && filenames.has(item.filename));
+}
+
 function catalogFromCase(caseRow) {
-  const attachments = Array.isArray(caseRow.attachments) ? caseRow.attachments : [];
+  const attachments = attachmentList(caseRow.attachments);
   const sectionIds = caseRow.section_id ? [caseRow.section_id] : [];
   return attachments
     .filter((item) => item && (item.id || item.filename))
@@ -216,7 +234,7 @@ export async function updateLibraryAttachment(id, { label, section_ids }) {
 export async function propagateLibraryLabel(attachmentId, label) {
   const cases = await db.prepare(`SELECT id, attachments FROM cases WHERE deleted_at IS NULL`).all();
   for (const row of cases) {
-    const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+    const attachments = attachmentList(row.attachments);
     let changed = false;
     const next = attachments.map((item) => {
       if (item?.id !== attachmentId) return item;
@@ -230,7 +248,7 @@ export async function propagateLibraryLabel(attachmentId, label) {
 
   const tasks = await db.prepare(`SELECT id, attachments FROM tasks WHERE deleted_at IS NULL`).all();
   for (const row of tasks) {
-    const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+    const attachments = attachmentList(row.attachments);
     let changed = false;
     const next = attachments.map((item) => {
       if (item?.id !== attachmentId) return item;
@@ -260,7 +278,7 @@ export async function catalogAttachmentExists(attachmentId) {
   if (await getLibraryAttachment(attachmentId)) return true;
   for (const table of ["cases", "tasks"]) {
     for (const row of await listLiveAttachmentRows(table)) {
-      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      const attachments = attachmentList(row.attachments);
       if (attachments.some((item) => item?.id === attachmentId)) return true;
     }
   }
@@ -273,7 +291,7 @@ async function filenamesForAttachment(attachmentId) {
   if (library?.filename) names.add(library.filename);
   for (const table of ["cases", "tasks"]) {
     for (const row of await listLiveAttachmentRows(table)) {
-      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      const attachments = attachmentList(row.attachments);
       for (const item of attachments) {
         if (item?.id === attachmentId && item.filename) names.add(item.filename);
       }
@@ -287,7 +305,7 @@ async function filenameStillUsed(filename) {
   if ((await listLibraryAttachments()).some((row) => row.filename === filename)) return true;
   for (const table of ["cases", "tasks"]) {
     for (const row of await listLiveAttachmentRows(table)) {
-      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
+      const attachments = attachmentList(row.attachments);
       if (attachments.some((item) => item?.filename === filename)) return true;
     }
   }
@@ -327,8 +345,8 @@ export async function permanentlyDeleteCatalogAttachment(attachmentId) {
   for (const table of ["cases", "tasks"]) {
     const rows = await listLiveAttachmentRows(table);
     for (const row of rows) {
-      const attachments = Array.isArray(row.attachments) ? row.attachments : [];
-      const next = attachments.filter((item) => item?.id !== attachmentId);
+      const attachments = attachmentList(row.attachments);
+      const next = attachments.filter((item) => !matchesRemovedAttachment(item, attachmentId, new Set(filenames)));
       if (next.length === attachments.length) continue;
       const sql =
         table === "tasks"

@@ -147,7 +147,7 @@ router.patch("/catalog/:id", requireAdminOnly, async (req, res) => {
     const label = String(req.body?.label || "").trim();
     if (!label) return res.status(400).json({ error: "اسم المرفق مطلوب." });
     if (!(await catalogAttachmentExists(id))) {
-      return res.status(404).json({ error: "المرفق غير موجود." });
+      return res.status(422).json({ error: "المرفق غير موجود." });
     }
     await renameCatalogAttachment(id, label);
     await writeAudit({
@@ -169,7 +169,7 @@ router.delete("/catalog/:id", requireAdminOnly, async (req, res) => {
   try {
     const id = String(req.params.id || "").trim();
     if (!(await catalogAttachmentExists(id))) {
-      return res.status(404).json({ error: "المرفق غير موجود." });
+      return res.status(422).json({ error: "المرفق غير موجود." });
     }
     await permanentlyDeleteCatalogAttachment(id);
     await writeAudit({

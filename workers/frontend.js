@@ -34,10 +34,20 @@ async function proxyToRailway(request, env) {
   try {
     const upstream = await fetch(target, init);
     if (upstream.status === 404) {
+      const text = await upstream.text();
+      let parsed = null;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = null;
+      }
+      if (parsed && typeof parsed.error === "string" && parsed.error !== "Not found") {
+        return Response.json(parsed, { status: 404 });
+      }
       return Response.json(
         {
           error:
-            "خادم Railway لا يستجيب على مسار API. افتح إعدادات Railway وانسخ Public Domain وتأكد أن الخدمة تعمل.",
+            "هذا المسار غير موجود على خادم Railway. أعد نشر خدمة الـ API من آخر تحديث على GitHub.",
         },
         { status: 502 }
       );
