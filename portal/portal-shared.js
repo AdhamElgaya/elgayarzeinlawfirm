@@ -1895,7 +1895,7 @@ const PortalDash = (() => {
     form.hidden = true;
     form.reset();
     const nameEl = document.getElementById("libraryUploadFileName");
-    if (nameEl) nameEl.textContent = "لم يُختر ملف";
+    if (nameEl) nameEl.textContent = "";
   }
 
   function setLibraryPickerMode(mode) {
@@ -2000,7 +2000,7 @@ const PortalDash = (() => {
     const fileName = document.getElementById("libraryUploadFileName");
     fileInput?.addEventListener("change", () => {
       const file = fileInput.files?.[0];
-      if (fileName) fileName.textContent = file?.name || "لم يُختر ملف";
+      if (fileName) fileName.textContent = file?.name || "";
       const labelInput = uploadForm?.querySelector('input[name="label"]');
       if (labelInput && !labelInput.value.trim() && file?.name) {
         labelInput.value = file.name.replace(/\.[^.]+$/, "");
@@ -2031,7 +2031,7 @@ const PortalDash = (() => {
     document.getElementById("libraryAddNewBtn")?.addEventListener("click", () => {
       if (!uploadForm) return;
       uploadForm.reset();
-      if (fileName) fileName.textContent = "لم يُختر ملف";
+      if (fileName) fileName.textContent = "";
       if (isAdminUser) {
         fillLibrarySectionAccess();
         const sectionId = caseSectionSelect?.value || libraryPickerTarget?.dataset.sectionId || "";
@@ -2892,7 +2892,7 @@ const PortalDash = (() => {
       return;
     }
     try {
-      const res = await fetch("dialogs.fragment.html?v=32");
+      const res = await fetch("dialogs.fragment.html?v=33");
       if (res.ok) {
         document.body.insertAdjacentHTML("beforeend", await res.text());
         bindDialogRefs();

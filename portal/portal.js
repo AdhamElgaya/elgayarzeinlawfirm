@@ -397,7 +397,7 @@ const Portal = (() => {
     if (!file || !isBlockedUploadFile(file)) return;
     input.value = "";
     const nameEl = document.getElementById("libraryUploadFileName");
-    if (nameEl && input.id === "libraryUploadFile") nameEl.textContent = "لم يُختر ملف";
+    if (nameEl && input.id === "libraryUploadFile") nameEl.textContent = "";
     const draftName = input.closest(".portal-attachment-file-wrap")?.querySelector(".portal-attachment-file-name");
     if (draftName) draftName.textContent = "لم يُرفَع ملف بعد";
     showToast(ZIP_REJECT_MESSAGE, "error");
