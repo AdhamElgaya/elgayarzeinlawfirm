@@ -113,6 +113,16 @@ const PortalDash = (() => {
     </button>`;
   }
 
+  function archiveIconBtn(action, id) {
+    return `<button type="button" class="portal-quick-btn" data-action="${action}" data-id="${Portal.escapeHtml(id)}" title="أرشفة" aria-label="أرشفة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M4 7h16v3H4V7Z" stroke-linejoin="round" />
+        <path d="M6 10v8h12v-8" stroke-linejoin="round" />
+        <path d="M10 14h4" stroke-linecap="round" />
+      </svg>
+    </button>`;
+  }
+
   function taskQuickActions(task) {
     if (task.status === "missed") {
       return `<div class="portal-quick-actions">${infoIconBtn("show-task", task.id)}</div>`;
@@ -388,8 +398,8 @@ const PortalDash = (() => {
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
             </div>
             <div class="portal-list-item__actions">
-              ${showMoreBtn("show-case", c.id)}
-              ${isAdminOnly && c.status !== "archived" ? showMoreBtn("archive-case", c.id, "أرشفة") : ""}
+              ${infoIconBtn("show-case", c.id, "عرض")}
+              ${isAdminOnly && c.status !== "archived" ? archiveIconBtn("archive-case", c.id) : ""}
             </div>
           </div>
         </li>`;
@@ -821,7 +831,7 @@ const PortalDash = (() => {
 
     titleEl.textContent = "تأكيد الأرشفة";
     confirmDeleteMessage.textContent =
-      "سيتم أرشفة القضية وإخفاؤها من القوائم النشطة. ستجدها في صفحة المؤرشفة. هل تريد المتابعة؟";
+      "سيتم أرشفة القضية وإخفاؤها من القوائم النشطة. ستبقى في صفحة المؤرشفة. هل تريد المتابعة؟";
     confirmDeleteOk.textContent = "أرشفة";
     confirmDeleteOk.className = "btn";
 

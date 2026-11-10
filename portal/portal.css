@@ -1615,8 +1615,8 @@ html.portal-dialog-open {
   }
 
   .portal-list-item__actions {
-    align-self: stretch;
-    width: 100%;
+    align-self: center;
+    width: auto;
   }
 
   .portal-quick-actions {
@@ -2325,7 +2325,7 @@ html.portal-dialog-open {
 .portal-list-item__actions {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
 }
