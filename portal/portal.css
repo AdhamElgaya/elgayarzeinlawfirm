@@ -2490,6 +2490,21 @@ html.portal-dialog-open {
   color: var(--gold-soft);
 }
 
+.portal-detail-subtitle--count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.portal-detail-subtitle--count #caseAttachmentCount {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--gold-soft);
+}
+
 .portal-detail-notes {
   width: 100%;
   padding: 0.65rem 0.75rem;

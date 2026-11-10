@@ -1179,6 +1179,14 @@ const PortalDash = (() => {
     const list = document.getElementById("caseAttachmentsList");
     if (!list) return;
     list.innerHTML = attachments.map((item) => savedAttachmentRow(item, canDelete)).join("");
+    refreshCaseAttachmentCount();
+  }
+
+  function refreshCaseAttachmentCount() {
+    const el = document.getElementById("caseAttachmentCount");
+    const list = document.getElementById("caseAttachmentsList");
+    if (!el || !list) return;
+    el.textContent = String(list.querySelectorAll(".portal-attachment-row").length);
   }
 
   async function openCaseDetail(caseId) {
@@ -1203,6 +1211,7 @@ const PortalDash = (() => {
           </div>`
         : `<p class="portal-detail-empty">لا توجد مهام بعد لهذه القضية.</p>`;
       const attachments = c.attachments || [];
+      const savedAttachments = attachments.filter(isSavedAttachment);
       detailDialogBody.innerHTML = `
           <div class="portal-detail" data-case-id="${c.id}" data-section-id="${Portal.escapeHtml(c.section_id || "")}">
           <div class="portal-detail-head">
@@ -1228,12 +1237,12 @@ const PortalDash = (() => {
               ? `<textarea id="caseNotesInput" class="portal-detail-notes" rows="4" placeholder="أضف مستجدات عن القضية...">${Portal.escapeHtml(c.notes || "")}</textarea>`
               : `<p class="portal-detail-text">${c.notes ? Portal.escapeHtml(c.notes) : "لا توجد مستجدات."}</p>`
           }
-          <h3 class="portal-detail-subtitle">مرفقات القضية</h3>
+          <h3 class="portal-detail-subtitle portal-detail-subtitle--count">
+            <span>مرفقات القضية</span>
+            <span id="caseAttachmentCount" dir="ltr">${savedAttachments.length}</span>
+          </h3>
           <div id="caseAttachmentsList" class="portal-attachments">
-            ${attachments
-              .filter(isSavedAttachment)
-              .map((item) => savedAttachmentRow(item, canDeleteAttachments))
-              .join("")}
+            ${savedAttachments.map((item) => savedAttachmentRow(item, canDeleteAttachments)).join("")}
           </div>
           ${
             canEdit
@@ -1907,6 +1916,7 @@ const PortalDash = (() => {
     if (!libraryPickerTarget || !item?.id) return;
     if (currentCaseAttachmentIds().includes(item.id)) return;
     libraryPickerTarget.insertAdjacentHTML("beforeend", savedAttachmentRow(item, true));
+    if (libraryPickerTarget.id === "caseAttachmentsList") refreshCaseAttachmentCount();
   }
 
   async function loadLibraryPage({ reset = false } = {}) {
@@ -2580,6 +2590,7 @@ const PortalDash = (() => {
         const isSaved = row?.classList.contains("portal-attachment-row--saved");
         if (isSaved && !isAdminOnly) return;
         row?.remove();
+        refreshCaseAttachmentCount();
         if (isSaved) {
           const caseId = detailDialogBody.querySelector("[data-case-id]")?.dataset.caseId;
           if (caseId) await saveCaseDetail(caseId, { quiet: true });
