@@ -1614,6 +1614,11 @@ html.portal-dialog-open {
     padding: 0.5rem 0.75rem;
   }
 
+  .portal-list-item__actions {
+    align-self: stretch;
+    width: 100%;
+  }
+
   .portal-quick-actions {
     align-self: flex-start;
   }
@@ -2315,6 +2320,14 @@ html.portal-dialog-open {
 .portal-link-btn:hover {
   background: rgba(200, 146, 46, 0.12);
   border-color: rgba(200, 146, 46, 0.55);
+}
+
+.portal-list-item__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .portal-quick-actions {

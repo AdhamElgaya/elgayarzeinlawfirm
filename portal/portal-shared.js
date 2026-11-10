@@ -99,8 +99,8 @@ const PortalDash = (() => {
     return `<span class="portal-badge ${cls}">${Portal.statusLabel(status)}</span>`;
   }
 
-  function showMoreBtn(action, id) {
-    return `<button type="button" class="portal-link-btn" data-action="${action}" data-id="${Portal.escapeHtml(id)}">عرض</button>`;
+  function showMoreBtn(action, id, label = "عرض") {
+    return `<button type="button" class="portal-link-btn" data-action="${action}" data-id="${Portal.escapeHtml(id)}">${Portal.escapeHtml(label)}</button>`;
   }
 
   function infoIconBtn(action, id, label = "التفاصيل") {
@@ -387,7 +387,10 @@ const PortalDash = (() => {
               ${sectionLine ? `<span class="portal-list-item__assignee">${sectionLine}</span>` : ""}
               ${assigneeLine ? `<span class="portal-list-item__assignee">${assigneeLine}</span>` : ""}
             </div>
-            ${showMoreBtn("show-case", c.id)}
+            <div class="portal-list-item__actions">
+              ${showMoreBtn("show-case", c.id)}
+              ${isAdminOnly && c.status !== "archived" ? showMoreBtn("archive-case", c.id, "أرشفة") : ""}
+            </div>
           </div>
         </li>`;
       })
