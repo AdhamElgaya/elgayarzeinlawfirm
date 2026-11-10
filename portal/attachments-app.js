@@ -20,8 +20,15 @@ const AttachmentsPage = (() => {
   let query = "";
   let previewObjectUrl = null;
   let searchTimer = 0;
+  const renameDialog = document.getElementById("renameAttachmentDialog");
+  const renameInput = document.getElementById("renameAttachmentInput");
+  const renameStatus = document.getElementById("renameAttachmentStatus");
+
   let canAdmin = false;
   let pendingDeleteId = "";
+  let renameId = "";
+  let renameTimer = 0;
+  let renameSaving = false;
 
   function apiRoot() {
     return typeof Portal.apiRoot === "function" ? Portal.apiRoot() : "/api";
@@ -50,11 +57,8 @@ const AttachmentsPage = (() => {
           ? `${Portal.escapeHtml(item.case_title)}${item.subsection_name ? ` · ${Portal.escapeHtml(item.subsection_name)}` : ""}`
           : "—";
         const label = item.label || item.originalName || item.filename || "مرفق";
-        const nameCell = canAdmin
-          ? `<input class="portal-library-rename" data-id="${Portal.escapeHtml(item.id || "")}" data-label="${Portal.escapeHtml(label)}" value="${Portal.escapeHtml(label)}" aria-label="اسم المرفق" />`
-          : `<strong>${Portal.escapeHtml(label)}</strong>`;
         return `<tr data-attachment-id="${Portal.escapeHtml(item.id || "")}">
-          <td>${nameCell}</td>
+          <td><strong class="portal-attachment-name">${Portal.escapeHtml(label)}</strong></td>
           <td>${Portal.escapeHtml(sections)}</td>
           <td>${caseTitle}</td>
           <td>
@@ -75,7 +79,10 @@ const AttachmentsPage = (() => {
               }
               ${
                 canAdmin && item.id
-                  ? `<button type="button" class="portal-attachment-delete-btn" data-action="delete-attachment" data-id="${Portal.escapeHtml(item.id)}" data-label="${Portal.escapeHtml(label)}" title="حذف نهائي" aria-label="حذف نهائي ${Portal.escapeHtml(label)}">
+                  ? `<button type="button" class="portal-attachment-edit-btn" data-action="rename-attachment" data-id="${Portal.escapeHtml(item.id)}" data-label="${Portal.escapeHtml(label)}" title="تعديل الاسم" aria-label="تعديل اسم ${Portal.escapeHtml(label)}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" stroke-linejoin="round"/><path d="M13.5 6.5l3 3" stroke-linecap="round"/></svg>
+                    </button>
+                    <button type="button" class="portal-attachment-delete-btn" data-action="delete-attachment" data-id="${Portal.escapeHtml(item.id)}" data-label="${Portal.escapeHtml(label)}" title="حذف نهائي" aria-label="حذف نهائي ${Portal.escapeHtml(label)}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>`
                   : ""
@@ -188,34 +195,74 @@ const AttachmentsPage = (() => {
     }
   }
 
-  async function renameAttachment(input) {
-    if (!canAdmin || input.dataset.saving === "1") return;
-    const id = input.dataset.id || "";
-    const previous = input.dataset.label || "";
-    const next = input.value.trim();
-    if (!id || !next || next === previous) {
-      input.value = previous;
-      return;
-    }
-    input.dataset.saving = "1";
-    input.disabled = true;
+  function setRenameStatus(message) {
+    if (renameStatus) renameStatus.textContent = message || "";
+  }
+
+  function applyAttachmentLabel(id, label) {
+    const item = items.find((row) => row.id === id);
+    if (item) item.label = label;
+    const row = bodyEl?.querySelector(`tr[data-attachment-id="${CSS.escape(id)}"]`);
+    if (!row) return;
+    const name = row.querySelector(".portal-attachment-name");
+    if (name) name.textContent = label;
+    row.querySelectorAll("[data-label]").forEach((el) => {
+      el.dataset.label = label;
+      if (el.dataset.action === "rename-attachment") el.setAttribute("aria-label", `تعديل اسم ${label}`);
+      if (el.dataset.action === "delete-attachment") el.setAttribute("aria-label", `حذف نهائي ${label}`);
+      if (el.dataset.action === "view-attachment") el.setAttribute("aria-label", `معاينة ${label}`);
+    });
+    const download = row.querySelector(".portal-attachment-download-link");
+    if (download) download.setAttribute("aria-label", `تنزيل ${label}`);
+  }
+
+  function openRename(id, label) {
+    if (!canAdmin || !renameDialog || !renameInput || !id) return;
+    window.clearTimeout(renameTimer);
+    renameId = id;
+    renameInput.value = label || "";
+    renameInput.dataset.saved = label || "";
+    setRenameStatus("");
+    renameDialog.showModal();
+    renameInput.focus();
+    renameInput.select();
+  }
+
+  function scheduleRename() {
+    window.clearTimeout(renameTimer);
+    renameTimer = window.setTimeout(() => {
+      saveRename();
+    }, 450);
+  }
+
+  async function saveRename() {
+    if (!canAdmin || !renameInput || renameSaving) return;
+    const id = renameId;
+    const next = renameInput.value.trim();
+    const previous = renameInput.dataset.saved || "";
+    if (!id || !next || next === previous) return;
+    renameSaving = true;
+    setRenameStatus("جاري الحفظ...");
     try {
       await Portal.request(`/library-attachments/catalog/${encodeURIComponent(id)}`, {
         method: "PATCH",
         body: JSON.stringify({ label: next }),
       });
-      input.dataset.label = next;
-      input.value = next;
-      const item = items.find((row) => row.id === id);
-      if (item) item.label = next;
-      Portal.showToast("تم تغيير اسم المرفق.", "success");
+      renameInput.dataset.saved = next;
+      applyAttachmentLabel(id, next);
+      setRenameStatus("تم الحفظ");
     } catch (error) {
-      input.value = previous;
+      setRenameStatus(error.message || "تعذر تغيير اسم المرفق.");
       Portal.showAlert(alertEl, error.message || "تعذر تغيير اسم المرفق.");
     } finally {
-      input.disabled = false;
-      delete input.dataset.saving;
+      renameSaving = false;
     }
+  }
+
+  async function closeRename() {
+    window.clearTimeout(renameTimer);
+    await saveRename();
+    renameDialog?.close();
   }
 
   async function deleteAttachment(id) {
@@ -267,6 +314,12 @@ const AttachmentsPage = (() => {
         );
         return;
       }
+      const renameBtn = event.target.closest("[data-action='rename-attachment']");
+      if (renameBtn && canAdmin) {
+        event.preventDefault();
+        openRename(renameBtn.dataset.id || "", renameBtn.dataset.label || "");
+        return;
+      }
       const deleteBtn = event.target.closest("[data-action='delete-attachment']");
       if (!deleteBtn || !canAdmin) return;
       event.preventDefault();
@@ -277,24 +330,21 @@ const AttachmentsPage = (() => {
       }
       deleteDialog?.showModal();
     });
-    bodyEl?.addEventListener("keydown", (event) => {
-      const input = event.target.closest(".portal-library-rename");
-      if (!input) return;
-      if (event.key === "Enter") {
-        event.preventDefault();
-        renameAttachment(input);
-      } else if (event.key === "Escape") {
-        input.value = input.dataset.label || "";
-        input.blur();
-      }
+    renameInput?.addEventListener("input", () => {
+      setRenameStatus("");
+      scheduleRename();
     });
-    bodyEl?.addEventListener("change", (event) => {
-      const input = event.target.closest(".portal-library-rename");
-      if (input) renameAttachment(input);
+    renameDialog?.addEventListener("close", () => {
+      window.clearTimeout(renameTimer);
+      saveRename();
+      renameId = "";
     });
-    bodyEl?.addEventListener("focusout", (event) => {
-      const input = event.target.closest(".portal-library-rename");
-      if (input) renameAttachment(input);
+    document.getElementById("renameAttachmentForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      closeRename();
+    });
+    document.getElementById("closeRenameAttachmentBtn")?.addEventListener("click", () => {
+      closeRename();
     });
     document.getElementById("cancelDeleteAttachmentBtn")?.addEventListener("click", () => {
       pendingDeleteId = "";

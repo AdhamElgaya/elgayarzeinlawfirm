@@ -2825,6 +2825,7 @@ html.portal-dialog-open {
 }
 
 .portal-attachment-view-btn,
+.portal-attachment-edit-btn,
 .portal-attachment-download-link {
   display: inline-flex;
   align-items: center;
@@ -2843,6 +2844,7 @@ html.portal-dialog-open {
 }
 
 .portal-attachment-view-btn svg,
+.portal-attachment-edit-btn svg,
 .portal-attachment-download-link svg {
   width: 1.05rem;
   height: 1.05rem;
@@ -2850,6 +2852,8 @@ html.portal-dialog-open {
 
 .portal-attachment-view-btn:hover,
 .portal-attachment-view-btn:focus-visible,
+.portal-attachment-edit-btn:hover,
+.portal-attachment-edit-btn:focus-visible,
 .portal-attachment-download-link:hover,
 .portal-attachment-download-link:focus-visible {
   background: rgba(200, 146, 46, 0.16);
@@ -3687,7 +3691,7 @@ button.portal-back-link {
 
 body.portal-attachments-admin .portal-attachments-table th:nth-child(4),
 body.portal-attachments-admin .portal-attachments-table td:nth-child(4) {
-  width: 9.2rem;
+  width: 11.6rem;
 }
 
 .portal-attachment-delete-btn {

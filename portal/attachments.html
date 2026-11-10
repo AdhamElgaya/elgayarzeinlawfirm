@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@600;700&display=swap" /></noscript>
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css?v=81" />
+    <link rel="stylesheet" href="portal.css?v=82" />
   </head>
   <body class="portal-page" data-page="portal-attachments" data-portal-page="attachments">
     <header class="portal-header">
@@ -81,6 +81,18 @@
       </div>
     </main>
 
+    <dialog id="renameAttachmentDialog" class="portal-dialog">
+      <form class="portal-form portal-dialog-form" id="renameAttachmentForm">
+        <h2>تعديل الاسم</h2>
+        <label for="renameAttachmentInput">الاسم الجديد</label>
+        <input type="text" id="renameAttachmentInput" autocomplete="off" />
+        <p id="renameAttachmentStatus" class="portal-confirm-text" aria-live="polite"></p>
+        <div class="portal-dialog-actions">
+          <button type="button" class="portal-btn-ghost" id="closeRenameAttachmentBtn">إغلاق</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="deleteAttachmentDialog" class="portal-dialog">
       <div class="portal-dialog-form">
         <h2>حذف نهائي</h2>
@@ -106,6 +118,6 @@
     <script src="api-config.js?v=4"></script>
     <script src="portal.js?v=27"></script>
     <script src="portal-nav.js?v=27"></script>
-    <script src="attachments-app.js?v=21"></script>
+    <script src="attachments-app.js?v=22"></script>
   </body>
 </html>
