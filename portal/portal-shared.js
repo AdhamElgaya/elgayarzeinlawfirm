@@ -2057,6 +2057,47 @@ const PortalDash = (() => {
 
     document.getElementById("cancelLibraryPickerBtn")?.addEventListener("click", () => dialog.close());
 
+    async function uploadLibraryFile(label, file, sectionIds) {
+      try {
+        const presign = await Portal.request("/library-attachments/presign", {
+          method: "POST",
+          body: JSON.stringify({
+            originalName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            size: file.size,
+            label,
+            section_ids: sectionIds,
+          }),
+        });
+        const uploadRes = await fetch(presign.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file,
+        });
+        if (!uploadRes.ok) throw new Error("تعذر رفع الملف مباشرة إلى التخزين.");
+        return Portal.request("/library-attachments/finalize", {
+          method: "POST",
+          body: JSON.stringify({
+            attachmentId: presign.attachmentId,
+            key: presign.key,
+            label,
+            originalName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            size: file.size,
+            section_ids: sectionIds,
+          }),
+        });
+      } catch (error) {
+        if (!String(error.message || "").includes("الرفع المباشر")) throw error;
+      }
+
+      const uploadFd = new FormData();
+      uploadFd.append("label", label);
+      uploadFd.append("file", file);
+      if (sectionIds.length) uploadFd.append("section_ids", JSON.stringify(sectionIds));
+      return Portal.upload("/library-attachments", uploadFd);
+    }
+
     uploadForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const alertEl = document.getElementById("libraryPickerAlert");
@@ -2072,15 +2113,11 @@ const PortalDash = (() => {
         Portal.showAlert(alertEl, Portal.ZIP_REJECT_MESSAGE || "لا يمكن رفع ملفات ZIP.");
         return;
       }
-      const uploadFd = new FormData();
-      uploadFd.append("label", label);
-      uploadFd.append("file", file);
-      if (isAdminUser) {
-        const ids = [...uploadForm.querySelectorAll('input[name="section_ids"]:checked')].map((el) => el.value);
-        uploadFd.append("section_ids", JSON.stringify(ids));
-      }
+      const sectionIds = isAdminUser
+        ? [...uploadForm.querySelectorAll('input[name="section_ids"]:checked')].map((el) => el.value)
+        : [];
       try {
-        const data = await Portal.upload("/library-attachments", uploadFd);
+        const data = await uploadLibraryFile(label, file, sectionIds);
         if (data.attachment) attachLibraryItem(data.attachment);
         dialog.close();
         Portal.showToast("تم رفع الملف.", "success");

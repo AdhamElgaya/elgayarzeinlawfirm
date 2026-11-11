@@ -20,7 +20,6 @@ export const UPLOAD_DIR = LOCAL_UPLOAD_DIR;
 export const storageMode = r2Configured() ? "r2" : "local";
 
 export function ensureUploadDir() {
-  if (storageMode === "r2") return;
   fs.mkdirSync(LOCAL_UPLOAD_DIR, { recursive: true });
 }
 
@@ -36,9 +35,9 @@ export function getLocalFilePath(key) {
   return path.join(LOCAL_UPLOAD_DIR, base);
 }
 
-export async function putFile(key, body, contentType) {
+export async function putFile(key, body, contentType, contentLength) {
   if (storageMode === "r2") {
-    await r2PutObject(key, body, contentType);
+    await r2PutObject(key, body, contentType, contentLength);
     return;
   }
   ensureUploadDir();
@@ -87,6 +86,22 @@ export async function openFile(key) {
     contentType: null,
     filePath,
   };
+}
+
+export async function persistUploadedFile(key, file) {
+  if (storageMode !== "r2") return;
+  if (!file?.path) throw new Error("Missing upload.");
+  const stream = fs.createReadStream(file.path);
+  try {
+    await putFile(key, stream, file.mimetype, file.size);
+  } finally {
+    await fs.promises.unlink(file.path).catch(() => {});
+  }
+}
+
+export async function discardUploadTemp(file) {
+  if (storageMode !== "r2" || !file?.path) return;
+  await fs.promises.unlink(file.path).catch(() => {});
 }
 
 export async function signedPutUrl(key, contentType, expiresInSeconds = 300) {

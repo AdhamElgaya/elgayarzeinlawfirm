@@ -22,7 +22,7 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { openFile, putFile, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
+import { discardUploadTemp, openFile, persistUploadedFile, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
 import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { CLIENT_SELECT_COLUMNS, publicClient } from "../lib/client-docs.js";
 import {
@@ -74,21 +74,17 @@ const router = Router();
 ensureUploadDir();
 
 const upload = multer({
-  storage:
-    storageMode === "r2"
-      ? multer.memoryStorage()
-      : multer.diskStorage({
-          destination: (_req, _file, cb) => {
-            ensureUploadDir();
-            cb(null, UPLOAD_DIR);
-          },
-          filename: (req, file, cb) => {
-            const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
-            const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
-            cb(null, `${req.attachmentId}${safeExt}`);
-          },
-        }),
-  limits: { fileSize: 15 * 1024 * 1024 },
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      ensureUploadDir();
+      cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
+      const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
+      cb(null, `${req.attachmentId}${safeExt}`);
+    },
+  }),
   fileFilter: (_req, file, cb) => {
     try {
       assertAllowedUpload(file.originalname, file.mimetype);
@@ -578,15 +574,10 @@ router.post(
 
     const originalName = String(req.body?.originalName || "").trim();
     const mimeType = String(req.body?.mimeType || "application/octet-stream").trim();
-    const size = Number(req.body?.size || 0);
     const label = String(req.body?.label || originalName || "").trim();
     if (!originalName || !label) {
       return res.status(400).json({ error: "بيانات المرفق غير مكتملة." });
     }
-    if (!Number.isFinite(size) || size <= 0 || size > 15 * 1024 * 1024) {
-      return res.status(400).json({ error: "حجم الملف غير صالح (الحد الأقصى 15MB)." });
-    }
-
     try {
       assertAllowedUpload(originalName, mimeType);
     } catch (error) {
@@ -693,6 +684,7 @@ router.post(
     const cleanup = async () => {
       if (storedKey) await deleteStoredFile(storedKey);
       else if (req.file?.filename) await deleteStoredFile(req.file.filename);
+      await discardUploadTemp(req.file);
     };
 
     const row = await getCaseIfAccessible(req.user, req.params.caseId);
@@ -730,7 +722,7 @@ router.post(
           : req.file.filename;
 
       if (storageMode === "r2") {
-        await putFile(storedKey, req.file.buffer, req.file.mimetype);
+        await persistUploadedFile(storedKey, req.file);
       }
 
       res.status(201).json({

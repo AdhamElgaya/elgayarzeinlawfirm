@@ -91,13 +91,14 @@ export async function r2Prepare() {
   return { ok: true, bucket: bucket() };
 }
 
-export async function r2PutObject(key, body, contentType) {
+export async function r2PutObject(key, body, contentType, contentLength) {
   await getClient().send(
     new PutObjectCommand({
       Bucket: bucket(),
       Key: key,
       Body: body,
       ContentType: contentType || "application/octet-stream",
+      ...(Number.isFinite(contentLength) ? { ContentLength: contentLength } : {}),
     })
   );
 }

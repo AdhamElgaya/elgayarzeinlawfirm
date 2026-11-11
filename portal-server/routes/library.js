@@ -11,7 +11,7 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
-import { putFile } from "../lib/storage.js";
+import { discardUploadTemp, fileExists, peekStoredBytes, persistUploadedFile, signedPutUrl } from "../lib/storage.js";
 import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { matchesSearch } from "../lib/search-text.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -46,21 +46,17 @@ router.use(requireAuth);
 ensureUploadDir();
 
 const upload = multer({
-  storage:
-    storageMode === "r2"
-      ? multer.memoryStorage()
-      : multer.diskStorage({
-          destination: (_req, _file, cb) => {
-            ensureUploadDir();
-            cb(null, UPLOAD_DIR);
-          },
-          filename: (req, file, cb) => {
-            const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
-            const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
-            cb(null, `${req.attachmentId}${safeExt}`);
-          },
-        }),
-  limits: { fileSize: 15 * 1024 * 1024 },
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      ensureUploadDir();
+      cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
+      const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
+      cb(null, `${req.attachmentId}${safeExt}`);
+    },
+  }),
   fileFilter: (_req, file, cb) => {
     try {
       assertAllowedUpload(file.originalname, file.mimetype);
@@ -215,6 +211,108 @@ router.get("/", requireLibraryEditor, async (req, res) => {
   }
 });
 
+router.post("/presign", requireLibraryEditor, async (req, res) => {
+  if (storageMode !== "r2") {
+    return res.status(400).json({ error: "الرفع المباشر متاح فقط مع R2." });
+  }
+
+  const originalName = String(req.body?.originalName || "").trim();
+  const mimeType = String(req.body?.mimeType || "application/octet-stream").trim();
+  const label = String(req.body?.label || originalName || "").trim();
+  if (!originalName || !label) {
+    return res.status(400).json({ error: "بيانات المرفق غير مكتملة." });
+  }
+
+  const managed = isSectionManager(req.user) ? await getManagedSection(req.user.id) : null;
+  const sectionIds = sectionIdsForCreate(req.user, req.body?.section_ids, managed?.id);
+  if (!sectionIds.length) {
+    return res.status(400).json({ error: "اختر قسماً واحداً على الأقل." });
+  }
+
+  try {
+    assertAllowedUpload(originalName, mimeType);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
+  }
+
+  const attachmentId = uuid();
+  const key = storedFilename(attachmentId, originalName);
+  try {
+    const uploadUrl = await signedPutUrl(key, mimeType, 300);
+    res.json({ attachmentId, key, uploadUrl, expiresIn: 300 });
+  } catch (error) {
+    console.error("[portal] library presign:", error);
+    res.status(500).json({ error: "تعذر إنشاء رابط الرفع." });
+  }
+});
+
+router.post("/finalize", requireLibraryEditor, async (req, res) => {
+  const attachmentId = String(req.body?.attachmentId || "").trim();
+  const key = String(req.body?.key || "").trim();
+  const label = String(req.body?.label || "").trim();
+  const originalName = String(req.body?.originalName || "").trim();
+  const mimeType = String(req.body?.mimeType || "").trim();
+  const size = Number(req.body?.size);
+
+  if (!attachmentId || !key || !label || !originalName) {
+    return res.status(400).json({ error: "بيانات المرفق غير مكتملة." });
+  }
+
+  const expectedKey = storedFilename(attachmentId, originalName);
+  if (key !== expectedKey) {
+    return res.status(400).json({ error: "مفتاح الملف غير صالح." });
+  }
+
+  const managed = isSectionManager(req.user) ? await getManagedSection(req.user.id) : null;
+  const sectionIds = sectionIdsForCreate(req.user, req.body?.section_ids, managed?.id);
+  if (!sectionIds.length) {
+    return res.status(400).json({ error: "اختر قسماً واحداً على الأقل." });
+  }
+
+  if (!(await fileExists(key))) {
+    return res.status(400).json({ error: "لم يتم العثور على الملف المرفوع. أعد الرفع وحاول مرة أخرى." });
+  }
+
+  try {
+    assertAllowedUpload(originalName, mimeType, await peekStoredBytes(key));
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
+  }
+
+  try {
+    const now = new Date().toISOString();
+    await insertLibraryAttachment({
+      id: attachmentId,
+      label,
+      filename: key,
+      original_name: originalName,
+      mime_type: mimeType || "application/octet-stream",
+      size: Number.isFinite(size) ? size : null,
+      section_ids: sectionIds,
+      created_by: req.user.id,
+      created_at: now,
+    });
+
+    await writeAudit({
+      userId: req.user.id,
+      action: "library_attachment_created",
+      entityType: "library_attachment",
+      entityId: attachmentId,
+      metadata: { label, section_ids: sectionIds },
+      ip: req.ip,
+    });
+
+    const row = await getLibraryAttachment(attachmentId);
+    res.status(201).json({
+      attachment: await enrichLibrary(row),
+      message: "تم رفع المرفق.",
+    });
+  } catch (error) {
+    console.error("[portal] library finalize:", error);
+    res.status(500).json({ error: "تعذر حفظ الملف." });
+  }
+});
+
 router.post(
   "/",
   requireLibraryEditor,
@@ -235,6 +333,7 @@ router.post(
     const cleanup = async () => {
       if (storedKey) await deleteStoredFile(storedKey);
       else if (req.file?.filename) await deleteStoredFile(req.file.filename);
+      await discardUploadTemp(req.file);
     };
 
     if (!req.file) {
@@ -265,7 +364,7 @@ router.post(
       storedKey =
         storageMode === "r2" ? storedFilename(req.attachmentId, req.file.originalname) : req.file.filename;
       if (storageMode === "r2") {
-        await putFile(storedKey, req.file.buffer, req.file.mimetype);
+        await persistUploadedFile(storedKey, req.file);
       }
 
       const now = new Date().toISOString();

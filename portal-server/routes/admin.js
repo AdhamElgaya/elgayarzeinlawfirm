@@ -17,7 +17,7 @@ import {
   UPLOAD_DIR,
 } from "../lib/attachments.js";
 import { CLIENT_SELECT_COLUMNS, clientDocumentFilenames, publicClient } from "../lib/client-docs.js";
-import { putFile } from "../lib/storage.js";
+import { discardUploadTemp, persistUploadedFile } from "../lib/storage.js";
 import { assertClientDocumentUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { normalizeDueAt } from "../lib/task-due.js";
 import { sendTaskAssignedPush } from "../lib/push.js";
@@ -38,23 +38,19 @@ const router = Router();
 ensureUploadDir();
 
 const clientUpload = multer({
-  storage:
-    storageMode === "r2"
-      ? multer.memoryStorage()
-      : multer.diskStorage({
-          destination: (_req, _file, cb) => {
-            ensureUploadDir();
-            cb(null, UPLOAD_DIR);
-          },
-          filename: (_req, file, cb) => {
-            const id = uuid();
-            file.clientDocId = id;
-            const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
-            const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
-            cb(null, `${id}${safeExt}`);
-          },
-        }),
-  limits: { fileSize: 15 * 1024 * 1024 },
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      ensureUploadDir();
+      cb(null, UPLOAD_DIR);
+    },
+    filename: (_req, file, cb) => {
+      const id = uuid();
+      file.clientDocId = id;
+      const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 20);
+      const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
+      cb(null, `${id}${safeExt}`);
+    },
+  }),
   fileFilter: (_req, file, cb) => {
     try {
       assertClientDocumentUpload(file.originalname, file.mimetype);
@@ -77,7 +73,7 @@ async function saveClientDocument(file, label) {
   const storedKey =
     storageMode === "r2" ? storedFilename(id, file.originalname) : file.filename;
   if (storageMode === "r2") {
-    await putFile(storedKey, file.buffer, file.mimetype);
+    await persistUploadedFile(storedKey, file);
   }
   return normalizeAttachment({
     id,
@@ -393,10 +389,12 @@ router.post(
   },
   async (req, res) => {
     const storedKeys = [];
+    const tempFiles = [];
     const cleanup = async () => {
       for (const key of storedKeys) {
         await deleteStoredFile(key);
       }
+      for (const file of tempFiles) await discardUploadTemp(file);
     };
 
     const name = String(req.body?.name || "").trim();
@@ -404,6 +402,7 @@ router.post(
     const address = String(req.body?.address || "").trim() || null;
     const poaFile = firstUploadedFile(req.files, "poa");
     const idFile = firstUploadedFile(req.files, "id_card");
+    tempFiles.push(poaFile, idFile);
     if (storageMode !== "r2") {
       if (poaFile?.filename) storedKeys.push(poaFile.filename);
       if (idFile?.filename) storedKeys.push(idFile.filename);
@@ -497,10 +496,12 @@ router.patch(
   },
   async (req, res) => {
     const storedKeys = [];
+    const tempFiles = [];
     const cleanup = async () => {
       for (const key of storedKeys) {
         await deleteStoredFile(key);
       }
+      for (const file of tempFiles) await discardUploadTemp(file);
     };
 
     const existing = await db
@@ -515,6 +516,7 @@ router.patch(
     const address = String(req.body?.address || "").trim() || null;
     const poaFile = firstUploadedFile(req.files, "poa");
     const idFile = firstUploadedFile(req.files, "id_card");
+    tempFiles.push(poaFile, idFile);
     if (storageMode !== "r2") {
       if (poaFile?.filename) storedKeys.push(poaFile.filename);
       if (idFile?.filename) storedKeys.push(idFile.filename);
