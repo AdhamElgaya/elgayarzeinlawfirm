@@ -22,6 +22,8 @@ import {
   storageMode,
   UPLOAD_DIR,
 } from "../lib/attachments.js";
+import { createDirectUpload, directUploadOrigin, takeDirectUpload, writeUploadBody } from "../lib/direct-upload.js";
+import fs from "fs";
 import { discardUploadTemp, openFile, persistUploadedFile, signedPutUrl, fileExists, peekStoredBytes } from "../lib/storage.js";
 import { assertAllowedUpload, peekUploadBytes } from "../lib/upload-policy.js";
 import { CLIENT_SELECT_COLUMNS, publicClient } from "../lib/client-docs.js";
@@ -93,6 +95,32 @@ const upload = multer({
       cb(error);
     }
   },
+});
+
+router.put("/uploads/:token", async (req, res) => {
+  const pendingUpload = takeDirectUpload(req.params.token);
+  if (!pendingUpload || pendingUpload.kind !== "case") {
+    return res.status(403).json({ error: "انتهت صلاحية رابط الرفع. حاول مرة أخرى." });
+  }
+  const ext = path.extname(pendingUpload.originalName || "").toLowerCase().slice(0, 20);
+  const safeExt = /^\.[a-z0-9.]+$/i.test(ext) ? ext : "";
+  const tempPath = path.join(UPLOAD_DIR, `${pendingUpload.attachmentId}${safeExt}`);
+  try {
+    ensureUploadDir();
+    const size = await writeUploadBody(req, tempPath);
+    const file = {
+      path: tempPath,
+      mimetype: pendingUpload.mimeType,
+      size,
+      originalname: pendingUpload.originalName,
+    };
+    assertAllowedUpload(pendingUpload.originalName, pendingUpload.mimeType, peekUploadBytes(file));
+    if (storageMode === "r2") await persistUploadedFile(pendingUpload.key, file);
+    res.json({ ok: true, size });
+  } catch (error) {
+    await fs.promises.unlink(tempPath).catch(() => {});
+    res.status(error.statusCode || 400).json({ error: error.message || "تعذر رفع الملف." });
+  }
 });
 
 router.use(requireAuth);
@@ -586,6 +614,22 @@ router.post(
 
     const attachmentId = uuid();
     const key = storedFilename(attachmentId, originalName);
+    const origin = directUploadOrigin();
+    if (origin) {
+      const token = createDirectUpload({
+        kind: "case",
+        attachmentId,
+        key,
+        originalName,
+        mimeType,
+      });
+      return res.json({
+        attachmentId,
+        key,
+        uploadUrl: `${origin}/api/dashboard/uploads/${token}`,
+        expiresIn: 900,
+      });
+    }
     try {
       const uploadUrl = await signedPutUrl(key, mimeType, 300);
       res.json({

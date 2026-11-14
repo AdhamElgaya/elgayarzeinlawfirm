@@ -1626,13 +1626,18 @@ const PortalDash = (() => {
           }),
         });
 
-        const uploadRes = await fetch(presign.uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": pendingFile.type || "application/octet-stream",
-          },
-          body: pendingFile,
-        });
+        let uploadRes;
+        try {
+          uploadRes = await fetch(presign.uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": pendingFile.type || "application/octet-stream",
+            },
+            body: pendingFile,
+          });
+        } catch {
+          throw new Error("تعذر رفع الملف. تحقق من الاتصال وحاول مرة أخرى.");
+        }
         if (!uploadRes.ok) {
           throw new Error("تعذر رفع الملف مباشرة إلى التخزين.");
         }
@@ -2069,11 +2074,16 @@ const PortalDash = (() => {
             section_ids: sectionIds,
           }),
         });
-        const uploadRes = await fetch(presign.uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
-          body: file,
-        });
+        let uploadRes;
+        try {
+          uploadRes = await fetch(presign.uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": file.type || "application/octet-stream" },
+            body: file,
+          });
+        } catch {
+          throw new Error("تعذر رفع الملف. تحقق من الاتصال وحاول مرة أخرى.");
+        }
         if (!uploadRes.ok) throw new Error("تعذر رفع الملف مباشرة إلى التخزين.");
         return Portal.request("/library-attachments/finalize", {
           method: "POST",
